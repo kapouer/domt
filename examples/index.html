@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=7" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="Content-Script-Type" content="text/javascript" />
+	<script charset="UTF-8" type="text/javascript" src="../index.js"></script>
+	<title>domt example</title>
+</head>
+<body>
+	<div class="list">
+    <ul>
+      <li repeat="items" class="red" bind-class="color" bind-text="text">first item</li>
+    </ul>
+  </div>
+
+	<div class="tree">
+		<div repeat="branch">
+			<div repeat="leave">
+				<p bind-text="text"></p>
+			</div>
+		</div>
+	</div>
+
+  <script type="text/javascript">
+		function test() {
+			Domt('.list', {
+				items: [
+					{color: "blue", text: "the sea"},
+					{color: null, text: "the void"}
+				]
+			});
+		}
+		test();
+		test();
+		test();
+		test();
+		test();
+		test();
+  </script>
+</body>
+</html>

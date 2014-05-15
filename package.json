@@ -1,0 +1,23 @@
+{
+  "name": "domt",
+  "version": "0.0.1",
+  "description": "Minimal DOM Templating",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/kapouer/domt"
+  },
+  "keywords": [
+    "DOM",
+    "template",
+    "templating"
+  ],
+  "author": "Jérémy Lal <kapouer@melix.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kapouer/domt/issues"
+  }
+}
