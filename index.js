@@ -144,10 +144,11 @@ Domt.prototype.merge = function(obj, opts) {
 
 function find(scope, path) {
 	if (!scope) return {scope: scope};
-	var name, val = scope, filter;
+	var name, val = scope, filters, filter;
 	path = (path || "").split('|');
-	if (path.length == 2) filter = Domt.filters[path[1]];
-	path = path[0] ? path[0].split('.') : [];
+	filters = path;
+	path = path.shift();
+	path = path ? path.split('.') : [];
 	if (typeof val == "function") val = val(scope, path);
 	while ((name = path.shift()) !== undefined) {
 		scope = val;
@@ -155,9 +156,15 @@ function find(scope, path) {
 		if (typeof val == "function") val = val(scope, path);
 		if (!val) break;
 	}
+	if (val != null) {
+		for (var i=0; i < filters.length; i++) {
+			filter = Domt.filters[filters[i]];
+			if (filter) val = filter(val);
+		}
+	}
 	return {
 		scope: scope,
-		value: filter ? filter(val) : val
+		value: val
 	};
 };
 
