@@ -7,10 +7,11 @@
 	<script charset="UTF-8" type="text/javascript" src="../index.js"></script>
 	<title>domt example</title>
 </head>
-<body>
-	<div class="list">
+<body onclick="test();">
+	<h1>Click body to merge</h1>
+	<div bind-class="class" id="list">
     <ul>
-      <li repeat="items" class="red" bind-class="color" bind-text="text">first item</li>
+      <li repeat="items" class="red" bind-bind-class="keys.class" bind-bind-html="keys.str">first item</li>
     </ul>
   </div>
 
@@ -24,19 +25,20 @@
 
   <script type="text/javascript">
 		function test() {
-			Domt('.list', {
+			var inst = Domt('#list').merge({
+				"class": "list",
+				"keys": {
+					"class": "color",
+					"str": "html"
+				}
+			});
+			inst.merge({
 				items: [
-					{color: "blue", text: "the sea"},
-					{color: null, text: "the void"}
+					{color: "blue", html: "the sea"},
+					{color: null, html: "the <b>void</b>"}
 				]
 			});
 		}
-		test();
-		test();
-		test();
-		test();
-		test();
-		test();
   </script>
 </body>
 </html>
