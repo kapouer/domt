@@ -95,9 +95,10 @@ function Domt(parent, obj) {
 		path = node.getAttribute(Domt.ns.bind);
 		current = find(obj, path);
 		if (current.value === undefined) continue;
-		iterate(node.attributes, function(i, att) {
+		iterate(node.attributes, function(i, att) { // iterates over a copy
 			var match = regBind.exec(att.name);
 			if (!match || match.length != 2) return;
+			node.removeAttribute(att.name);
 			var name = match[1];
 			var val = find(current.value, att.value).value;
 			if (val === undefined) return;
