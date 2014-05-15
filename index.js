@@ -10,10 +10,16 @@ Domt.ns = {
 
 Domt.filters = {
 	upper: function(val) {
-		return Object.prototype.toString(val).toUpperCase();
+		return (val + "").toUpperCase();
 	},
 	lower: function(val) {
-		return Object.prototype.toString(val).toLowerCase();
+		return (val + "").toLowerCase();
+	},
+	br: function(val) {
+		return (val + "").replace(/\n/g, "<br />");
+	},
+	esc: function(val) {
+		return encodeURIComponent(val + "");
 	}
 };
 
