@@ -7,7 +7,7 @@
 	<script charset="UTF-8" type="text/javascript" src="../index.js"></script>
 	<title>domt example</title>
 </head>
-<body onclick="test();">
+<body onclick="testExpression();">
 	<h1>Click body to merge</h1>
 	<div bind-class="class" id="list">
     <ul>
@@ -23,20 +23,27 @@
 		</div>
 	</div>
 
+	<p id="exp" bind-html><span class="the [class]">[text|upper|br]</span></p>
+
   <script type="text/javascript">
-		function test() {
-			var inst = Domt('#list').merge({
+		function testBindRepeat() {
+			Domt('#list').merge({
 				"class": "list",
 				"keys": {
 					"class": "color",
 					"str": "html"
 				}
-			});
-			inst.merge({
+			}).merge({
 				items: [
 					{color: "blue", html: "the sea"},
 					{color: null, html: "the <b>void</b>"}
 				]
+			});
+		}
+		function testExpression() {
+			Domt('#exp').merge({
+				"class": "potato",
+				text: "is \ngreen"
 			});
 		}
   </script>
