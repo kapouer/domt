@@ -4,7 +4,8 @@ window.Domt = Domt;
 Domt.Error = DomtError;
 Domt.ns = {
 	repeat: 'repeat',
-	bind: 'bind'
+	bind: 'bind',
+	holder: 'holder'
 };
 
 Domt.filters = {
@@ -19,48 +20,45 @@ Domt.filters = {
 
 function Holder(node) {
 	if (!(this instanceof Holder)) return new Holder(node);
-	this.node = node;
-}
-Holder.prototype.open = function() {
-	// returns the node "caret" template, which is the template container
-	// which has a copy of the repeat attribute that was set on the original
-	// template node, itself being inside the caret and without the repeat
-	// attribute
-	var container, node = this.node;
+	var container, REPEAT = Domt.ns.repeat;
 	if (node.tagName == "SCRIPT" && node.type == "text/template") {
 		container = node;
-		container.repeat = container.getAttribute(Domt.ns.repeat);
-		container.removeAttribute(Domt.ns.repeat);
-		if (container.template) {
-			node = container.template;
-		}	else {
+		var origHolder = node[Domt.ns.holder];
+		if (origHolder) {
+			this.repeat = origHolder.repeat;
+			this.template = origHolder.template;
+		} else {
+			this.repeat = container.getAttribute(REPEAT);
 			var doc = document.implementation.createHTMLDocument();
 			var div = doc.createElement('div');
 			div.innerHTML = container.text.replace(/^\s+|\s+$/g, '');
 			var childs = div.childNodes;
 			if (childs.length == 1) {
-				node = childs[0];
-			}	else throw new DomtError("template with children 1 != " + childs.length);
+				this.template = childs[0];
+			}	else {
+				throw new DomtError("template with children 1 != " + childs.length);
+			}
 		}
+		container.removeAttribute(REPEAT);
 	} else {
+		this.template = node;
 		container = document.createElement("script");
 		container.type = "text/template";
-		container.repeat = node.getAttribute(Domt.ns.repeat);
-		node.removeAttribute(Domt.ns.repeat);
+		this.repeat = node.getAttribute(REPEAT);
+		node.removeAttribute(REPEAT);
 		node.parentNode.insertBefore(container, node);
 		var div = document.createElement("div");
 		div.appendChild(node);
 		container.text = div.innerHTML;
 	}
 	this.container = container;
-	this.template = container.template = node;
+	container[Domt.ns.holder] = this;
 	return this;
 };
 Holder.prototype.close = function() {
 	var node = this.container;
-	if (node.repeat !== undefined) {
-		node.setAttribute(Domt.ns.repeat, node.repeat);
-		delete node.repeat;
+	if (this.repeat !== undefined) {
+		node.setAttribute(Domt.ns.repeat, this.repeat);
 	}
 };
 
@@ -97,10 +95,10 @@ Domt.prototype.merge = function(obj, opts) {
 		var holders = [];
 		do {
 			if (!node) continue;
-			holder = Holder(node).open();
+			holder = Holder(node);
 			holders.push(holder);
 			container = holder.container;
-			path = container.repeat;
+			path = holder.repeat;
 			// get data
 			current = find(obj, path);
 			if (current.value === undefined) {
