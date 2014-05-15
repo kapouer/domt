@@ -146,8 +146,8 @@ Domt.prototype.merge = function(obj, opts) {
 
 function find(scope, path) {
 	if (!scope) return {scope: scope};
-	var name, val = scope, initial = val, filter;
-	path = path.split('|');
+	var name, val = scope, filter;
+	path = (path || "").split('|');
 	if (path.length == 2) filter = Domt.filters[path[1]];
 	path = path[0] ? path[0].split('.') : [];
 	if (typeof val == "function") val = val(scope, path);
