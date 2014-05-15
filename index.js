@@ -5,7 +5,8 @@ Domt.Error = DomtError;
 Domt.ns = {
 	repeat: 'repeat',
 	bind: 'bind',
-	holder: 'holder'
+	holder: 'holder',
+	expr: '[*]'
 };
 
 Domt.filters = {
@@ -88,6 +89,13 @@ function Domt(parent) {
 		parent = document.querySelector(parent);
 	}
 	this.parent = parent;
+
+	this.reBind = new RegExp("^" + Domt.ns.bind + "-(.*)$", "i");
+
+	var delims = Domt.ns.expr.split('*');
+	if (delims.length != 2) throw new DomtError("bad Domt.ns.expr");
+	var start = '\\' + delims[0], end = '\\' + delims[1];
+	this.reExpr = new RegExp(start + '([^' + start + end + ']+)' + end, "g");
 };
 
 Domt.prototype.merge = function(obj, opts) {
@@ -123,18 +131,17 @@ Domt.prototype.merge = function(obj, opts) {
 		}
 	}
 
-	var regBind = new RegExp("^" + Domt.ns.bind + "-(.*)$", "i");
 	var binds = parent.querySelectorAll('[' + Domt.ns.bind + ']');
 	node = parent;
 	i = 0;
 	len = binds.length;
-	var val;
+	var val, reExpr = this.reExpr, reBind = this.reBind;
 	do {
 		path = node.getAttribute(Domt.ns.bind);
 		current = find(obj, path);
 		if (current.value === undefined) continue;
 		iterate(node.attributes, function(i, att) { // iterates over a copy
-			var match = regBind.exec(att.name);
+			var match = reBind.exec(att.name);
 			if (!match || match.length != 2) return;
 			if (opts.strip) node.removeAttribute(att.name);
 			var name = match[1];
@@ -142,7 +149,7 @@ Domt.prototype.merge = function(obj, opts) {
 				if (name == "text") val = node.innerText;
 				else if (name == "html") val = node.innerHTML;
 				else val = node.getAttribute(name);
-				val = val.replace(/\[([^\[\]]+)\]/g, function(match, path) {
+				val = val.replace(reExpr, function(str, path) {
 					return find(current.value, path).value;
 				});
 			} else {
