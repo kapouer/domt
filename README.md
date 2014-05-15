@@ -22,16 +22,17 @@ And stick with these constraints :
 Quick start
 -----------
 
-Starting with a template and a call to Domin:
+Starting with a template and a call to Domt:
 
-  <div class="list">
+  <div id="test" bind-class="class">
     <ul>
       <li repeat="items" class="red" bind-class="color" bind-text="text">first item</li>
     </ul>
   </div>
 
   <script type="text/javascript">
-    Domt('.list').merge({
+    Domt('#test').merge({
+      "class": "list",
       items: [
         {color: "blue", text: "the sea"},
         {color: null, text: "the void"}
@@ -41,7 +42,7 @@ Starting with a template and a call to Domin:
 
 We get:
 
-  <div class="list">
+  <div id="test" class="list" bind-class="class">
     <ul>
       <li class="blue">the sea</li>
       <li>the void</li>
@@ -51,19 +52,26 @@ We get:
     </ul>
   </div>
 
-Calling it a second time is possible and will just add the items again:
+The API is chainable, also calling it a second time is possible:
 
-  <div class="list">
-    <ul>
-      <li class="blue">the sea</li>
-      <li>the void</li>
-      <li class="blue">the sea</li>
-      <li>the void</li>
-      <script type="text/template" repeat="items">
-        <li class="red" bind-class="color" bind-text="text">first item</li>
-      </script>
-    </ul>
-  </div>
+  Domt('#test').merge({
+    "class": "list"
+  }).merge({
+    items: [
+      {color: "blue", text: "the sea"},
+      {color: null, text: "the void"}
+    ]
+  });
+  Domt('#test').merge({
+    "class": null
+  }).merge({
+    items: [
+      {color: "red", text: "another one"}
+    ]
+  });
+
+The second call with remove attribute "class" from #test, and append a
+list item named "another one".
 
 
 Which DOM nodes are processed ?
@@ -72,17 +80,21 @@ Which DOM nodes are processed ?
 The only processed nodes are the ones where one of these two attributes
 is set:
 
-* bind = "path"
+* bind = "accessor"
   tells from which object binded variables are the keys
   applies only to the node on which it is declared (not its children).
+  Can be empty (in which case parent object is used).
+  If a value is :
+  - undefined or null, obj isn't changed
+  - string, path is used as an accessor of obj
+  - function, obj is the result of fun(obj, paths)
 
-* repeat = "path"
-  repeats the node (and its content) by iterating over the given scope.
-  If variable is undefined, do nothing.
-  If variable is null or has no keys, the list of nodes is empty.
-  If variable is a function, it is called with parameters:
-  scope.varname(node, scope, varname)
-  and the result is merged like a variable.
+* repeat = "accessor"
+  repeats the node (and its content) by iterating over the given accessor.
+  If a value is :
+  - undefined or null, obj isn't changed
+  - string, path is used as an accessor of obj
+  - function, obj is the result of fun(obj, paths)
 
 
 Operations on instances
@@ -90,7 +102,7 @@ Operations on instances
 
 The actual data merging is controled by these attributes:
 
-* bind-<attribute>
+* bind-<attributeName>
   where attribute is the name of the attribute to process.
 
 * bind-text
@@ -99,62 +111,33 @@ The actual data merging is controled by these attributes:
 * bind-html
   node.innerHTML = <value>
 
-If one of these attributes is set and has a value, the value is a path
-from the current scope.
-If one of these attributes is set and has no value, the actual content
-of the target (be it innerHTML or an attribute) is parsed and only
-[path.to.data] expressions are replaced.
-
 If a value is :
-- undefined - no replacement is done
-- null - target (attribute, childNodes) is removed, or expression is replaced by an empty string
-- a function - the value returned by value(node, scope, path) is processed again
+- undefined, expressions in the target are evaluated
+- null, target is removed
+- string, target is replaced by the value accessed in obj
+- function, the value is replaced by the result of fun(obj, paths)
 
-When merged, a node looses its bind and repeat attributes.
-All these attributes can be namespaced.
+When merged, a repeated node looses its bind and repeat attributes,
+and non-repeated nodes keep their bind-* attributes.
 
-Given this html
+Expressions are written as "{{path.to.val|optional_filter}}" and are
+replaced by their accessed value in the target.
 
-  <section>
-    <header>People meeting <span bind="person" bind-text="name" class="meeters age[age]">Joe</span> today</header>
-    <ul class="list">
-      <li repeat="friends" bind-text="value">first item<span bind="friends">([key])</span></li>
-      <li class="willbeignored">second item</li>
-    </ul>
-  </section>
 
-And some data
+Global settings
+---------------
 
-  var obj = {
-    person: {name: "John Doe", age: 20},
-    friends: ["Luke", "Samantha"]
+Domt.ns object is used to set the prefixes used for the attribute names.
+
+Domt.filters stores filter functions by name.
+
+
+Filters
+-------
+
+Filters are called before merging the value in the target.
+A filter is a simple function returning a string.
+
+  Domt.filters.myfilter = function(val) {
+    return "my" + val;
   };
-
-This will save the node as a template and replace it by the merged nodes
-
-  Domin.ns = 'do';
-  var inst = Domin('ul.list');
-  inst.merge(obj);
-
-Generating this piece of html
-
-  <section>
-    <header>People meeting <span>John Doe</span> today</header>
-    <ul class="list">
-      <li>Luke</li>
-      <li>Samantha</li>
-    </ul>
-  </section>
-
-
-
-Filter
-------
-
-Domin is simple yet flexible enough to do just that !
-
-  inst.ns().merge(obj, function(node, scope, varname, key) {
-    return node.innerHTML.replace(...);
-  });
-
-The filter can call inst.find(scope, varpath)
