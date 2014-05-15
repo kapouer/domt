@@ -122,6 +122,7 @@ Domt.prototype.merge = function(obj, opts) {
 	node = parent;
 	i = 0;
 	len = binds.length;
+	var val;
 	do {
 		path = node.getAttribute(Domt.ns.bind);
 		current = find(obj, path);
@@ -131,16 +132,29 @@ Domt.prototype.merge = function(obj, opts) {
 			if (!match || match.length != 2) return;
 			if (opts.strip) node.removeAttribute(att.name);
 			var name = match[1];
-			var val = find(current.value, att.value).value;
-			if (val === undefined) return;
-			if (name == "text") node.innerText = val;
-			else if (name == "html") node.innerHTML = val;
-			else if (val !== null) node.setAttribute(name, val);
-			else node.removeAttribute(name);
+			if (!att.value) {
+				if (name == "text") val = node.innerText;
+				else if (name == "html") val = node.innerHTML;
+				else val = node.getAttribute(name);
+				val = val.replace(/\[([^\[\]]+)\]/g, function(match, path) {
+					return find(current.value, path).value;
+				});
+			} else {
+				val = find(current.value, att.value).value;
+			}
+			replace(node, name, val);
 		});
 	} while (i < len && (node = binds.item(i++)));
 	return this;
 };
+
+function replace(node, name, val) {
+	if (val === undefined) return;
+	if (name == "text") node.innerText = val;
+	else if (name == "html") node.innerHTML = val;
+	else if (val !== null) node.setAttribute(name, val);
+	else node.removeAttribute(name);
+}
 
 function find(scope, path) {
 	if (!scope) return {scope: scope};
