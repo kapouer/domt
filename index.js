@@ -4,10 +4,17 @@ window.Domt = Domt;
 Domt.Error = DomtError;
 Domt.ns = {
 	repeat: 'repeat',
-	bind: 'bind',
-	id: 'template'
+	bind: 'bind'
 };
 
+Domt.filters = {
+	upper: function(val) {
+		return Object.prototype.toString(val).toUpperCase();
+	},
+	lower: function(val) {
+		return Object.prototype.toString(val).toLowerCase();
+	}
+};
 
 
 function Holder(node) {
@@ -139,18 +146,20 @@ Domt.prototype.merge = function(obj, opts) {
 
 function find(scope, path) {
 	if (!scope) return {scope: scope};
-	var name, val = scope, initial = val;
-	path = path ? path.split('.') : [];
+	var name, val = scope, initial = val, filter;
+	path = path.split('|');
+	if (path.length == 2) filter = Domt.filters[path[1]];
+	path = path[0] ? path[0].split('.') : [];
 	if (typeof val == "function") val = val(scope, path);
 	while ((name = path.shift()) !== undefined) {
 		scope = val;
 		val = scope[name];
-		if (typeof val == "function") val = val(scope, path, name);
+		if (typeof val == "function") val = val(scope, path);
 		if (!val) break;
 	}
 	return {
 		scope: scope,
-		value: val
+		value: filter ? filter(val) : val
 	};
 };
 
