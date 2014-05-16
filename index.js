@@ -145,13 +145,17 @@ Domt.prototype.merge = function(obj, opts) {
 			if (!match || match.length != 2) return;
 			if (opts.strip) node.removeAttribute(att.name);
 			var name = match[1];
-			if (!att.value) {
-				if (name == "text") val = node.innerText;
-				else if (name == "html") val = node.innerHTML;
-				else val = node.getAttribute(name);
-				val = val.replace(reExpr, function(str, path) {
-					return find(current.value, path).value;
-				});
+			if (name == "text") val = node.innerText;
+			else if (name == "html") val = node.innerHTML;
+			else val = node.getAttribute(name);
+			var replacements = 0, initial = val;
+			if (att.value) initial = att.value;
+			val = initial.replace(reExpr, function(str, path) {
+				replacements++;
+				return find(current.value, path).value;
+			});
+			if (replacements) {
+				if (!att.value) att.value = initial;
 			} else {
 				val = find(current.value, att.value).value;
 			}
