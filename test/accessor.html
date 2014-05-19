@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <script src="../index.js"></script>
+  <script src="check.js"></script>
+  <script>
+	describe("accessors", function suite() {
+		it("should merge direct data into text", function() {
+			Domt('#text').merge("me").check('expected-text-undefined');
+		});
+		it("should not merge undefined data into text", function() {
+			Domt('#text').merge().check('expected-text-undefined');
+		});
+		it("should merge null data into text", function() {
+			Domt('#text').merge(null).check('expected-text-null');
+		});
+	});
+  </script>
+	<title>Domt test suite</title>
+</head>
+<body>
+
+	<h1 id="text" bind-text>old header</h1>
+	<h1 id="expected-text-undefined" bind-text>me</h1>
+	<h1 id="expected-text-null" bind-text></h1>
+
+</body>
+</html>
