@@ -44,6 +44,7 @@ We get:
 
   <div id="test" class="list" bind-class="class">
     <ul>
+      <script repeat-tail="true" type="text/template"></script>
       <li class="blue">the sea</li>
       <li>the void</li>
       <script type="text/template" repeat="items">
@@ -73,23 +74,29 @@ The API is chainable, also calling it a second time is possible:
 The second call with remove attribute "class" from #test, and append a
 list item named "another one".
 
+It is also possible to empty the repeated lists:
+
+  Domt('#test').empty().merge({
+    items: [
+      {color: "red", text: "another one"}
+    ]
+  });
+
 
 Which DOM nodes are processed ?
 -------------------------------
 
-The only processed nodes are the ones where one of these two attributes
-is set:
+* the argument of Domt() or its target (see next section)
 
-* bind = "accessor"
-  tells from which object binded variables are the keys
-  applies only to the node on which it is declared (not its children).
-  Can be empty (in which case parent object is used).
+* the descendants with attribute "bind"
+  The attribute value is an object accessor of the form "path.to.key",
+  and it can be empty (in which case parent object is used).
   If a value is :
   - undefined or null, obj isn't changed
   - string, path is used as an accessor of obj
   - function, obj is the result of fun(obj, paths)
 
-* repeat = "accessor"
+* the descendants with attribute "repeat"
   repeats the node (and its content) by iterating over the given accessor.
   If a value is :
   - undefined or null, obj isn't changed
@@ -106,7 +113,8 @@ The actual data merging is controled by these attributes:
   where attribute is the name of the attribute to process.
 
 * bind-text
-  node.innerText = <value>
+  node.textContent = <value>
+  (or node.innerText for older browsers)
 
 * bind-html
   node.innerHTML = <value>
@@ -122,6 +130,13 @@ and non-repeated nodes keep their bind-* attributes.
 
 Expressions are written as "{{path.to.val|optional_filter}}" and are
 replaced by their accessed value in the target.
+
+A node is repeated in natural order. To invert that order, just add an
+empty "repeat-invert" attribute like this:
+
+  <ul>
+    <li repeat="items" repeat-invert bind-text="text">first item</li>
+  </ul>
 
 
 Global settings
