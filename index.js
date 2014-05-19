@@ -1,5 +1,9 @@
 (function() {
-window.Domt = Domt;
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+	module.exports = Domt;
+} else {
+	window.Domt = Domt;
+}
 
 Domt.Error = DomtError;
 Domt.ns = {
