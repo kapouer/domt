@@ -125,7 +125,7 @@ Domt.prototype.empty = function() {
 
 Domt.prototype.merge = function(obj, opts) {
 	var node, current, holder, container, path, i, len, parentNode, curNode;
-		parent = this.parent;
+	var parent = this.parent;
 	opts = opts || {};
 	if (!opts.norepeat) {
 		// repeat
