@@ -1,4 +1,15 @@
-Domt.prototype.check = function() {
+if (!window.describe) {
+	window.tests = {};
+	window.describe = function(str, suite) {
+		console.log(str, "can be run manually by calling");
+		suite();
+	};
+	window.it = function(name, test) {
+		console.log('tests["' + name + '"]()');
+		tests[name] = test;
+	};
+}
+
 Domt.prototype.check = function(expectedId) {
 	var actual = this.parent;
 	var id = actual.id;
