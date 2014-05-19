@@ -13,6 +13,23 @@
 				{ content: "two" }
 			]);
 		});
+		it("should repeat node and append to previous test from same DOM", function() {
+			check("expected-repeat", [
+				{ content: "one" },
+				{ content: "two" }
+			]);
+		});
+		it("should repeat node and append to previous test from a DOM copy", function() {
+			var actual = document.getElementById('repeat').cloneNode(true);
+			var expected = document.getElementById('expected-expected-repeat').cloneNode(true);
+			actual.id = 'repeat-copy';
+			expected.id = 'expected-repeat-copy';
+			document.body.innerHTML += actual.outerHTML + expected.outerHTML;
+			check("repeat-copy", [
+				{ content: "one" },
+				{ content: "two" }
+			]);
+		});
 	});
   </script>
 	<title>Domt repeat test suite</title>
@@ -23,6 +40,9 @@
 	</ul>
 	<ul id="expected-repeat">
 		<script repeat-tail="true" type="text/template"></script><li>one</li><li>two</li><script type="text/template" repeat=""><li bind-text="content"></li></script>
+	</ul>
+	<ul id="expected-expected-repeat">
+		<script repeat-tail="true" type="text/template"></script><li>one</li><li>two</li><li>one</li><li>two</li><script type="text/template" repeat=""><li bind-text="content"></li></script>
 	</ul>
 </body>
 </html>
