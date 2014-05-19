@@ -38,8 +38,10 @@ function Holder(node) {
 		if (origHolder) {
 			this.repeat = origHolder.repeat;
 			this.template = origHolder.template;
+			this.invert = origHolder.invert;
 		} else {
 			this.repeat = container.getAttribute(REPEAT);
+			this.invert = container.getAttribute(REPEAT + '-invert');
 			var doc = document.implementation.createHTMLDocument();
 			var div = doc.createElement('div');
 			div.innerHTML = container.text.replace(/^\s+|\s+$/g, '');
@@ -56,11 +58,22 @@ function Holder(node) {
 		container = document.createElement("script");
 		container.type = "text/template";
 		this.repeat = node.getAttribute(REPEAT);
+		this.invert = node.getAttribute(REPEAT + '-invert');
+		if (this.invert) container.setAttribute(REPEAT + '-invert', this.invert);
 		node.removeAttribute(REPEAT);
+		node.removeAttribute(REPEAT + '-invert');
 		node.parentNode.insertBefore(container, node);
 		var div = document.createElement("div");
 		div.appendChild(node);
 		container.text = div.innerHTML;
+		var begin = document.createElement("script");
+		begin.setAttribute(Domt.ns.repeat + "-tail", true);
+		if (this.invert) {
+			if (container.nextSibling) container.parentNode.insertBefore(begin, container.nextSibling);
+			else container.parentNode.appendChild(begin);
+		} else {
+			container.parentNode.insertBefore(begin, container);
+		}
 	}
 	this.container = container;
 	container[Domt.ns.holder] = this;
@@ -103,13 +116,13 @@ function Domt(parent) {
 };
 
 Domt.prototype.merge = function(obj, opts) {
-	var node, current, holder, container, path, i, len,
+	var node, current, holder, container, path, i, len, parentNode, curNode;
 		parent = this.parent;
 	opts = opts || {};
 	if (!opts.norepeat) {
 		// repeat
-		var REPEAT = '[' + Domt.ns.repeat + ']';
-		if (parent.hasAttribute(Domt.ns.repeat)) node = parent;
+		var REPEAT = Domt.ns.repeat;
+		if (parent.hasAttribute(REPEAT)) node = parent;
 		var holders = [];
 		do {
 			if (!node) continue;
@@ -122,12 +135,26 @@ Domt.prototype.merge = function(obj, opts) {
 			if (current.value === undefined) {
 				// nothing to repeat, merge and restore repeat
 				Domt(holder.template).merge(obj, {norepeat: true});
-			} else iterate(current.value, function(key, val) {
-				var clone = holder.template.cloneNode();
-				Domt(clone).merge(val, {strip: true});
-				container.parentNode.insertBefore(clone, container);
-			});
-		} while ((node = parent.querySelector(REPEAT)));
+			} else {
+				parentNode = container.parentNode;
+				if (opts.empty) {
+					if (holder.invert) {
+						while ((curNode = container.nextSibling) && !curNode.hasAttribute(REPEAT + '-tail')) {
+							parentNode.removeChild(curNode);
+						}
+					} else {
+						while ((curNode = container.previousSibling) && !curNode.hasAttribute(REPEAT + '-tail')) {
+							parentNode.removeChild(curNode);
+						}
+					}
+				}
+				iterate(current.value, function(key, val) {
+					var clone = holder.template.cloneNode();
+					Domt(clone).merge(val, {strip: true});
+					parentNode.insertBefore(clone, holder.invert ? container.nextSibling : container);
+				});
+			}
+		} while ((node = parent.querySelector('[' + REPEAT + ']')));
 
 		len = holders.length;
 		for (i=0; i < len; i++) {
