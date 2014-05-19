@@ -97,8 +97,11 @@ function iterate(obj, fun) {
 		obj = Array.prototype.slice.call(obj, 0);
 		for (var i=0, len=obj.length; i < len; i++) fun(i, obj[i]);
 	} else if (obj instanceof Object) {
-		var keys = obj.keys();
-		for (var i=0, len=keys.length; i < len; i++) fun(keys[i], obj[keys[i]]);
+		var keys = Object.keys(obj);
+		for (var i=0, len=keys.length, key; i < len; i++) {
+			key = keys[i];
+			fun(key, {key: key, val: obj[key]});
+		}
 	}
 };
 
