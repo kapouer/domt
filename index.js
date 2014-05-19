@@ -176,7 +176,7 @@ Domt.prototype.merge = function(obj, opts) {
 			if (!match || match.length != 2) return;
 			if (opts.strip) node.removeAttribute(att.name);
 			var name = match[1];
-			if (name == "text") val = node.innerText;
+			if (name == "text") val = node.textContent || node.innerText;
 			else if (name == "html") val = node.innerHTML;
 			else val = node.getAttribute(name);
 			var replacements = 0, initial = val;
@@ -198,8 +198,10 @@ Domt.prototype.merge = function(obj, opts) {
 
 function replace(node, name, val) {
 	if (val === undefined) return;
-	if (name == "text") node.innerText = val;
-	else if (name == "html") node.innerHTML = val;
+	if (name == "text") {
+		if ("textContent" in node) node.textContent = val;
+		else node.innerText = val;
+	} else if (name == "html") node.innerHTML = val;
 	else if (val !== null) node.setAttribute(name, val);
 	else node.removeAttribute(name);
 }
