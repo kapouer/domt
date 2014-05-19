@@ -1,11 +1,12 @@
 Domt.prototype.check = function() {
+Domt.prototype.check = function(expectedId) {
 	var actual = this.parent;
 	var id = actual.id;
 	if (!actual) throw new Error("Missing node with id " + id);
 	actual = actual.cloneNode(true);
 	actual.removeAttribute('id');
 
-	id = 'expected-' + id;
+	id = expectedId || 'expected-' + id;
 	var expected = document.getElementById(id);
 	if (!expected) {
 		console.error(actual.outerHTML);
