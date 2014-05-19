@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <script src="../index.js"></script>
+  <script>
+	if (window.describe) window.describe("merge bind", function suite() {
+		it("should use bind-text to replace text content", function() {
+			Domt('#text').merge({ header: "new header" });
+			assert.html('text', 'result-text');
+		});
+
+		it("should use bind-text to replace escaped content", function() {
+			Domt('#escaped-text').merge({ header: "new <img /> header" });
+			assert.html('escaped-text', 'result-escaped-text');
+		});
+
+		it("should use bind-html to replace content", function() {
+			Domt('#html').merge({ content: '<a href="http://localhost:7000/?test=1">link</a>' });
+			assert.html('html', 'result-html');
+		});
+
+		it("should use bind-class to add class attribute", function() {
+			Domt('#class-add').merge({ "class": "list" });
+			assert.html('class-add', 'result-class-add');
+		});
+
+		it("should use bind-class to replace class attribute", function() {
+			Domt('#class-replace').merge({ "class": "list" });
+			assert.html('class-replace', 'result-class-replace');
+		});
+
+		it("should use bind-class to remove class attribute", function() {
+			Domt('#class-remove').merge({ "class": null });
+			assert.html('class-remove', 'result-class-remove');
+		});
+	});
+  </script>
+	<title>Domt bind test suite</title>
+</head>
+<body>
+	<h1 id="text" bind-text="header">old header</h1>
+	<h1 id="result-text" bind-text="header">new header</h1>
+
+	<h1 id="escaped-text" bind-text="header">old header</h1>
+	<h1 id="result-escaped-text" bind-text="header">new &lt;img /&gt; header</h1>
+
+	<h1 id="html" bind-html="content">old header</h1>
+	<h1 id="result-html" bind-html="content"><a href="http://localhost:7000/?test=1">link</a></h1>
+
+	<div id="class-add" bind-class="class">a</div>
+	<div id="result-class-add" bind-class="class" class="list">a</div>
+
+	<div id="class-replace" bind-class="class" class="toto">b</div>
+	<div id="result-class-replace" bind-class="class" class="list">b</div>
+
+	<div id="class-remove" bind-class="class" class="toto">c</div>
+	<div id="result-class-remove" bind-class="class">c</div>
+
+	<div id="class-ignore" bind-class="class" class="toto">d</div>
+	<div id="result-class-ignore" bind-class="class" class="toto">d</div>
+
+
+</body>
+</html>
