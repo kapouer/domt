@@ -30,19 +30,50 @@
 				{ content: "two" }
 			]).check();
 		});
+		it("should repeat node in inverted order", function() {
+			Domt('#repeat-invert').merge([
+				{ content: "one" },
+				{ content: "two" }
+			]).check();
+		});
+		it("should repeat node then empty the list", function() {
+			var inst = Domt('#repeat-empty').merge([
+				{ content: "one" },
+				{ content: "two" }
+			]);
+			inst.empty().check();
+		});
 	});
   </script>
 	<title>Domt test suite</title>
 </head>
 <body>
+
 	<ul id="repeat">
 		<li repeat bind-text="content"></li>
 	</ul>
 	<ul id="expected-repeat">
-		<script repeat-tail="true" type="text/template"></script><li>one</li><li>two</li><script type="text/template" repeat=""><li bind-text="content"></li></script>
+		<script repeat-tail="" type="text/template"></script><li>one</li><li>two</li><script type="text/template" repeat=""><li bind-text="content"></li></script>
 	</ul>
+
 	<ul id="expected-expected-repeat">
-		<script repeat-tail="true" type="text/template"></script><li>one</li><li>two</li><li>one</li><li>two</li><script type="text/template" repeat=""><li bind-text="content"></li></script>
+		<script repeat-tail="" type="text/template"></script><li>one</li><li>two</li><li>one</li><li>two</li><script type="text/template" repeat=""><li bind-text="content"></li></script>
 	</ul>
+
+	<ul id="repeat-invert">
+		<li repeat repeat-invert bind-text="content"></li>
+	</ul>
+	<ul id="expected-repeat-invert">
+		<script type="text/template" repeat-invert="" repeat=""><li bind-text="content"></li></script><li>two</li><li>one</li><script repeat-tail="" type="text/template"></script>
+	</ul>
+
+	<ul id="repeat-empty">
+		<li repeat bind-text="content"></li>
+	</ul>
+	<ul id="expected-repeat-empty">
+		<script repeat-tail="" type="text/template"></script><script type="text/template" repeat=""><li bind-text="content"></li></script>
+	</ul>
+
 </body>
 </html>
+
