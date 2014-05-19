@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <script src="../index.js"></script>
+  <script src="check.js"></script>
+  <script>
+	if (window.describe) window.describe("repeat", function suite() {
+		it("should repeat node", function() {
+			check("repeat", [
+				{ content: "one" },
+				{ content: "two" }
+			]);
+		});
+	});
+  </script>
+	<title>Domt repeat test suite</title>
+</head>
+<body>
+	<ul id="repeat">
+		<li repeat bind-text="content"></li>
+	</ul>
+	<ul id="expected-repeat">
+		<script repeat-tail="true" type="text/template"></script><li>one</li><li>two</li><script type="text/template" repeat=""><li bind-text="content"></li></script>
+	</ul>
+</body>
+</html>
