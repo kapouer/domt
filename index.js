@@ -41,7 +41,7 @@ function Holder(node) {
 			this.invert = origHolder.invert;
 		} else {
 			this.repeat = container.getAttribute(REPEAT);
-			this.invert = container.getAttribute(REPEAT + '-invert');
+			this.invert = container.hasAttribute(REPEAT + '-invert');
 			var doc = (document.implementation && document.implementation.createHTMLDocument || function() {
 				return document;
 			})();
@@ -60,8 +60,8 @@ function Holder(node) {
 		container = document.createElement("script");
 		container.type = "text/template";
 		this.repeat = node.getAttribute(REPEAT);
-		this.invert = node.getAttribute(REPEAT + '-invert');
-		if (this.invert) container.setAttribute(REPEAT + '-invert', this.invert);
+		this.invert = node.hasAttribute(REPEAT + '-invert');
+		if (this.invert) container.setAttribute(REPEAT + '-invert', "");
 		node.removeAttribute(REPEAT);
 		node.removeAttribute(REPEAT + '-invert');
 		node.parentNode.insertBefore(container, node);
@@ -69,7 +69,7 @@ function Holder(node) {
 		div.appendChild(node);
 		container.text = div.innerHTML;
 		var begin = document.createElement("script");
-		begin.setAttribute(Domt.ns.repeat + "-tail", true);
+		begin.setAttribute(Domt.ns.repeat + "-tail", "");
 		begin.setAttribute("type", "text/template");
 		if (this.invert) {
 			if (container.nextSibling) container.parentNode.insertBefore(begin, container.nextSibling);
