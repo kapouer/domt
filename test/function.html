@@ -7,8 +7,20 @@
   <script src="check.js"></script>
   <script>
 	describe("functions", function suite() {
-		it("should call function when merging data", function() {
-			Domt('#function').merge({
+		it("should call filter when merging data", function() {
+			Domt.filters.price = function(val) {
+				return val + ",00 €";
+			}
+			Domt('#filter').merge({
+				path: {
+					to: {
+						value: 15
+					}
+				}
+			}).check();
+		});
+		it("should call getter when merging data", function() {
+			Domt('#getter').merge({
 				path: {
 					to: {
 						price: function(obj, paths) {
@@ -20,8 +32,8 @@
 				}
 			}).check();
 		});
-		it("should call function even if it is not last accessed value in the path", function() {
-			Domt('#function-paths').merge({
+		it("should call getter even if it is not last accessed value in the path", function() {
+			Domt('#getter-paths').merge({
 				path: {
 					to: {
 						price: function(obj, paths) {
@@ -42,11 +54,14 @@
 </head>
 <body>
 
-	<h1 id="function" bind-text="path.to.price">old header</h1>
-	<h1 id="expected-function" bind-text="path.to.price">16.5</h1>
+	<h1 id="filter" bind-text="path.to.value|price">old header</h1>
+	<h1 id="expected-filter" bind-text="path.to.value|price">15,00 €</h1>
 
-	<h1 id="function-paths" bind-text="path.to.price.euro">old header</h1>
-	<h1 id="expected-function-paths" bind-text="path.to.price.euro">16.5 €</h1>
+	<h1 id="getter" bind-text="path.to.price">old header</h1>
+	<h1 id="expected-getter" bind-text="path.to.price">16.5</h1>
+
+	<h1 id="getter-paths" bind-text="path.to.price.euro">old header</h1>
+	<h1 id="expected-getter-paths" bind-text="path.to.price.euro">16.5 €</h1>
 
 </body>
 </html>
