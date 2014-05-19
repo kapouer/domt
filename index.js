@@ -215,8 +215,11 @@ function replace(node, name, val) {
 }
 
 function find(scope, path) {
-	if (!scope) return {scope: scope};
 	var name, val = scope, filters, filter;
+	if (scope == null) {
+		if (path) val = undefined;
+		return {scope: scope, value: val};
+	}
 	path = (path || "").split('|');
 	filters = path;
 	path = path.shift();
