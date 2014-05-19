@@ -42,7 +42,9 @@ function Holder(node) {
 		} else {
 			this.repeat = container.getAttribute(REPEAT);
 			this.invert = container.getAttribute(REPEAT + '-invert');
-			var doc = document.implementation.createHTMLDocument();
+			var doc = (document.implementation && document.implementation.createHTMLDocument || function() {
+				return document;
+			})();
 			var div = doc.createElement('div');
 			div.innerHTML = container.text.replace(/^\s+|\s+$/g, '');
 			var childs = div.childNodes;
