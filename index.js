@@ -235,8 +235,7 @@ function DomtError(message) {
   this.name = arguments.callee.name;
   this.message = message;
 }
-DomtError.prototype = new Error();
-DomtError.prototype.constructor = DomtError;
+DomtError.prototype = Error.prototype;
 
 
 })();
