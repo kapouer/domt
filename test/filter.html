@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <script src="../index.js"></script>
+  <script src="check.js"></script>
+  <script>
+	describe("filters", function suite() {
+		it("should call filter when merging data", function() {
+			Domt.filters.price = function(val) {
+				return val + ",00 €";
+			}
+			Domt('#filter').merge({
+				path: {
+					to: {
+						value: 15
+					}
+				}
+			}).check();
+		});
+	});
+  </script>
+	<title>Domt test suite</title>
+</head>
+<body>
+
+	<h1 id="filter" bind-text="path.to.value|price">old header</h1>
+	<h1 id="expected-filter" bind-text="path.to.value|price">15,00 €</h1>
+
+</body>
+</html>

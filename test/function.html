@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <script src="../index.js"></script>
+  <script src="check.js"></script>
+  <script>
+	describe("functions", function suite() {
+		it("should call function when merging data", function() {
+			Domt('#function').merge({
+				path: {
+					to: {
+						price: function(obj, paths) {
+							return obj.value * (obj.taxes + 1);
+						},
+						taxes: 0.10,
+						value: 15
+					}
+				}
+			}).check();
+		});
+		it("should call function even if it is not last accessed value in the path", function() {
+			Domt('#function-paths').merge({
+				path: {
+					to: {
+						price: function(obj, paths) {
+							// paths == ['euro']
+							return {
+								euro: obj.value * (obj.taxes + 1) + " €"
+							};
+						},
+						taxes: 0.10,
+						value: 15
+					}
+				}
+			}).check();
+		});
+	});
+  </script>
+	<title>Domt test suite</title>
+</head>
+<body>
+
+	<h1 id="function" bind-text="path.to.price">old header</h1>
+	<h1 id="expected-function" bind-text="path.to.price">16.5</h1>
+
+	<h1 id="function-paths" bind-text="path.to.price.euro">old header</h1>
+	<h1 id="expected-function-paths" bind-text="path.to.price.euro">16.5 €</h1>
+
+</body>
+</html>
