@@ -1,6 +1,6 @@
-function check(id, data) {
-	Domt('#'+id).merge(data);
-	var actual = document.getElementById(id);
+Domt.prototype.check = function() {
+	var actual = this.parent;
+	var id = actual.id;
 	if (!actual) throw new Error("Missing node with id " + id);
 	actual = actual.cloneNode(true);
 	actual.removeAttribute('id');

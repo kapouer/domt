@@ -8,16 +8,16 @@
   <script>
 	if (window.describe) window.describe("repeat", function suite() {
 		it("should repeat node", function() {
-			check("repeat", [
+			Domt('#repeat').merge([
 				{ content: "one" },
 				{ content: "two" }
-			]);
+			]).check();
 		});
 		it("should repeat node and append to previous test from same DOM", function() {
-			check("expected-repeat", [
+			Domt('#expected-repeat').merge([
 				{ content: "one" },
 				{ content: "two" }
-			]);
+			]).check();
 		});
 		it("should repeat node and append to previous test from a DOM copy", function() {
 			var actual = document.getElementById('repeat').cloneNode(true);
@@ -25,14 +25,14 @@
 			actual.id = 'repeat-copy';
 			expected.id = 'expected-repeat-copy';
 			document.body.innerHTML += actual.outerHTML + expected.outerHTML;
-			check("repeat-copy", [
+			Domt('#repeat-copy').merge([
 				{ content: "one" },
 				{ content: "two" }
-			]);
+			]).check();
 		});
 	});
   </script>
-	<title>Domt repeat test suite</title>
+	<title>Domt test suite</title>
 </head>
 <body>
 	<ul id="repeat">

@@ -8,43 +8,43 @@
   <script>
 	if (window.describe) window.describe("bind", function suite() {
 		it("should use bind-text to replace text content", function() {
-			check("text", {
+			Domt('#text').merge({
 				header: "new header"
-			});
+			}).check();
 		});
 
 		it("should use bind-text to replace escaped content", function() {
-			check("escaped-text", {
+			Domt('#escaped-text').merge({
 				header: "new <img /> header"
-			});
+			}).check();
 		});
 
 		it("should use bind-html to replace content", function() {
-			check("html", {
+			Domt('#html').merge({
 				content: '<a href="http://localhost:7000/?test=1">link</a>'
-			});
+			}).check();
 		});
 
 		it("should use bind-class to add class attribute", function() {
-			check("class-add", {
+			Domt('#class-add').merge({
 				"class": "list"
-			});
+			}).check();
 		});
 
 		it("should use bind-class to replace class attribute", function() {
-			check("class-replace", {
+			Domt('#class-replace').merge({
 				"class": "list"
-			});
+			}).check();
 		});
 
 		it("should use bind-class to remove class attribute", function() {
-			check("class-remove", {
+			Domt('#class-remove').merge({
 				"class": null
-			});
+			}).check();
 		});
 	});
   </script>
-	<title>Domt bind test suite</title>
+	<title>Domt test suite</title>
 </head>
 <body>
 
