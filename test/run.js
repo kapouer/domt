@@ -8,20 +8,14 @@ fs.readdirSync(__dirname).filter(function(file) {
 	var str = fs.readFileSync(path.join(__dirname, file)).toString();
 	var doc = jsdom.jsdom(str, null, {features: {
 		FetchExternalResources   : false,
-		ProcessExternalResources : false,
-		MutationEvents           : false
+		ProcessExternalResources : false
 	}});
 	var win = doc.createWindow();
 	win.console = console;
 	win.describe = describe;
 	win.it = it;
 	win.assert = assert;
-	win.assert.html = function(id1, id2) {
-		assert.equal(
-			doc.querySelector('#'+id1).cloneNode().removeAttribute('id').outerHTML,
-			doc.querySelector('#'+id2).cloneNode().removeAttribute('id').outerHTML
-		);
-	};
+
 	Array.prototype.forEach.call(doc.querySelectorAll('script'), function(script) {
 		try {
 			if (script.textContent) {
