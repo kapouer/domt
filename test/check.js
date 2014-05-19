@@ -17,6 +17,8 @@ function check(id, data) {
 	actual = actual && actual.outerHTML;
 	expected =  expected && expected.outerHTML;
 
+	if (!actual && !expected) throw new Error("void check " + id);
+
 	if (window.assert) window.assert.equal(actual, expected);
 	else if (actual != expected) throw new Error("failed check\n" + actual + "\n\n" + expected);
 }
