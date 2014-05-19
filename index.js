@@ -157,7 +157,7 @@ Domt.prototype.merge = function(obj, opts) {
 				Domt(holder.template).merge(obj, {norepeat: true});
 			} else {
 				iterate(current.value, function(key, val) {
-					var clone = holder.template.cloneNode();
+					var clone = holder.template.cloneNode(true);
 					Domt(clone).merge(val, {strip: true});
 					parentNode.insertBefore(clone, holder.invert ? container.nextSibling : container);
 				});
