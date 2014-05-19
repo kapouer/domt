@@ -101,10 +101,10 @@ function iterate(obj, fun) {
 
 function Domt(parent) {
 	if (!(this instanceof Domt)) return new Domt(parent);
-	if (!parent) throw new DomtError("missing parent");
 	if (typeof parent == "string") {
 		parent = document.querySelector(parent);
 	}
+	if (!parent) throw new DomtError("missing parent");
 	this.parent = parent;
 
 	this.reBind = new RegExp("^" + Domt.ns.bind + "-(.*)$", "i");
