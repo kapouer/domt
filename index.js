@@ -68,6 +68,7 @@ function Holder(node) {
 		container.text = div.innerHTML;
 		var begin = document.createElement("script");
 		begin.setAttribute(Domt.ns.repeat + "-tail", true);
+		begin.setAttribute("type", "text/template");
 		if (this.invert) {
 			if (container.nextSibling) container.parentNode.insertBefore(begin, container.nextSibling);
 			else container.parentNode.appendChild(begin);
