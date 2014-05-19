@@ -118,6 +118,11 @@ function Domt(parent) {
 	this.reExpr = new RegExp(start + '([^' + start + end + ']+)' + end, "g");
 };
 
+Domt.prototype.empty = function() {
+	this.merge(null, {empty:true});
+	return this;
+};
+
 Domt.prototype.merge = function(obj, opts) {
 	var node, current, holder, container, path, i, len, parentNode, curNode;
 		parent = this.parent;
@@ -135,22 +140,22 @@ Domt.prototype.merge = function(obj, opts) {
 			path = holder.repeat;
 			// get data
 			current = find(obj, path);
+			parentNode = container.parentNode;
+			if (opts.empty) {
+				if (holder.invert) {
+					while ((curNode = container.nextSibling) && !curNode.hasAttribute(REPEAT + '-tail')) {
+						parentNode.removeChild(curNode);
+					}
+				} else {
+					while ((curNode = container.previousSibling) && !curNode.hasAttribute(REPEAT + '-tail')) {
+						parentNode.removeChild(curNode);
+					}
+				}
+			}
 			if (current.value === undefined) {
 				// nothing to repeat, merge and restore repeat
 				Domt(holder.template).merge(obj, {norepeat: true});
 			} else {
-				parentNode = container.parentNode;
-				if (opts.empty) {
-					if (holder.invert) {
-						while ((curNode = container.nextSibling) && !curNode.hasAttribute(REPEAT + '-tail')) {
-							parentNode.removeChild(curNode);
-						}
-					} else {
-						while ((curNode = container.previousSibling) && !curNode.hasAttribute(REPEAT + '-tail')) {
-							parentNode.removeChild(curNode);
-						}
-					}
-				}
 				iterate(current.value, function(key, val) {
 					var clone = holder.template.cloneNode();
 					Domt(clone).merge(val, {strip: true});
