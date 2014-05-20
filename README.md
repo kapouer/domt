@@ -182,6 +182,9 @@ Some filters are already availables:
 * unesc: decodeURIComponent
 * json: JSON.stringify(val)
 
+Note that escaping xml entities is usually not needed because we use the
+DOM methods and they do the conversions for us.
+
 
 Tables
 ------
