@@ -6,17 +6,17 @@ Merge plain javascript objects into DOM.
 Support following workflow :
 
 * add attributes to static html document
-* merge data using DOM (optionally, from data attributes)
-* serialize document (optionally, with data attributes)
+* merge data using DOM
+* serialize document
 * reload document later and merge new data using DOM
 
 And stick with these constraints :
 
-* light
+* light (4.8KB minified)
 * simple
-* keep logic in javascript (using filters and plugins)
-* cross browser, no shims
-* configurable
+* force separation between logic (js), template (html), and data (obj)
+* cross browsers - a legacy.js file is provided for < IE9
+* extensible
 
 
 Quick start
@@ -103,6 +103,15 @@ Which DOM nodes are processed ?
   - string, path is used as an accessor of obj
   - function, obj is the result of fun(obj, paths)
 
+As a consequence, this p descendant won't be processed by
+
+  Domt('#test').merge(data);
+
+  <div id="target"><p bind-text="data"></p></div>
+
+Because p is missing a "bind" attribute.
+
+
 
 Operations on instances
 -----------------------
@@ -125,8 +134,9 @@ If a value is :
 - string, target is replaced by the value accessed in obj
 - function, the value is replaced by the result of fun(obj, paths)
 
-When merged, a repeated node looses its bind and repeat attributes,
-and non-repeated nodes keep their bind-* attributes.
+When merged, a repeated node looses its bind and repeat attributes (but
+doesn't remove attributes added by a "bind-bind-att" trick) and
+non-repeated nodes keep their bind-* attributes.
 
 Expressions are written as "{{path.to.val|optional_filter}}" and are
 replaced by their accessed value in the target.
@@ -147,6 +157,13 @@ Domt.ns object is used to set the prefixes used for the attribute names.
 Domt.filters stores filter functions by name.
 
 
+Data getters
+------------
+
+As mentioned above, merging a function will call it with parameters
+(obj, paths). This cannot be used to modify the DOM, only the data.
+
+
 Filters
 -------
 
@@ -156,3 +173,20 @@ A filter is a simple function returning a string.
   Domt.filters.myfilter = function(val) {
     return "my" + val;
   };
+
+Some filters are already availables:
+
+* upper, lower: change string case
+* br: replace newlines by <br>
+* esc: encodeURIComponent
+* json: JSON.stringify(val)
+
+
+Tables
+------
+
+It is possible to merge columns, then merge rows, to achieve merging
+table data with arbitrary columns.
+There's an example of this in
+test/repeat.html#should repeat within repeat
+
