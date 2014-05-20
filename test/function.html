@@ -19,6 +19,13 @@
 				}
 			}).check();
 		});
+		it("should use json filter when merging object", function() {
+			Domt('#json').merge({
+				data: {
+					some: { data: 34.2, bool: true }
+				}
+			}).check();
+		});
 		it("should call getter when merging data", function() {
 			Domt('#getter').merge({
 				path: {
@@ -56,6 +63,9 @@
 
 	<h1 id="filter" bind-text="path.to.value|price">old header</h1>
 	<h1 id="expected-filter" bind-text="path.to.value|price">15,00 €</h1>
+
+	<h1 id="json" bind-text="data|json">old header</h1>
+	<h1 id="expected-json" bind-text="data|json">{"some":{"data":34.2,"bool":true}}</h1>
 
 	<h1 id="getter" bind-text="path.to.price">old header</h1>
 	<h1 id="expected-getter" bind-text="path.to.price">16.5</h1>
