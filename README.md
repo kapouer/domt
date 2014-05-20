@@ -14,6 +14,7 @@ And stick with these constraints :
 
 * light (4.8KB minified)
 * simple
+* thorough test suites
 * force separation between logic (js), template (html), and data (obj)
 * cross browsers - a legacy.js file is provided for < IE9
 * extensible
