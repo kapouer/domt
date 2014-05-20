@@ -5,7 +5,6 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
 	window.Domt = Domt;
 }
 
-Domt.Error = DomtError;
 Domt.ns = {
 	repeat: 'repeat',
 	bind: 'bind',
@@ -110,13 +109,13 @@ function Domt(parent) {
 	if (typeof parent == "string") {
 		parent = document.querySelector(parent);
 	}
-	if (!parent) throw new DomtError("missing parent");
 	this.parent = parent;
+	if (!parent) throw DomtError("missing parent");
 
 	this.reBind = new RegExp("^" + Domt.ns.bind + "-(.*)$", "i");
 
 	var delims = Domt.ns.expr.split('*');
-	if (delims.length != 2) throw new DomtError("bad Domt.ns.expr");
+	if (delims.length != 2) throw DomtError("bad Domt.ns.expr");
 	var start = '\\' + delims[0], end = '\\' + delims[1];
 	this.reExpr = new RegExp(start + '([^' + start + end + ']+)' + end, "g");
 };
@@ -248,10 +247,9 @@ function find(scope, path) {
 
 
 function DomtError(message) {
-  this.name = arguments.callee.name;
-  this.message = message;
+	var error = new Error(message);
+	error.name = arguments.callee.name;
+	return error;
 }
-DomtError.prototype = Error.prototype;
-
 
 })();
