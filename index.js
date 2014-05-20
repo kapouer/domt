@@ -27,46 +27,37 @@ Domt.filters = {
 	}
 };
 
+function match(re, str) {
+	var m = re.exec(str);
+	if (m && m.length == 2) return m[1];
+}
 
 function Holder(node) {
 	if (!(this instanceof Holder)) return new Holder(node);
 	var container, REPEAT = Domt.ns.repeat;
 	if (node.tagName == "SCRIPT" && node.type == "text/template") {
-		container = node;
+		this.container = container = node;
 		var origHolder = node[Domt.ns.holder];
 		if (origHolder) {
 			this.repeat = origHolder.repeat;
 			this.template = origHolder.template;
 			this.invert = origHolder.invert;
 		} else {
-			this.repeat = container.getAttribute(REPEAT);
-			this.invert = container.hasAttribute(REPEAT + '-invert');
-			var doc = (document.implementation && document.implementation.createHTMLDocument || function() {
-				return document;
-			})();
-			var div = doc.createElement('div');
-			div.innerHTML = container.text.replace(/^\s+|\s+$/g, '');
-			var childs = div.childNodes;
-			if (childs.length == 1) {
-				this.template = childs[0];
-			}	else {
-				throw new DomtError("template with children 1 != " + childs.length);
-			}
+			this.reload();
 		}
-		container.removeAttribute(REPEAT);
+		node.removeAttribute(REPEAT);
 	} else {
 		this.template = node;
-		container = document.createElement("script");
+		this.container = container = document.createElement("script");
 		container.type = "text/template";
-		this.repeat = node.getAttribute(REPEAT);
+		this.repeat = node.getAttribute(REPEAT) || "";
 		this.invert = node.hasAttribute(REPEAT + '-invert');
 		if (this.invert) container.setAttribute(REPEAT + '-invert', "");
 		node.removeAttribute(REPEAT);
 		node.removeAttribute(REPEAT + '-invert');
 		node.parentNode.insertBefore(container, node);
-		var div = document.createElement("div");
-		div.appendChild(node);
-		container.text = div.innerHTML;
+		container.text = node.outerHTML;
+		node.parentNode.removeChild(node);
 		var begin = document.createElement("script");
 		begin.setAttribute(Domt.ns.repeat + "-tail", "");
 		begin.setAttribute("type", "text/template");
@@ -77,7 +68,6 @@ function Holder(node) {
 			container.parentNode.insertBefore(begin, container);
 		}
 	}
-	this.container = container;
 	container[Domt.ns.holder] = this;
 	return this;
 };
@@ -87,30 +77,58 @@ Holder.prototype.close = function() {
 		node.setAttribute(Domt.ns.repeat, this.repeat);
 	}
 };
+Holder.prototype.reload = function() {
+	var container = this.container;
+	var REPEAT = Domt.ns.repeat;
+	this.repeat = container.getAttribute(REPEAT) || this.repeat || "";
+	this.invert = container.hasAttribute(REPEAT + '-invert') || this.invert;
+	var doc = document.implementation && document.implementation.createHTMLDocument ?
+		document.implementation.createHTMLDocument() : document;
+	var div = doc.createElement('div');
+	var html = container.text.replace(/^\s+|\s+$/g, '');
+	var tagName = match(/<(\w+)[\s>]/i, html);
+	if (tagName) {
+		tagName = tagName.toLowerCase();
+		if (tagName == "td") {
+			html = '<table><tr>' + html + '</tr></table>';
+		} else if (tagName == "tr") {
+			html = '<table>' + html + '</table>';
+		}
+		div.innerHTML = html;
+		this.template = div.querySelector(tagName);
+	}
+	if (!this.template) throw DomtError("problem parsing template\n" + html);
+};
 
 function iterate(obj, fun) {
-	if (obj == null) return;
+	if (obj == null) return 0;
+	var i, len;
 	if (Object.prototype.toString.call(obj) === '[object Array]') {
-		for (var i=0, len=obj.length; i < len; i++) fun(i, obj[i]);
+		len = obj.length;
+		for (i=0; i < len; i++) fun(i, obj[i]);
 	} else if (obj.length !== undefined && typeof obj.item == "function") {
 		obj = Array.prototype.slice.call(obj, 0);
-		for (var i=0, len=obj.length; i < len; i++) fun(i, obj[i]);
+		len = obj.length;
+		for (i=0; i < len; i++) fun(i, obj[i]);
 	} else if (obj instanceof Object) {
 		var keys = Object.keys(obj);
-		for (var i=0, len=keys.length, key; i < len; i++) {
+		len = keys.length;
+		var key;
+		for (i=0; i < len; i++) {
 			key = keys[i];
 			fun(key, {key: key, val: obj[key]});
 		}
 	}
-};
+	return len;
+}
 
 function Domt(parent) {
 	if (!(this instanceof Domt)) return new Domt(parent);
 	if (typeof parent == "string") {
 		parent = document.querySelector(parent);
 	}
-	this.parent = parent;
 	if (!parent) throw DomtError("missing parent");
+	this.node = parent;
 
 	this.reBind = new RegExp("^" + Domt.ns.bind + "-(.*)$", "i");
 
@@ -127,49 +145,48 @@ Domt.prototype.empty = function() {
 
 Domt.prototype.merge = function(obj, opts) {
 	var node, current, holder, container, path, i, len, parentNode, curNode;
-	var parent = this.parent;
+	var parent = this.node;
 	opts = opts || {};
-	if (!opts.norepeat) {
-		// repeat
-		var REPEAT = Domt.ns.repeat;
-		if (parent.hasAttribute(REPEAT)) node = parent;
-		var holders = [];
-		do {
-			if (!node) continue;
-			holder = Holder(node);
-			holders.push(holder);
-			container = holder.container;
-			path = holder.repeat;
-			// get data
-			current = find(obj, path);
-			parentNode = container.parentNode;
-			if (opts.empty) {
-				if (holder.invert) {
-					while ((curNode = container.nextSibling) && !curNode.hasAttribute(REPEAT + '-tail')) {
-						parentNode.removeChild(curNode);
-					}
-				} else {
-					while ((curNode = container.previousSibling) && !curNode.hasAttribute(REPEAT + '-tail')) {
-						parentNode.removeChild(curNode);
-					}
+	var REPEAT = Domt.ns.repeat;
+	if (parent.hasAttribute(REPEAT)) node = parent;
+	var holders = [];
+	do {
+		if (!node) continue;
+		holder = Holder(node);
+		holders.push(holder);
+		container = holder.container;
+		path = holder.repeat;
+		// get data
+		current = find(obj, path);
+		parentNode = container.parentNode;
+		if (opts.empty) {
+			if (holder.invert) {
+				while ((curNode = container.nextSibling) && !curNode.hasAttribute(REPEAT + '-tail')) {
+					parentNode.removeChild(curNode);
+				}
+			} else {
+				while ((curNode = container.previousSibling) && !curNode.hasAttribute(REPEAT + '-tail')) {
+					parentNode.removeChild(curNode);
 				}
 			}
-			if (current.value === undefined) {
-				// nothing to repeat, merge and restore repeat
-				Domt(holder.template).merge(obj, {norepeat: true});
-			} else {
-				iterate(current.value, function(key, val) {
-					var clone = holder.template.cloneNode(true);
-					Domt(clone).merge(val, {strip: true});
-					parentNode.insertBefore(clone, holder.invert ? container.nextSibling : container);
-				});
-			}
-		} while ((node = parent.querySelector('[' + REPEAT + ']')));
-
-		len = holders.length;
-		for (i=0; i < len; i++) {
-			holders[i].close();
+			// restore holder.template modified by current.value === undefined (see after)
+			holder.reload();
 		}
+		if (current.value === undefined) {
+			// nothing to repeat, merge and save for later
+			Domt(holder.template).merge(obj);
+		} else {
+			iterate(current.value, function(key, val) {
+				var clone = holder.template.cloneNode(true);
+				Domt(clone).merge(val, {strip: true});
+				parentNode.insertBefore(clone, holder.invert ? container.nextSibling : container);
+			});
+		}
+	} while ((node = parent.querySelector('[' + REPEAT + ']')));
+
+	len = holders.length;
+	for (i=0; i < len; i++) {
+		holders[i].close();
 	}
 
 	var binds = parent.querySelectorAll('[' + Domt.ns.bind + ']');
@@ -181,19 +198,30 @@ Domt.prototype.merge = function(obj, opts) {
 		path = node.getAttribute(Domt.ns.bind);
 		current = find(obj, path);
 		if (current.value === undefined) continue;
-		iterate(node.attributes, function(i, att) { // iterates over a copy
-			var match = reBind.exec(att.name);
-			if (!match || match.length != 2) return;
-			if (opts.strip) node.removeAttribute(att.name);
-			var name = match[1];
-			if (name == "text") val = node.textContent || node.innerText;
-			else if (name == "html") val = node.innerHTML;
-			else val = node.getAttribute(name);
+		var added = 0;
+		iterate(node.attributes, function(index, att) { // iterates over a copy
+			var name = match(reBind, att.name);
+			if (!name) return;
+			if (opts.strip) {
+				node.removeAttribute(att.name);
+			}
+			if (name == "text") {
+				val = node.textContent || node.innerText;
+			} else if (name == "html") {
+				val = node.innerHTML;
+			}	else {
+				val = node.getAttribute(name);
+				if (opts.strip && match(reBind, name)) added += 1;
+			}
 			var replacements = 0, initial = val;
 			if (att.value) initial = att.value;
+			if (initial == null) initial = "";
 			val = initial.replace(reExpr, function(str, path) {
+				var repl = find(current.value, path).value;
+				if (repl === undefined) return "";
 				replacements++;
-				return find(current.value, path).value;
+				if (repl == null) return "";
+				else return repl;
 			});
 			if (replacements) {
 				if (!att.value) att.value = initial;
@@ -202,12 +230,14 @@ Domt.prototype.merge = function(obj, opts) {
 			}
 			replace(node, name, val);
 		});
+		if (opts.strip && !added) node.removeAttribute(Domt.ns.bind);
 	} while (i < len && (node = binds.item(i++)));
 	return this;
 };
 
 function replace(node, name, val) {
 	if (val === undefined) return;
+	if (val != null && val.toString && val.toString() == "[object Object]") val = "";
 	if (name == "text") {
 		if ("textContent" in node) node.textContent = val;
 		else node.innerText = val;

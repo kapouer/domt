@@ -11,7 +11,7 @@ if (!window.describe) {
 }
 
 Domt.prototype.check = function(expectedId) {
-	var actual = this.parent;
+	var actual = this.node;
 	var id = actual.id;
 	if (!actual) throw new Error("Missing node with id " + id);
 	actual = actual.cloneNode(true);
@@ -32,5 +32,5 @@ Domt.prototype.check = function(expectedId) {
 	if (!actual && !expected) throw new Error("void check " + id);
 
 	if (window.assert) window.assert.equal(actual, expected);
-	else if (actual != expected) throw new Error("failed check\n" + actual + "\n\n" + expected);
+	else if (actual != expected) throw new Error("Actual\n" + actual + "\n\nExpected\n" + expected);
 }
