@@ -179,6 +179,7 @@ Some filters are already availables:
 * upper, lower: change string case
 * br: replace newlines by <br>
 * esc: encodeURIComponent
+* unesc: decodeURIComponent
 * json: JSON.stringify(val)
 
 

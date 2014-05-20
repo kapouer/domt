@@ -25,6 +25,9 @@ Domt.filters = {
 	esc: function(val) {
 		return encodeURIComponent(val + "");
 	},
+	unesc: function(val) {
+		return decodeURIComponent(val + "");
+	},
 	json: function(val) {
 		return JSON.stringify(val);
 	}
