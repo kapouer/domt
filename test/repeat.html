@@ -13,6 +13,21 @@
 				{ content: "two" }
 			]).check();
 		});
+		it("should process repeat even if not repeating anything", function() {
+			Domt('#repeat-process').merge().check();
+		});
+		it("should strip bind, bind-* attributes from repeated fragment", function() {
+			Domt('#repeat-strip').merge([
+				{ content: "one" },
+				{ content: "two" }
+			]).check();
+		});
+		it("should strip bind-* attributes but not bind-bind from repeated fragment", function() {
+			Domt('#repeat-strip-bind-bind').merge([
+				{ content: "one", 'class': "test1" },
+				{ content: "two", 'class': "test2" }
+			]).check();
+		});
 		it("should repeat node and append to previous test from same DOM", function() {
 			Domt('#expected-repeat').merge([
 				{ content: "one" },
@@ -20,6 +35,7 @@
 			]).check();
 		});
 		it("should repeat node and append to previous test from a DOM copy", function() {
+			// WARNING that test depend on "should repeat node" test
 			var actual = document.getElementById('repeat').cloneNode(true);
 			var expected = document.getElementById('expected-expected-repeat').cloneNode(true);
 			actual.id = 'repeat-copy';
@@ -43,6 +59,50 @@
 			]);
 			inst.empty().check();
 		});
+		it("should repeat TD node and reload template properly", function() {
+			var inst = Domt('#cell').merge([
+				{ content: "one" },
+				{ content: "two" }
+			]);
+			var copy = inst.node.cloneNode(true);
+			copy.id = 'cell-copy';
+			inst.node.parentNode.insertBefore(copy, inst.node);
+			Domt('#cell-copy').merge([
+				{ content: "three" },
+				{ content: "four" }
+			]).check();
+		});
+		it("should repeat node over an object key, value", function() {
+			Domt('#repeat-object').merge({
+				a: "one",
+				b: "two"
+			}).check();
+		});
+		it("should repeat within repeat", function() {
+			var inst = Domt('#repeat-repeat').merge({col:
+				{ a: "A", b: "B" }
+			});
+			inst.merge({table: [
+				{ a: 1, b: 2 },
+				{ a: 3, b: 4 },
+			]}).check();
+		});
+		it("should repeat within repeat and reload template properly", function() {
+			var inst = Domt('#repeat-repeat-reload').merge({col:
+				{ a: "A", b: "B" }
+			}).merge({table: [
+				{ a: 1, b: 2 },
+				{ a: 3, b: 4 },
+			]});
+			inst.empty();
+			inst.merge({col:
+				{ a: "A", b: "B", c: "C" }
+			});
+			inst.merge({table: [
+				{ a: 1, b: 2, c: 5 },
+				{ a: 3, b: 4, c: 6 },
+			]}).check();
+		});
 	});
   </script>
 	<title>Domt test suite</title>
@@ -54,6 +114,27 @@
 	</ul>
 	<ul id="expected-repeat">
 		<script repeat-tail="" type="text/template"></script><li>one</li><li>two</li><script type="text/template" repeat=""><li bind-text="content"></li></script>
+	</ul>
+
+	<ul id="repeat-process">
+		<li repeat="table" bind-text="content"></li>
+	</ul>
+	<ul id="expected-repeat-process">
+		<script repeat-tail="" type="text/template"></script><script type="text/template" repeat="table"><li bind-text="content"></li></script>
+	</ul>
+
+	<ul id="repeat-strip">
+		<li repeat><span bind bind-text="content"></span></li>
+	</ul>
+	<ul id="expected-repeat-strip">
+		<script repeat-tail="" type="text/template"></script><li><span>one</span></li><li><span>two</span></li><script type="text/template" repeat=""><li><span bind="" bind-text="content"></span></li></script>
+	</ul>
+
+	<ul id="repeat-strip-bind-bind">
+		<li repeat><span bind bind-text="content" bind-bind-class="class"></span></li>
+	</ul>
+	<ul id="expected-repeat-strip-bind-bind">
+		<script repeat-tail="" type="text/template"></script><li><span bind="" bind-class="test1">one</span></li><li><span bind="" bind-class="test2">two</span></li><script type="text/template" repeat=""><li><span bind="" bind-text="content" bind-bind-class="class"></span></li></script>
 	</ul>
 
 	<ul id="expected-expected-repeat">
@@ -73,6 +154,42 @@
 	<ul id="expected-repeat-empty">
 		<script repeat-tail="" type="text/template"></script><script type="text/template" repeat=""><li bind-text="content"></li></script>
 	</ul>
+
+	<table id="cell">
+		<tr>
+			<td repeat bind-text="content"></td>
+		</tr>
+	</table>
+	<table id="expected-cell-copy">
+		<tr>
+			<script repeat-tail="" type="text/template"></script><td>one</td><td>two</td><td>three</td><td>four</td><script type="text/template" repeat=""><td bind-text="content"></td></script>
+		</tr>
+	</table>
+
+	<ul id="repeat-object">
+		<li repeat bind-text>[key] - [val]</li>
+	</ul>
+	<ul id="expected-repeat-object">
+		<script repeat-tail="" type="text/template"></script><li>a - one</li><li>b - two</li><script type="text/template" repeat=""><li bind-text="">[key] - [val]</li></script>
+	</ul>
+
+	<table id="repeat-repeat">
+		<tr><td bind-text="[val]" repeat="col"></td></tr>
+		<tr repeat="table"><td bind-bind bind-bind-text="[key]" repeat="col"></td></tr>
+	</table>
+	<table id="expected-repeat-repeat">
+		<tr><script repeat-tail="" type="text/template"></script><td>A</td><td>B</td><script type="text/template" repeat="col"><td bind-text="[val]"></td></script></tr>
+		<script repeat-tail="" type="text/template"></script><tr><script repeat-tail="" type="text/template"></script><td>1</td><td>2</td><script type="text/template" repeat="col"><td bind-bind="" bind-bind-text="[key]"></td></script></tr><tr><script repeat-tail="" type="text/template"></script><td>3</td><td>4</td><script type="text/template" repeat="col"><td bind-bind="" bind-bind-text="[key]"></td></script></tr><script type="text/template" repeat="table"><tr><td bind-bind="" bind-bind-text="[key]" repeat="col"></td></tr></script>
+	</table>
+
+	<table id="repeat-repeat-reload">
+		<tr><td bind-text="[val]" repeat="col"></td></tr>
+		<tr repeat="table"><td bind-bind bind-bind-text="[key]" repeat="col"></td></tr>
+	</table>
+	<table id="expected-repeat-repeat-reload">
+		<tr><script repeat-tail="" type="text/template"></script><td>A</td><td>B</td><td>C</td><script type="text/template" repeat="col"><td bind-text="[val]"></td></script></tr>
+		<script repeat-tail="" type="text/template"></script><tr><script repeat-tail="" type="text/template"></script><td>1</td><td>2</td><td>5</td><script type="text/template" repeat="col"><td bind-bind="" bind-bind-text="[key]"></td></script></tr><tr><script repeat-tail="" type="text/template"></script><td>3</td><td>4</td><td>6</td><script type="text/template" repeat="col"><td bind-bind="" bind-bind-text="[key]"></td></script></tr><script type="text/template" repeat="table"><tr><td bind-bind="" bind-bind-text="[key]" repeat="col"></td></tr></script>
+	</table></table>
 
 </body>
 </html>

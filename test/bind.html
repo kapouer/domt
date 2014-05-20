@@ -42,6 +42,12 @@
 				"class": null
 			}).check();
 		});
+
+		it("should create an empty attribute", function() {
+			Domt('#create').merge({
+				unused: 1
+			}).check();
+		});
 	});
   </script>
 	<title>Domt test suite</title>
@@ -68,6 +74,9 @@
 
 	<div id="class-ignore" bind-class="class" class="toto">d</div>
 	<div id="expected-class-ignore" bind-class="class" class="toto">d</div>
+
+	<h1 id="create" bind-anything>stuff</h1>
+	<h1 id="expected-create" bind-anything anything>stuff</h1>
 
 </body>
 </html>
