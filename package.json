@@ -2,7 +2,7 @@
   "name": "domt",
   "version": "0.1.0",
   "description": "Minimal DOM Templating",
-  "main": "index.js",
+  "main": "domt.js",
   "scripts": {
     "test": "make test"
   },
