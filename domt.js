@@ -40,7 +40,7 @@ function match(re, str) {
 
 function Holder(node) {
 	if (!(this instanceof Holder)) return new Holder(node);
-	var container, REPEAT = Domt.ns.repeat;
+	var container, REPEAT = Domt.ns.repeat, BIND = Domt.ns.bind;
 	if (node.tagName == "SCRIPT" && node.type == "text/template") {
 		this.container = container = node;
 		var origHolder = node[Domt.ns.holder];
@@ -52,7 +52,7 @@ function Holder(node) {
 			this.reload();
 		}
 		node.removeAttribute(REPEAT);
-	} else {
+	} else if (node.hasAttribute(REPEAT)) {
 		this.template = node;
 		this.container = container = document.createElement("script");
 		container.type = "text/template";
@@ -73,6 +73,9 @@ function Holder(node) {
 		} else {
 			container.parentNode.insertBefore(begin, container);
 		}
+	} else {
+		if (node.hasAttribute(BIND)) this.bind = node.getAttribute(BIND);
+		this.container = container = node;
 	}
 	container[Domt.ns.holder] = this;
 	return this;
@@ -81,6 +84,9 @@ Holder.prototype.close = function() {
 	var node = this.container;
 	if (this.repeat !== undefined) {
 		node.setAttribute(Domt.ns.repeat, this.repeat);
+	}
+	if (this.bind !== undefined) {
+		node.setAttribute(Domt.ns.bind, this.bind);
 	}
 };
 Holder.prototype.reload = function() {
@@ -150,65 +156,67 @@ Domt.prototype.empty = function() {
 };
 
 Domt.prototype.merge = function(obj, opts) {
-	var node, current, holder, container, path, i, len, parentNode, curNode;
-	var parent = this.node;
+	var bound, repeated, holder, container, path, len, parentNode;
 	opts = opts || {};
+	var node = opts.node || this.node;
+	var parent = node;
 	var REPEAT = Domt.ns.repeat;
-	if (parent.hasAttribute(REPEAT)) node = parent;
+	var BIND = Domt.ns.bind;
 	var holders = [];
 	do {
-		if (!node) continue;
 		holder = Holder(node);
 		holders.push(holder);
 		container = holder.container;
-		path = holder.repeat;
-		// get data
-		current = find(obj, path);
 		parentNode = container.parentNode;
-		if (opts.empty) {
-			if (holder.invert) {
-				while ((curNode = container.nextSibling) && !curNode.hasAttribute(REPEAT + '-tail')) {
-					parentNode.removeChild(curNode);
+		bound = holder.bind ? find(obj, holder.bind) : obj;
+		if (holder.repeat !== undefined) {
+			repeated = find(bound, holder.repeat);
+			if (opts.empty) {
+				if (holder.invert) {
+					while ((curNode = container.nextSibling) && !curNode.hasAttribute(REPEAT + '-tail')) {
+						parentNode.removeChild(curNode);
+					}
+				} else {
+					while ((curNode = container.previousSibling) && !curNode.hasAttribute(REPEAT + '-tail')) {
+						parentNode.removeChild(curNode);
+					}
 				}
-			} else {
-				while ((curNode = container.previousSibling) && !curNode.hasAttribute(REPEAT + '-tail')) {
-					parentNode.removeChild(curNode);
-				}
+				// restore holder.template modified by current.value === undefined (see after)
+				holder.reload();
 			}
-			// restore holder.template modified by current.value === undefined (see after)
-			holder.reload();
-		}
-		if (current.value === undefined) {
-			// nothing to repeat, merge and save for later
-			Domt(holder.template).merge(obj);
+			if (repeated === undefined) {
+				// merge inside template (that won't be selected because it's now out of the DOM)
+				this.merge(bound, {node: holder.template});
+			} else {
+				var self = this;
+				iterate(repeated, function(key, val) {
+					var clone = holder.template.cloneNode(true);
+					self.replace(val, clone, true);
+					parentNode.insertBefore(clone, holder.invert ? container.nextSibling : container);
+				});
+			}
 		} else {
-			iterate(current.value, function(key, val) {
-				var clone = holder.template.cloneNode(true);
-				Domt(clone).merge(val, {strip: true});
-				parentNode.insertBefore(clone, holder.invert ? container.nextSibling : container);
-			});
+			this.replace(bound, node);
 		}
-	} while ((node = parent.querySelector('[' + REPEAT + ']')));
+	} while ((node = parent.querySelector('[' + REPEAT + '],[' + BIND + ']')));
 
 	len = holders.length;
 	for (i=0; i < len; i++) {
 		holders[i].close();
 	}
+	return this;
+};
 
-	var binds = parent.querySelectorAll('[' + Domt.ns.bind + ']');
-	node = parent;
-	i = 0;
-	len = binds.length;
+Domt.prototype.replace = function(obj, node, strip) {
+	var descendants = node.querySelectorAll('*');
+	var i = 0;
+	var len = descendants.length;
 	var val, reExpr = this.reExpr, reBind = this.reBind;
 	do {
-		path = node.getAttribute(Domt.ns.bind);
-		current = find(obj, path);
-		if (current.value === undefined) continue;
-		var added = 0;
 		iterate(node.attributes, function(index, att) { // iterates over a copy
 			var name = match(reBind, att.name);
 			if (!name) return;
-			if (opts.strip) {
+			if (strip) {
 				node.removeAttribute(att.name);
 			}
 			if (name == "text") {
@@ -217,13 +225,12 @@ Domt.prototype.merge = function(obj, opts) {
 				val = node.innerHTML;
 			}	else {
 				val = node.getAttribute(name);
-				if (opts.strip && match(reBind, name)) added += 1;
 			}
 			var replacements = 0, initial = val;
 			if (att.value) initial = att.value;
 			if (initial == null) initial = "";
 			val = initial.replace(reExpr, function(str, path) {
-				var repl = find(current.value, path).value;
+				var repl = find(obj, path);
 				if (repl === undefined) return "";
 				replacements++;
 				if (repl == null) return "";
@@ -232,18 +239,15 @@ Domt.prototype.merge = function(obj, opts) {
 			if (replacements) {
 				if (!att.value) att.value = initial;
 			} else {
-				val = find(current.value, att.value).value;
+				val = find(obj, att.value);
 			}
 			replace(node, name, val);
 		});
-		if (opts.strip && !added) node.removeAttribute(Domt.ns.bind);
-	} while (i < len && (node = binds.item(i++)));
-	return this;
+	} while (i < len && (node = descendants.item(i++)));
 };
 
 function replace(node, name, val) {
-	if (val === undefined) return;
-	if (val != null && val.toString && val.toString() == "[object Object]") val = "";
+	if (val === undefined || val !== null && typeof val == "object") return;
 	if (name == "text") {
 		if ("textContent" in node) node.textContent = val;
 		else node.innerText = val;
@@ -256,7 +260,7 @@ function find(scope, path) {
 	var name, val = scope, filters, filter;
 	if (scope == null) {
 		if (path) val = undefined;
-		return {scope: scope, value: val};
+		return val;
 	}
 	path = (path || "").split('|');
 	filters = path;
@@ -275,10 +279,7 @@ function find(scope, path) {
 			if (filter) val = filter(val);
 		}
 	}
-	return {
-		scope: scope,
-		value: val
-	};
+	return val;
 };
 
 
