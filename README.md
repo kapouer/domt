@@ -107,6 +107,7 @@ Which DOM nodes are processed ?
   - undefined or null, obj isn't changed
   - string, path is used as an accessor of obj
   - function, obj is the result of fun(obj, paths)
+  Current item has a special property #, which is the current key.
 
 
 Operations on instances
