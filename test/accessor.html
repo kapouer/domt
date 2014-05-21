@@ -43,6 +43,20 @@
 				}
 			}).check('expected-path-null');
 		});
+		it("should bind data to item then merge item.name", function() {
+			Domt('#bind').merge({
+				item: {
+					name: "Da"
+				}
+			}).check();
+		});
+		it("should bind within bind then merge items.item.name", function() {
+			Domt('#bind-in-bind').merge({
+				item: {
+					name: "Da"
+				}
+			}).check();
+		});
 	});
   </script>
 	<title>Domt test suite</title>
@@ -56,6 +70,28 @@
 	<h1 id="path" bind-text="path.to.value">old header</h1>
 	<h1 id="expected-path" bind-text="path.to.value">15</h1>
 	<h1 id="expected-path-null" bind-text="path.to.value"></h1>
+
+	<div id="bind">
+		<p bind="item"><span bind-text="name">Doe</span></p>
+	</div>
+	<div id="expected-bind">
+		<p bind="item"><span bind-text="name">Da</span></p>
+	</div>
+
+	<div id="bind-in-bind">
+		<div bind="items">
+			<div bind="item">
+				<span bind-text="name">Doe</span>
+			</div>
+		</div>
+	</div>
+	<div id="expected-bind-in-bind">
+		<div bind="items">
+			<div bind="item">
+				<span bind-text="name">Da</span>
+			</div>
+		</div>
+	</div>
 
 </body>
 </html>
