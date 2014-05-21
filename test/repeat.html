@@ -16,6 +16,10 @@
 		it("should repeat list of strings", function() {
 			Domt('#repeat-strings').merge(["one", "two"]).check();
 		});
+		it("should repeat and replace # by current key", function() {
+			Domt.filters.inc = function(str) { return parseFloat(str) + 1; };
+			Domt('#repeat-key').merge(["one", "two"]).check();
+		});
 		it("should process repeat even if not repeating anything", function() {
 			Domt('#repeat-process').merge().check();
 		});
@@ -126,6 +130,13 @@
 		<script repeat-tail="" type="text/template"></script><li>one</li><li>two</li><script type="text/template" repeat><li bind-text=""></li></script>
 	</ul>
 
+	<ul id="repeat-key">
+		<li repeat bind-text="#|inc">re</li>
+	</ul>
+	<ul id="expected-repeat-key">
+		<script repeat-tail="" type="text/template"></script><li>1</li><li>2</li><script type="text/template" repeat><li bind-text="#|inc">re</li></script>
+	</ul>
+
 	<ul id="repeat-process">
 		<li repeat="table" bind-text="content"></li>
 	</ul>
@@ -177,28 +188,28 @@
 	</table>
 
 	<ul id="repeat-object">
-		<li repeat bind-text>[key] - [val]</li>
+		<li repeat bind-text>[#] - []</li>
 	</ul>
 	<ul id="expected-repeat-object">
-		<script repeat-tail="" type="text/template"></script><li>a - one</li><li>b - two</li><script type="text/template" repeat=""><li bind-text="">[key] - [val]</li></script>
+		<script repeat-tail="" type="text/template"></script><li>a - one</li><li>b - two</li><script type="text/template" repeat=""><li bind-text="">[#] - []</li></script>
 	</ul>
 
 	<table id="repeat-repeat">
-		<tr><td bind-text="[val]" repeat="col"></td></tr>
-		<tr repeat="table"><td bind-bind-text="[key]" repeat="col"></td></tr>
+		<tr><td bind-text="[]" repeat="col"></td></tr>
+		<tr repeat="table"><td bind-bind-text="[#]" repeat="col"></td></tr>
 	</table>
 	<table id="expected-repeat-repeat">
-		<tr><script repeat-tail="" type="text/template"></script><td>A</td><td>B</td><script type="text/template" repeat="col"><td bind-text="[val]"></td></script></tr>
-		<script repeat-tail="" type="text/template"></script><tr><script repeat-tail="" type="text/template"></script><td>1</td><td>2</td><script type="text/template" repeat="col"><td bind-bind-text="[key]"></td></script></tr><tr><script repeat-tail="" type="text/template"></script><td>3</td><td>4</td><script type="text/template" repeat="col"><td bind-bind-text="[key]"></td></script></tr><script type="text/template" repeat="table"><tr><td bind-bind-text="[key]" repeat="col"></td></tr></script>
+		<tr><script repeat-tail="" type="text/template"></script><td>A</td><td>B</td><script type="text/template" repeat="col"><td bind-text="[]"></td></script></tr>
+		<script repeat-tail="" type="text/template"></script><tr><script repeat-tail="" type="text/template"></script><td>1</td><td>2</td><script type="text/template" repeat="col"><td bind-bind-text="[#]"></td></script></tr><tr><script repeat-tail="" type="text/template"></script><td>3</td><td>4</td><script type="text/template" repeat="col"><td bind-bind-text="[#]"></td></script></tr><script type="text/template" repeat="table"><tr><td bind-bind-text="[#]" repeat="col"></td></tr></script>
 	</table>
 
 	<table id="repeat-repeat-reload">
-		<tr><td bind-text="[val]" repeat="col"></td></tr>
-		<tr repeat="table"><td bind-bind-text="[key]" repeat="col"></td></tr>
+		<tr><td bind-text="[]" repeat="col"></td></tr>
+		<tr repeat="table"><td bind-bind-text="[#]" repeat="col"></td></tr>
 	</table>
 	<table id="expected-repeat-repeat-reload">
-		<tr><script repeat-tail="" type="text/template"></script><td>A</td><td>B</td><td>C</td><script type="text/template" repeat="col"><td bind-text="[val]"></td></script></tr>
-		<script repeat-tail="" type="text/template"></script><tr><script repeat-tail="" type="text/template"></script><td>1</td><td>2</td><td>5</td><script type="text/template" repeat="col"><td bind-bind-text="[key]"></td></script></tr><tr><script repeat-tail="" type="text/template"></script><td>3</td><td>4</td><td>6</td><script type="text/template" repeat="col"><td bind-bind-text="[key]"></td></script></tr><script type="text/template" repeat="table"><tr><td bind-bind-text="[key]" repeat="col"></td></tr></script>
+		<tr><script repeat-tail="" type="text/template"></script><td>A</td><td>B</td><td>C</td><script type="text/template" repeat="col"><td bind-text="[]"></td></script></tr>
+		<script repeat-tail="" type="text/template"></script><tr><script repeat-tail="" type="text/template"></script><td>1</td><td>2</td><td>5</td><script type="text/template" repeat="col"><td bind-bind-text="[#]"></td></script></tr><tr><script repeat-tail="" type="text/template"></script><td>3</td><td>4</td><td>6</td><script type="text/template" repeat="col"><td bind-bind-text="[#]"></td></script></tr><script type="text/template" repeat="table"><tr><td bind-bind-text="[#]" repeat="col"></td></tr></script>
 	</table></table>
 
 </body>
