@@ -87,9 +87,13 @@ It is also possible to empty the repeated lists:
 Which DOM nodes are processed ?
 -------------------------------
 
-* the argument of Domt() or its target (see next section)
+* the target given as argument of Domt(target)
 
 * the descendants with attribute "bind"
+  in itself the node doesn't change, the "bind" attributes set the current
+  base path for all accessors in the same node or its descendants.
+
+* the descendants with attributes starting with "bind-"
   The attribute value is an object accessor of the form "path.to.key",
   and it can be empty (in which case parent object is used).
   If a value is :
@@ -103,15 +107,6 @@ Which DOM nodes are processed ?
   - undefined or null, obj isn't changed
   - string, path is used as an accessor of obj
   - function, obj is the result of fun(obj, paths)
-
-As a consequence, this p descendant won't be processed by
-
-  Domt('#test').merge(data);
-
-  <div id="target"><p bind-text="data"></p></div>
-
-Because p is missing a "bind" attribute.
-
 
 
 Operations on instances
