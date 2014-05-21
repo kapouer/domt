@@ -74,7 +74,10 @@ function Holder(node) {
 			container.parentNode.insertBefore(begin, container);
 		}
 	} else {
-		if (node.hasAttribute(BIND)) this.bind = node.getAttribute(BIND);
+		if (node.hasAttribute(BIND)) {
+			this.bind = node.getAttribute(BIND);
+			node.removeAttribute(BIND);
+		}
 		this.container = container = node;
 	}
 	container[Domt.ns.holder] = this;
