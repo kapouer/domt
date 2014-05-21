@@ -43,11 +43,12 @@ function Holder(node) {
 	var container, REPEAT = Domt.ns.repeat, BIND = Domt.ns.bind;
 	if (node.tagName == "SCRIPT" && node.type == "text/template") {
 		this.container = container = node;
-		var origHolder = node[Domt.ns.holder];
-		if (origHolder) {
-			this.repeat = origHolder.repeat;
-			this.template = origHolder.template;
-			this.invert = origHolder.invert;
+		var orig = node[Domt.ns.holder];
+		if (orig) {
+			this.repeat = orig.repeat;
+			this.template = orig.template;
+			this.invert = orig.invert;
+			this.bind = orig.bind;
 		} else {
 			this.reload();
 		}
@@ -59,6 +60,10 @@ function Holder(node) {
 		this.repeat = node.getAttribute(REPEAT) || "";
 		this.invert = node.hasAttribute(REPEAT + '-invert');
 		if (this.invert) container.setAttribute(REPEAT + '-invert', "");
+		if (node.hasAttribute(BIND)) {
+			this.bind = node.getAttribute(BIND);
+			node.removeAttribute(BIND);
+		}
 		node.removeAttribute(REPEAT);
 		node.removeAttribute(REPEAT + '-invert');
 		node.parentNode.insertBefore(container, node);
@@ -97,6 +102,7 @@ Holder.prototype.reload = function() {
 	var REPEAT = Domt.ns.repeat;
 	this.repeat = container.getAttribute(REPEAT) || this.repeat || "";
 	this.invert = container.hasAttribute(REPEAT + '-invert') || this.invert;
+	this.bind = container.getAttribute(Domt.ns.bind) || this.bind || undefined;
 	var doc = document.implementation && document.implementation.createHTMLDocument ?
 		document.implementation.createHTMLDocument() : document;
 	var div = doc.createElement('div');
@@ -131,7 +137,7 @@ function iterate(obj, fun) {
 		var key;
 		for (i=0; i < len; i++) {
 			key = keys[i];
-			fun(key, {key: key, val: obj[key]});
+			fun(key, obj[key]);
 		}
 	}
 	return len;
@@ -150,7 +156,7 @@ function Domt(parent) {
 	var delims = Domt.ns.expr.split('*');
 	if (delims.length != 2) throw DomtError("bad Domt.ns.expr");
 	var start = '\\' + delims[0], end = '\\' + delims[1];
-	this.reExpr = new RegExp(start + '([^' + start + end + ']+)' + end, "g");
+	this.reExpr = new RegExp(start + '([^' + start + end + ']*)' + end, "g");
 };
 
 Domt.prototype.empty = function() {
@@ -194,7 +200,7 @@ Domt.prototype.merge = function(obj, opts) {
 				var self = this;
 				iterate(repeated, function(key, val) {
 					var clone = holder.template.cloneNode(true);
-					self.replace(val, clone, true);
+					self.replace(val, clone, key);
 					parentNode.insertBefore(clone, holder.invert ? container.nextSibling : container);
 				});
 			}
@@ -210,7 +216,7 @@ Domt.prototype.merge = function(obj, opts) {
 	return this;
 };
 
-Domt.prototype.replace = function(obj, node, strip) {
+Domt.prototype.replace = function(obj, node, key) {
 	var descendants = node.querySelectorAll('*');
 	var i = 0;
 	var len = descendants.length;
@@ -219,7 +225,7 @@ Domt.prototype.replace = function(obj, node, strip) {
 		iterate(node.attributes, function(index, att) { // iterates over a copy
 			var name = match(reBind, att.name);
 			if (!name) return;
-			if (strip) {
+			if (key != null) {
 				node.removeAttribute(att.name);
 			}
 			if (name == "text") {
@@ -233,8 +239,8 @@ Domt.prototype.replace = function(obj, node, strip) {
 			if (att.value) initial = att.value;
 			if (initial == null) initial = "";
 			val = initial.replace(reExpr, function(str, path) {
-				var repl = find(obj, path);
-				if (repl === undefined) return "";
+				var repl = find(obj, path, key);
+				if (repl === undefined || repl !== null && typeof repl == "object") return "";
 				replacements++;
 				if (repl == null) return "";
 				else return repl;
@@ -242,7 +248,7 @@ Domt.prototype.replace = function(obj, node, strip) {
 			if (replacements) {
 				if (!att.value) att.value = initial;
 			} else {
-				val = find(obj, att.value);
+				val = find(obj, att.value, key);
 			}
 			replace(node, name, val);
 		});
@@ -259,7 +265,7 @@ function replace(node, name, val) {
 	else node.removeAttribute(name);
 }
 
-function find(scope, path) {
+function find(scope, path, key) {
 	var name, val = scope, filters, filter;
 	if (scope == null) {
 		if (path) val = undefined;
@@ -272,6 +278,10 @@ function find(scope, path) {
 	if (typeof val == "function") val = val(scope, path);
 	while ((name = path.shift()) !== undefined) {
 		scope = val;
+		if (name == '#' && key !== undefined && path.length == 0) {
+			val = key;
+			break;
+		}
 		val = scope[name];
 		if (typeof val == "function") val = val(scope, path);
 		if (!val) break;
