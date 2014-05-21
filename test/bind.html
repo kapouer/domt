@@ -43,7 +43,7 @@
 			}).check();
 		});
 
-		it("should create an empty attribute", function() {
+		it("should not create an empty attribute when nothing was replaced", function() {
 			Domt('#create').merge({
 				unused: 1
 			}).check();
@@ -76,7 +76,7 @@
 	<div id="expected-class-ignore" bind-class="class" class="toto">d</div>
 
 	<h1 id="create" bind-anything>stuff</h1>
-	<h1 id="expected-create" bind-anything anything>stuff</h1>
+	<h1 id="expected-create" bind-anything>stuff</h1>
 
 </body>
 </html>
