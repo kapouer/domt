@@ -1,6 +1,6 @@
 {
   "name": "domt",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Minimal DOM Templating",
   "main": "domt.js",
   "scripts": {
