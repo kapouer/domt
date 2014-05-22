@@ -95,10 +95,10 @@
 			var inst = Domt('#repeat-repeat').merge({col:
 				{ a: "A", b: "B" }
 			});
-			// inst.merge({table: [
-				// { a: 1, b: 2 },
-				// { a: 3, b: 4 },
-			// ]}).check();
+			inst.merge({table: [
+				{ a: 1, b: 2 },
+				{ a: 3, b: 4 },
+			]}).check();
 		});
 		it("should repeat within repeat and reload template properly", function() {
 			var inst = Domt('#repeat-repeat-reload').merge({col:
@@ -208,11 +208,11 @@
 
 	<table id="repeat-repeat">
 		<tr><td bind-text="col.#val" repeat="col"></td></tr>
-		<tr repeat="table"><td bind-bind-text="table.[col.#]" repeat="col"></td></tr>
+		<tr repeat="table"><td bind-bind-text="table.[col.#key]" repeat="col"></td></tr>
 	</table>
 	<table id="expected-repeat-repeat">
-		<tr><script repeat-tail="" type="text/template"></script><td>A</td><td>B</td><script type="text/template" repeat="col"><td bind-text="[]"></td></script></tr>
-		<script repeat-tail="" type="text/template"></script><tr><script repeat-tail="" type="text/template"></script><td>1</td><td>2</td><script type="text/template" repeat="col"><td bind-bind-text="[#]"></td></script></tr><tr><script repeat-tail="" type="text/template"></script><td>3</td><td>4</td><script type="text/template" repeat="col"><td bind-bind-text="[#]"></td></script></tr><script type="text/template" repeat="table"><tr><td bind-bind-text="[#]" repeat="col"></td></tr></script>
+		<tr><script repeat-tail="" type="text/template"></script><td>A</td><td>B</td><script type="text/template" repeat="col"><td bind-text="col.#val"></td></script></tr>
+		<script repeat-tail="" type="text/template"></script><tr><script repeat-tail="" type="text/template"></script><td>1</td><td>2</td><script type="text/template" repeat="col"><td bind-bind-text="table.[col.#key]"></td></script></tr><tr><script repeat-tail="" type="text/template"></script><td>3</td><td>4</td><script type="text/template" repeat="col"><td bind-bind-text="table.[col.#key]"></td></script></tr><script type="text/template" repeat="table"><tr><td bind-bind-text="table.[col.#key]" repeat="col"></td></tr></script>
 	</table>
 
 	<table id="repeat-repeat-reload">
