@@ -19,6 +19,9 @@
 				name: "Barns & Smiths"
 			}).check();
 		});
+		it("should empty and not alter node", function() {
+			Domt('#empty').empty().check();
+		});
 	});
 	</script>
 	<title>Domt test suite</title>
@@ -27,8 +30,12 @@
 
 	<p id="replace" bind-html><i>this is italic</i>[data.html]</p>
 	<p id="expected-replace" bind-html="&lt;i&gt;this is italic&lt;/i&gt;[data.html]"><i>this is italic</i>This is <b>bold</b></p>
+
 	<a id="replace-escape" bind-href href="http://localhost/?name=[name|esc]">Test replace</a>
 	<a id="expected-replace-escape" bind-href="http://localhost/?name=[name|esc]" href="http://localhost/?name=Barns%20%26%20Smiths">Test replace</a>
+
+	<div id="empty"><div repeat><p bind-text>[some][.to.something]</p></div></div>
+	<div id="expected-empty"><script repeat-tail="" type="text/template"></script><script type="text/template" repeat=""><div><p bind-text="">[some][.to.something]</p></div></script></div>
 
 </body>
 </html>
