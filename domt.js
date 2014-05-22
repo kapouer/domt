@@ -160,7 +160,7 @@ function Domt(parent) {
 };
 
 Domt.prototype.empty = function() {
-	this.merge(null, {empty:true});
+	this.merge(undefined, {empty:true});
 	return this;
 };
 
