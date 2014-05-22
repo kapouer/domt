@@ -22,6 +22,12 @@
 		it("should empty and not alter node", function() {
 			Domt('#empty').empty().check();
 		});
+		it("should escape text but not alter siblings", function() {
+			Domt('#siblings').merge({text: "<b>test</b>"}).check();
+		});
+		it("should still correctly escape after previous test", function() {
+			Domt('#expected-siblings').merge({text: "<b>test</b>"}).check('expected-siblings');
+		});
 	});
 	</script>
 	<title>Domt test suite</title>
@@ -36,6 +42,9 @@
 
 	<div id="empty"><div repeat><p bind-text>[some][.to.something]</p></div></div>
 	<div id="expected-empty"><script repeat-tail="" type="text/template"></script><script type="text/template" repeat=""><div><p bind-text="">[some][.to.something]</p></div></script></div>
+
+	<div id="siblings"><p bind-text>[text] shouldn't be <b>test</b></p></div>
+	<div id="expected-siblings"><p bind-text="[text] shouldn't be &lt;b&gt;test&lt;/b&gt;">&lt;b&gt;test&lt;/b&gt; shouldn't be <b>test</b></p></div>
 
 </body>
 </html>
