@@ -33,6 +33,13 @@ Domt.filters = {
 	}
 };
 
+var escaper = document.createElement('p');
+escaper.appendChild(document.createTextNode(""));
+function escapeText(str) {
+	escaper.firstChild.nodeValue = str;
+	return escaper.innerHTML;
+}
+
 function match(re, str) {
 	var m = re.exec(str);
 	if (m && m.length == 2) return m[1];
@@ -232,9 +239,7 @@ Domt.prototype.replace = function(obj, node, key) {
 			if (key != null) {
 				node.removeAttribute(att.name);
 			}
-			if (name == "text") {
-				val = node.textContent || node.innerText;
-			} else if (name == "html") {
+			if (name == "text" || name == "html") {
 				val = node.innerHTML;
 			}	else {
 				val = node.getAttribute(name);
@@ -247,12 +252,14 @@ Domt.prototype.replace = function(obj, node, key) {
 				if (repl === undefined || repl !== null && typeof repl == "object") return "";
 				replacements++;
 				if (repl == null) return "";
+				else if (name == "text") return escapeText(repl);
 				else return repl;
 			});
 			if (replacements) {
 				if (!att.value) att.value = initial;
 			} else {
 				val = find(obj, att.value, key).val;
+				if (name == "text" && val != null && typeof val != "object") val = escapeText(val);
 			}
 			replace(node, name, val);
 		});
@@ -261,10 +268,7 @@ Domt.prototype.replace = function(obj, node, key) {
 
 function replace(node, name, val) {
 	if (val === undefined || val !== null && typeof val == "object") return;
-	if (name == "text") {
-		if ("textContent" in node) node.textContent = val;
-		else node.innerText = val;
-	} else if (name == "html") node.innerHTML = val;
+	if (name == "text" || name == "html") node.innerHTML = val;
 	else if (val !== null) node.setAttribute(name, val);
 	else node.removeAttribute(name);
 }
