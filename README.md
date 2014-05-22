@@ -27,7 +27,7 @@ Starting with a template and a call to Domt:
 
   <div id="test" bind-class="class">
     <ul>
-      <li repeat="items" class="red" bind-class="color" bind-text="text">first item</li>
+      <li repeat="items" class="red" bind-class="items.color" bind-text="items.text">first item</li>
     </ul>
   </div>
 
@@ -49,12 +49,12 @@ We get:
       <li class="blue">the sea</li>
       <li>the void</li>
       <script type="text/template" repeat="items">
-        <li class="red" bind-class="color" bind-text="text">first item</li>
+        <li class="red" bind-class="items.color" bind-text="items.text">first item</li>
       </script>
     </ul>
   </div>
 
-The API is chainable, also calling it a second time is possible:
+The API is chainable and calling it a second time is possible:
 
   Domt('#test').merge({
     "class": "list"
@@ -64,6 +64,9 @@ The API is chainable, also calling it a second time is possible:
       {color: null, text: "the void"}
     ]
   });
+
+One can create another instance of Domt to update a previously merged node:
+
   Domt('#test').merge({
     "class": null
   }).merge({
@@ -107,7 +110,7 @@ Which DOM nodes are processed ?
   - undefined or null, obj isn't changed
   - string, path is used as an accessor of obj
   - function, obj is the result of fun(obj, paths)
-  Current item has a special property #, which is the current key.
+  Current item has two special properties: #key and #val.
 
 
 Operations on instances
@@ -142,7 +145,7 @@ A node is repeated in natural order. To invert that order, just add an
 empty "repeat-invert" attribute like this:
 
   <ul>
-    <li repeat="items" repeat-invert bind-text="text">first item</li>
+    <li repeat="items" repeat-invert bind-text="items.text">first item</li>
   </ul>
 
 
