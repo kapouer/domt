@@ -177,9 +177,8 @@ Domt.prototype.merge = function(obj, opts) {
 		holders.push(holder);
 		container = holder.container;
 		parentNode = container.parentNode;
-		bound = holder.bind ? find(obj, holder.bind) : obj;
+		bound = holder.bind ? find(obj, holder.bind).val : obj;
 		if (holder.repeat !== undefined) {
-			repeated = find(bound, holder.repeat);
 			if (opts.empty) {
 				if (holder.invert) {
 					while ((curNode = container.nextSibling) && !curNode.hasAttribute(REPEAT + '-tail')) {
@@ -193,14 +192,17 @@ Domt.prototype.merge = function(obj, opts) {
 				// restore holder.template modified by current.value === undefined (see after)
 				holder.reload();
 			}
-			if (repeated === undefined) {
+			repeated = find(bound, holder.repeat);
+			if (repeated.val === undefined) {
 				// merge inside template (that won't be selected because it's now out of the DOM)
 				this.merge(bound, {node: holder.template});
 			} else {
 				var self = this;
-				iterate(repeated, function(key, val) {
+				iterate(repeated.val, function(key, val) {
 					var clone = holder.template.cloneNode(true);
-					self.replace(val, clone, key);
+					var obj = {};
+					obj[repeated.name] = val;
+					self.replace(obj, clone, key);
 					parentNode.insertBefore(clone, holder.invert ? container.nextSibling : container);
 				});
 			}
@@ -239,7 +241,7 @@ Domt.prototype.replace = function(obj, node, key) {
 			if (att.value) initial = att.value;
 			if (initial == null) initial = "";
 			val = initial.replace(reExpr, function(str, path) {
-				var repl = find(obj, path, key);
+				var repl = find(obj, path, key).val;
 				if (repl === undefined || repl !== null && typeof repl == "object") return "";
 				replacements++;
 				if (repl == null) return "";
@@ -248,7 +250,7 @@ Domt.prototype.replace = function(obj, node, key) {
 			if (replacements) {
 				if (!att.value) att.value = initial;
 			} else {
-				val = find(obj, att.value, key);
+				val = find(obj, att.value, key).val;
 			}
 			replace(node, name, val);
 		});
@@ -266,25 +268,30 @@ function replace(node, name, val) {
 }
 
 function find(scope, path, key) {
-	var name, val = scope, filters, filter;
-	if (scope == null) {
-		if (path) val = undefined;
-		return val;
-	}
+	var name, last, val = scope, filters, filter;
 	path = (path || "").split('|');
 	filters = path;
 	path = path.shift();
+	if (scope == null) {
+		if (path) val = undefined;
+		return {val: val};
+	}
 	path = path ? path.split('.') : [];
 	if (typeof val == "function") val = val(scope, path);
 	while ((name = path.shift()) !== undefined) {
 		scope = val;
-		if (name == '#' && key !== undefined && path.length == 0) {
-			val = key;
-			break;
+		if (key !== undefined && path.length == 0) {
+			if (name == '#key') {
+				val = key;
+				break;
+			} else if (name == '#val') {
+				break;
+			}
 		}
+		if (!scope || name == "" && !(typeof scope == "object")) break;
 		val = scope[name];
 		if (typeof val == "function") val = val(scope, path);
-		if (!val) break;
+		last = name;
 	}
 	if (val != null) {
 		for (var i=0; i < filters.length; i++) {
@@ -292,7 +299,8 @@ function find(scope, path, key) {
 			if (filter) val = filter(val);
 		}
 	}
-	return val;
+	if (last == null) last = "";
+	return {val: val, name: last};
 };
 
 
