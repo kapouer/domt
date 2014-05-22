@@ -116,6 +116,12 @@
 				{ a: 3, b: 4, c: 6 },
 			]}).check();
 		});
+		it("should repeat and still give access to keys from current scope", function() {
+			Domt('#repeat-scope').merge({
+				path: "mypath",
+				list: [12, 13]
+			}).check();
+		});
 	});
   </script>
 	<title>Domt test suite</title>
@@ -223,6 +229,13 @@
 		<tr><script repeat-tail="" type="text/template"></script><td>A</td><td>B</td><td>C</td><script type="text/template" repeat="col"><td bind-text="col.#val"></td></script></tr>
 		<script repeat-tail="" type="text/template"></script><tr><script repeat-tail="" type="text/template"></script><td>1</td><td>2</td><td>5</td><script type="text/template" repeat="col"><td bind-bind-text="table.[col.#key]"></td></script></tr><tr><script repeat-tail="" type="text/template"></script><td>3</td><td>4</td><td>6</td><script type="text/template" repeat="col"><td bind-bind-text="table.[col.#key]"></td></script></tr><script type="text/template" repeat="table"><tr><td bind-bind-text="table.[col.#key]" repeat="col"></td></tr></script>
 	</table></table>
+
+	<ul id="repeat-scope">
+		<li repeat="list" bind-text>[path] - [list.#val]</li>
+	</ul>
+	<ul id="expected-repeat-scope">
+		<script repeat-tail="" type="text/template"></script><li>mypath - 12</li><li>mypath - 13</li><script type="text/template" repeat="list"><li bind-text="[path] - [list.#val]">mypath - </li></script>
+	</ul
 
 </body>
 </html>
