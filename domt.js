@@ -200,11 +200,13 @@ Domt.prototype.merge = function(obj, opts) {
 				var self = this;
 				iterate(repeated.val, function(key, val) {
 					var clone = holder.template.cloneNode(true);
-					var obj = {};
-					obj[repeated.name] = val;
-					self.replace(obj, clone, key);
+					// overwrite obj
+					bound[repeated.name] = val;
+					self.replace(bound, clone, key);
 					parentNode.insertBefore(clone, holder.invert ? container.nextSibling : container);
 				});
+				// restore obj
+				bound[repeated.name] = repeated.val;
 			}
 		} else {
 			this.replace(bound, node);
