@@ -12,26 +12,33 @@ Domt.ns = {
 	expr: '[*]'
 };
 
-Domt.filters = {
-	upper: function(val) {
-		return (val + "").toUpperCase();
-	},
-	lower: function(val) {
-		return (val + "").toLowerCase();
-	},
-	br: function(val) {
-		return (val + "").replace(/\n/g, "<br />");
-	},
-	esc: function(val) {
-		return encodeURIComponent(val + "");
-	},
-	unesc: function(val) {
-		return decodeURIComponent(val + "");
-	},
-	json: function(val) {
-		return JSON.stringify(val);
+function Filters(obj) {
+	if (obj && typeof obj == "object") for (var name in obj) {
+		this[name] = obj[name];
 	}
+}
+
+Domt.filters = Filters.prototype;
+
+Filters.prototype.upper = function(val) {
+	return (val + "").toUpperCase();
 };
+Filters.prototype.lower = function(val) {
+	return (val + "").toLowerCase();
+};
+Filters.prototype.br = function(val) {
+	return (val + "").replace(/\n/g, "<br />");
+};
+Filters.prototype.esc = function(val) {
+	return encodeURIComponent(val + "");
+};
+Filters.prototype.unesc = function(val) {
+	return decodeURIComponent(val + "");
+};
+Filters.prototype.json = function(val) {
+	return JSON.stringify(val);
+};
+
 
 var escaper = document.createElement('p');
 escaper.appendChild(document.createTextNode(""));
@@ -150,12 +157,13 @@ function iterate(obj, fun) {
 	return len;
 }
 
-function Domt(parent) {
-	if (!(this instanceof Domt)) return new Domt(parent);
+function Domt(parent, filters) {
+	if (!(this instanceof Domt)) return new Domt(parent, filters);
 	if (typeof parent == "string") {
 		parent = document.querySelector(parent);
 	}
 	if (!parent) throw DomtError("missing parent");
+	this.filters = new Filters(filters);
 	this.node = parent;
 
 	this.reBind = new RegExp("^" + Domt.ns.bind + "-(.*)$", "i");
@@ -184,7 +192,7 @@ Domt.prototype.merge = function(obj, opts) {
 		holders.push(holder);
 		container = holder.container;
 		parentNode = container.parentNode;
-		bound = holder.bind ? find(obj, holder.bind).val : obj;
+		bound = holder.bind ? find(obj, holder.bind, undefined, this.filters).val : obj;
 		if (holder.repeat !== undefined) {
 			if (opts.empty) {
 				if (holder.invert) {
@@ -199,7 +207,7 @@ Domt.prototype.merge = function(obj, opts) {
 				// restore holder.template modified by current.value === undefined (see after)
 				holder.reload();
 			}
-			repeated = find(bound, holder.repeat);
+			repeated = find(bound, holder.repeat, undefined, this.filters);
 			if (repeated.val === undefined) {
 				// merge inside template (that won't be selected because it's now out of the DOM)
 				this.merge(bound, {node: holder.template});
@@ -232,6 +240,7 @@ Domt.prototype.replace = function(obj, node, key) {
 	var i = 0;
 	var len = descendants.length;
 	var val, reExpr = this.reExpr, reBind = this.reBind;
+	var filters = this.filters;
 	do {
 		iterate(node.attributes, function(index, att) { // iterates over a copy
 			var name = match(reBind, att.name);
@@ -248,7 +257,7 @@ Domt.prototype.replace = function(obj, node, key) {
 			if (att.value) initial = att.value;
 			if (initial == null) initial = "";
 			val = initial.replace(reExpr, function(str, path) {
-				var repl = find(obj, path, key).val;
+				var repl = find(obj, path, key, filters).val;
 				if (repl === undefined || repl !== null && typeof repl == "object") return "";
 				replacements++;
 				if (repl == null) return "";
@@ -258,7 +267,7 @@ Domt.prototype.replace = function(obj, node, key) {
 			if (replacements) {
 				if (!att.value) att.value = initial;
 			} else {
-				val = find(obj, att.value, key).val;
+				val = find(obj, att.value, key, filters).val;
 				if (name == "text" && val != null && typeof val != "object") val = escapeText(val);
 			}
 			replace(node, name, val);
@@ -273,10 +282,10 @@ function replace(node, name, val) {
 	else node.removeAttribute(name);
 }
 
-function find(scope, path, key) {
-	var name, last, val = scope, filters, filter;
+function find(scope, path, key, filters) {
+	var name, last, val = scope, filterNames, filter;
 	path = (path || "").split('|');
-	filters = path;
+	filterNames = path;
 	path = path.shift();
 	if (scope == null) {
 		if (path) val = undefined;
@@ -300,8 +309,8 @@ function find(scope, path, key) {
 		last = name;
 	}
 	if (val != null) {
-		for (var i=0; i < filters.length; i++) {
-			filter = Domt.filters[filters[i]];
+		for (var i=0; i < filterNames.length; i++) {
+			filter = filters[filterNames[i]];
 			if (filter) val = filter(val);
 		}
 	}
