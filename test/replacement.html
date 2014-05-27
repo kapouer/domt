@@ -28,6 +28,24 @@
 		it("should still correctly escape after previous test", function() {
 			Domt('#expected-siblings').merge({text: "<b>test</b>"}).check('expected-siblings');
 		});
+		it("should use instance filter", function() {
+			Domt('#instance-filter', {
+				myFilter: function(str) { return '0'+str; }
+			}).merge({text:"plus0"}).check();
+		});
+		it("should remove attribute when filter return null", function() {
+			Domt('#filter-null', {
+				hide: function(str) { return null; }
+			}).merge({text:"plus0"}).check();
+		});
+		it("should remove attribute when filter return null on an object", function() {
+			Domt('#filter-repeat-null', {
+				hide: function(obj) { return obj.show ? null : "hidden"; }
+			}).merge({items:[
+				{show: true, text:"is visible"},
+				{show: false, text:"is hidden"}
+			]}).check();
+		});
 	});
 	</script>
 	<title>Domt test suite</title>
@@ -45,6 +63,15 @@
 
 	<div id="siblings"><p bind-text>[text] shouldn't be <b>test</b></p></div>
 	<div id="expected-siblings"><p bind-text="[text] shouldn't be &lt;b&gt;test&lt;/b&gt;">&lt;b&gt;test&lt;/b&gt; shouldn't be <b>test</b></p></div>
+
+	<div id="instance-filter" bind-text>[text|myFilter]</div>
+	<div id="expected-instance-filter" bind-text="[text|myFilter]">0plus0</div>
+
+	<div id="filter-null" bind-hidden="text|hide">hide me</div>
+	<div id="expected-filter-null" bind-hidden="text|hide">hide me</div>
+
+	<div id="filter-repeat-null"><p repeat="items" bind-hidden="items|hide" bind-text>[items.text]</p></div>
+	<div id="expected-filter-repeat-null"><script repeat-tail="" type="text/template"></script><p>is visible</p><p hidden="hidden">is hidden</p><script type="text/template" repeat="items"><p bind-hidden="items|hide" bind-text="" hidden="hidden">[items.text]</p></script></div>
 
 </body>
 </html>
