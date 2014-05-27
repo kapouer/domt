@@ -154,7 +154,17 @@ Global settings
 
 Domt.ns object is used to set the prefixes used for the attribute names.
 
-Domt.filters stores filter functions by name.
+Domt.filters stores filters prototype (shared by all domt.filters instances).
+To add per-instance filters, use either
+
+  Domt(parent, {
+    myFilter: function(str) {...}
+  })
+
+or
+
+  var inst = Domt(parent);
+  inst.filters.myFilter = function(str) {...};
 
 
 Data getters
@@ -184,6 +194,8 @@ Some filters are already availables:
 
 Note that escaping xml entities is usually not needed because we use the
 DOM methods and they do the conversions for us.
+
+Filters can accept objects as well, see test/replacement.html.
 
 
 Tables
