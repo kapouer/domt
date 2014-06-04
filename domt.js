@@ -28,6 +28,7 @@ Filters.prototype.lower = function(val) {
 };
 Filters.prototype.br = function(val) {
 	return (val + "").replace(/\n/g, "<br />");
+};
 Filters.prototype.text = function(val) {
 	return escapeText(val);
 };
