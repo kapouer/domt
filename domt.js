@@ -142,9 +142,8 @@ function iterate(obj, fun) {
 		len = obj.length;
 		for (i=0; i < len; i++) fun(i, obj[i]);
 	} else if (obj.length !== undefined && typeof obj.item == "function") {
-		obj = Array.prototype.slice.call(obj, 0);
 		len = obj.length;
-		for (i=0; i < len; i++) fun(i, obj[i]);
+		for (i=0; i < len; i++) fun(i, obj.item(i));
 	} else if (obj instanceof Object) {
 		var keys = Object.keys(obj);
 		len = keys.length;
