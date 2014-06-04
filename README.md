@@ -105,12 +105,16 @@ Which DOM nodes are processed ?
   - function, obj is the result of fun(obj, paths)
 
 * the descendants with attribute "repeat"
-  repeats the node (and its content) by iterating over the given accessor.
+  repeats the node (and its content) by iterating over accessed data.
   If a value is :
   - undefined or null, obj isn't changed
   - string, path is used as an accessor of obj
   - function, obj is the result of fun(obj, paths)
   Current item has two special properties: #key and #val.
+  Accessed data can be iterated if it is :
+  - an array
+  - an object with length property and .item(i) method
+  - finally the object is looped as an hash array
 
 
 Operations on instances
