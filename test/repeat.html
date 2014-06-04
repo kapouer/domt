@@ -122,6 +122,21 @@
 				list: [12, 13]
 			}).check();
 		});
+		it("should repeat over a List", function() {
+			var list = {
+				length: 2,
+				item: function(i) {
+					return this._private[i];
+				},
+				_private: [
+					{ content: "three" },
+					{ content: "four" }
+				]
+			};
+			Domt('#repeat-list').merge({
+				data: list
+			}).check();
+		});
 	});
   </script>
 	<title>Domt test suite</title>
@@ -235,7 +250,14 @@
 	</ul>
 	<ul id="expected-repeat-scope">
 		<script repeat-tail="" type="text/template"></script><li>mypath - 12</li><li>mypath - 13</li><script type="text/template" repeat="list"><li bind-text="[path] - [list.#val]">mypath - </li></script>
-	</ul
+	</ul>
+
+	<ul id="repeat-list">
+		<li repeat="data" bind-text="data.content"></li>
+	</ul>
+	<ul id="expected-repeat-list">
+		<script repeat-tail="" type="text/template"></script><li>three</li><li>four</li><script type="text/template" repeat="data"><li bind-text="data.content"></li></script>
+	</ul>
 
 </body>
 </html>
