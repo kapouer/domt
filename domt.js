@@ -241,7 +241,7 @@ Domt.prototype.replace = function(obj, node, key) {
 	var val, reExpr = this.reExpr, reBind = this.reBind;
 	var filters = this.filters;
 	do {
-		iterate(node.attributes, function(index, att) { // iterates over a copy
+		iterate(Array.prototype.slice.call(node.attributes, 0), function(index, att) { // iterates over a copy
 			var name = match(reBind, att.name);
 			if (!name) return;
 			if (key != null) {
