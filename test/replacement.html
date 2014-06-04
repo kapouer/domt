@@ -46,6 +46,11 @@
 				{show: false, text:"is hidden"}
 			]}).check();
 		});
+		it("should escape value as text and replace newlines by br", function() {
+			Domt('#replace-escape-br').merge({
+				data: '<b>no html</b>\nand a newline'
+			}).check();
+		});
 	});
 	</script>
 	<title>Domt test suite</title>
@@ -72,6 +77,9 @@
 
 	<div id="filter-repeat-null"><p repeat="items" bind-hidden="items|hide" bind-text>[items.text]</p></div>
 	<div id="expected-filter-repeat-null"><script repeat-tail="" type="text/template"></script><p>is visible</p><p hidden="hidden">is hidden</p><script type="text/template" repeat="items"><p bind-hidden="items|hide" bind-text="" hidden="hidden">[items.text]</p></script></div>
+
+	<p id="replace-escape-br" bind-html="data|text|br"></p>
+	<p id="expected-replace-escape-br" bind-html="data|text|br">&lt;b&gt;no html&lt;/b&gt;<br>and a newline</p>
 
 </body>
 </html>
