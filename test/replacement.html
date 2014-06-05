@@ -51,6 +51,18 @@
 				data: '<b>no html</b>\nand a newline'
 			}).check();
 		});
+		it("should call filter even if accessor leads to undefined data", function() {
+			Domt('#replace-undefined', {
+				check: function(val) {
+					if (val === undefined) return "was undefined";
+					else return "was set";
+				}
+			}).merge({
+				data: {
+					me: "there"
+				}
+			}).check();
+		});
 	});
 	</script>
 	<title>Domt test suite</title>
@@ -80,6 +92,9 @@
 
 	<p id="replace-escape-br" bind-html="data|text|br"></p>
 	<p id="expected-replace-escape-br" bind-html="data|text|br">&lt;b&gt;no html&lt;/b&gt;<br>and a newline</p>
+
+	<p id="replace-undefined" bind-text="data.undef|check"></p>
+	<p id="expected-replace-undefined" bind-text="data.undef|check">was undefined</p>
 
 </body>
 </html>
