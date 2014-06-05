@@ -162,13 +162,18 @@ Domt.filters stores filters prototype (shared by all domt.filters instances).
 To add per-instance filters, use either
 
   Domt(parent, {
-    myFilter: function(str) {...}
+    myFilter: function(str) {
+      return '<b>' + this.text(str) + '</b>';
+    }
   })
 
 or
 
   var inst = Domt(parent);
   inst.filters.myFilter = function(str) {...};
+
+In a filter function, `this` refers to `instance.filters` so it is easy
+to call other filters.
 
 
 Data getters

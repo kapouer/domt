@@ -30,8 +30,8 @@
 		});
 		it("should use instance filter", function() {
 			Domt('#instance-filter', {
-				myFilter: function(str) { return '0'+str; }
-			}).merge({text:"plus0"}).check();
+				myFilter: function(str) { return '<b>'+this.text(str)+'</b>'; }
+			}).merge({text:"escaped <br>"}).check();
 		});
 		it("should remove attribute when filter return null", function() {
 			Domt('#filter-null', {
@@ -81,8 +81,8 @@
 	<div id="siblings"><p bind-text>[text] shouldn't be <b>test</b></p></div>
 	<div id="expected-siblings"><p bind-text="[text] shouldn't be &lt;b&gt;test&lt;/b&gt;">&lt;b&gt;test&lt;/b&gt; shouldn't be <b>test</b></p></div>
 
-	<div id="instance-filter" bind-text>[text|myFilter]</div>
-	<div id="expected-instance-filter" bind-text="[text|myFilter]">0plus0</div>
+	<div id="instance-filter" bind-html>[text|myFilter]</div>
+	<div id="expected-instance-filter" bind-html="[text|myFilter]"><b>escaped &lt;br&gt;</b></div>
 
 	<div id="filter-null" bind-hidden="text|hide">hide me</div>
 	<div id="expected-filter-null" bind-hidden="text|hide">hide me</div>
