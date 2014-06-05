@@ -21,21 +21,27 @@ function Filters(obj) {
 Domt.filters = Filters.prototype;
 
 Filters.prototype.upper = function(val) {
+	if (val == null) return val;
 	return (val + "").toUpperCase();
 };
 Filters.prototype.lower = function(val) {
+	if (val == null) return val;
 	return (val + "").toLowerCase();
 };
 Filters.prototype.br = function(val) {
+	if (val == null) return val;
 	return (val + "").replace(/\n/g, "<br />");
 };
 Filters.prototype.text = function(val) {
+	if (val == null) return val;
 	return escapeText(val);
 };
 Filters.prototype.esc = function(val) {
+	if (val == null) return val;
 	return encodeURIComponent(val + "");
 };
 Filters.prototype.unesc = function(val) {
+	if (val == null) return val;
 	return decodeURIComponent(val + "");
 };
 Filters.prototype.json = function(val) {
