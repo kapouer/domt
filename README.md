@@ -188,6 +188,9 @@ A filter is a simple function returning a string.
     return "my" + val;
   };
 
+In the above example, data|myfilter always return something defined,
+meaning the merge will happen even if val === undefined.
+
 Some filters are already availables:
 
 * upper, lower: change string case
@@ -196,6 +199,8 @@ Some filters are already availables:
 * esc: encodeURIComponent
 * unesc: decodeURIComponent
 * json: JSON.stringify(val)
+* empty: promote undefined to null, and null to '', useful for
+  attribute removal upon undefined value.
 
 Note that escaping xml entities is usually not needed because we use the
 DOM methods and they do the conversions for us.
