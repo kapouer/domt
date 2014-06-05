@@ -51,6 +51,10 @@ Filters.prototype.empty = function(val) {
 	if (val === undefined) return null;
 	else return "";
 };
+Filters.prototype.notempty = function(val) {
+	if (val === undefined) return "";
+	else return null;
+};
 
 
 var escaper = document.createElement('p');
