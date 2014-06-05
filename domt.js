@@ -326,7 +326,7 @@ function find(scope, path, key, filters) {
 	}
 	for (var i=0; i < filterNames.length; i++) {
 		filter = filters[filterNames[i]];
-		if (filter) val = filter(val);
+		if (filter) val = filter.call(filters, val);
 	}
 	if (last == null) last = "";
 	return {val: val, name: last};
