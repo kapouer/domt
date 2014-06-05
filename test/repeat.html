@@ -23,7 +23,7 @@
 			Domt('#repeat-strings').merge(["one", "two"]).check();
 		});
 		it("should repeat and replace .#key by current key", function() {
-			Domt.filters.inc = function(str) { return parseFloat(str) + 1; };
+			Domt.filters.inc = function(str) { if (str == null) return str; else return parseFloat(str) + 1; };
 			Domt('#repeat-key').merge(["one", "two"]).check();
 		});
 		it("should process repeat even if not repeating anything", function() {
