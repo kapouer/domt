@@ -310,11 +310,9 @@ function find(scope, path, key, filters) {
 		if (typeof val == "function") val = val(scope, path);
 		last = name;
 	}
-	if (val != null) {
-		for (var i=0; i < filterNames.length; i++) {
-			filter = filters[filterNames[i]];
-			if (filter) val = filter(val);
-		}
+	for (var i=0; i < filterNames.length; i++) {
+		filter = filters[filterNames[i]];
+		if (filter) val = filter(val);
 	}
 	if (last == null) last = "";
 	return {val: val, name: last};
