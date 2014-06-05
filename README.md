@@ -199,8 +199,8 @@ Some filters are already availables:
 * esc: encodeURIComponent
 * unesc: decodeURIComponent
 * json: JSON.stringify(val)
-* empty: merge even undefined values (promote to null, and null to '')
-* notempty: if defined, return undefined, else return empty string
+* : returns null if value is undefined
+* no: returns empty string if value is null-ish, otherwise returns null
 
 Note that escaping xml entities is usually not needed because we use the
 DOM methods and they do the conversions for us.
