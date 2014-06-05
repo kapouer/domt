@@ -47,13 +47,13 @@ Filters.prototype.unesc = function(val) {
 Filters.prototype.json = function(val) {
 	return JSON.stringify(val);
 };
-Filters.prototype.empty = function(val) {
-	if (val === undefined) return null;
-	else return "";
-};
-Filters.prototype.notempty = function(val) {
-	if (val === undefined) return "";
+Filters.prototype.no = function(val) {
+	if (val == null) return "";
 	else return null;
+};
+Filters.prototype[''] = function(val) {
+	if (val === undefined) return null;
+	else return val;
 };
 
 
