@@ -47,6 +47,10 @@ Filters.prototype.unesc = function(val) {
 Filters.prototype.json = function(val) {
 	return JSON.stringify(val);
 };
+Filters.prototype.empty = function(val) {
+	if (val === undefined) return null;
+	else return "";
+};
 
 
 var escaper = document.createElement('p');
