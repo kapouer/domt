@@ -151,6 +151,22 @@ empty "repeat-invert" attribute like this:
     <li repeat="items" repeat-invert bind-text="items.text">first item</li>
   </ul>
 
+Note that if node contains other nodes that are targets of Domt,
+the usage of bind-html or bind-text on that parent node is not defined.
+It is strongly advised to avoid that situation:
+
+  <p bind-text>
+    [data.text]
+    <a bind-href="data.href">link</a>
+  </p>
+
+Instead, wrap the first text node in a span:
+
+  <p>
+    <span bind-text>[data.text]</span>
+    <a bind-href="data.href">link</a>
+  </p>
+
 
 Global settings
 ---------------
