@@ -155,7 +155,10 @@ empty "repeat-invert" attribute like this:
 Global settings
 ---------------
 
-Domt.ns object is used to set the prefixes used for the attribute names.
+Domt.ns object is used to set the prefixes used for the attribute names,
+or change delimiters, like this:
+
+  Domt.ns.expr = '{{*}}';
 
 Domt.filters stores filters prototype (shared by all domt.filters instances).
 To add per-instance filters, use either
