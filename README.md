@@ -126,8 +126,7 @@ The actual data merging is controled by these attributes:
   where attribute is the name of the attribute to process.
 
 * bind-text
-  node.textContent = <value>
-  (or node.innerText for older browsers)
+  node.innerHTML = <escaped_text(value)>
 
 * bind-html
   node.innerHTML = <value>
