@@ -141,7 +141,7 @@ When merged, a repeated node looses its bind and repeat attributes (but
 doesn't remove attributes added by a "bind-bind-att" trick) and
 non-repeated nodes keep their bind-* attributes.
 
-Expressions are written as "{{path.to.val|optional_filter}}" and are
+Expressions are written as "[path.to.val|optional_filter]" and are
 replaced by their accessed value in the target.
 
 A node is repeated in natural order. To invert that order, just add an
