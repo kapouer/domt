@@ -12,7 +12,7 @@ Support following workflow :
 
 And stick with these constraints :
 
-* light (4.8KB minified)
+* light (5.8KB minified)
 * simple
 * thorough test suites
 * force separation between logic (js), template (html), and data (obj)
