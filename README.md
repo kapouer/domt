@@ -24,67 +24,71 @@ Quick start
 -----------
 
 Starting with a template and a call to Domt:
-
-  <div id="test" bind-class="class">
-    <ul>
-      <li repeat="items" class="red" bind-class="items.color" bind-text="items.text">first item</li>
-    </ul>
-  </div>
-
-  <script type="text/javascript">
-    Domt('#test').merge({
-      "class": "list",
-      items: [
-        {color: "blue", text: "the sea"},
-        {color: null, text: "the void"}
-      ]
-    });
-  </script>
-
-We get:
-
-  <div id="test" class="list" bind-class="class">
-    <ul>
-      <script repeat-tail="true" type="text/template"></script>
-      <li class="blue">the sea</li>
-      <li>the void</li>
-      <script type="text/template" repeat="items">
-        <li class="red" bind-class="items.color" bind-text="items.text">first item</li>
-      </script>
-    </ul>
-  </div>
-
-The API is chainable and calling it a second time is possible:
-
+```html
+<div id="test" bind-class="class">
+  <ul>
+    <li repeat="items" class="red" bind-class="items.color" bind-text="items.text">first item</li>
+  </ul>
+</div>
+```
+```js
   Domt('#test').merge({
-    "class": "list"
-  }).merge({
+    "class": "list",
     items: [
       {color: "blue", text: "the sea"},
       {color: null, text: "the void"}
     ]
   });
+```
+
+We get:
+```html
+<div id="test" class="list" bind-class="class">
+  <ul>
+    <script repeat-tail="true" type="text/template"></script>
+    <li class="blue">the sea</li>
+    <li>the void</li>
+    <script type="text/template" repeat="items">
+      <li class="red" bind-class="items.color" bind-text="items.text">first item</li>
+    </script>
+  </ul>
+</div>
+```
+
+The API is chainable and calling it a second time is possible:
+```js
+Domt('#test').merge({
+  "class": "list"
+}).merge({
+  items: [
+    {color: "blue", text: "the sea"},
+    {color: null, text: "the void"}
+  ]
+});
+```
 
 One can create another instance of Domt to update a previously merged node:
-
-  Domt('#test').merge({
-    "class": null
-  }).merge({
-    items: [
-      {color: "red", text: "another one"}
-    ]
-  });
+```js
+Domt('#test').merge({
+  "class": null
+}).merge({
+  items: [
+    {color: "red", text: "another one"}
+  ]
+});
+```
 
 The second call with remove attribute "class" from #test, and append a
 list item named "another one".
 
 It is also possible to empty the repeated lists:
-
-  Domt('#test').empty().merge({
-    items: [
-      {color: "red", text: "another one"}
-    ]
-  });
+```js
+Domt('#test').empty().merge({
+  items: [
+    {color: "red", text: "another one"}
+  ]
+});
+```
 
 
 Which DOM nodes are processed ?
@@ -146,49 +150,50 @@ replaced by their accessed value in the target.
 
 A node is repeated in natural order. To invert that order, just add an
 empty "repeat-invert" attribute like this:
-
-  <ul>
-    <li repeat="items" repeat-invert bind-text="items.text">first item</li>
-  </ul>
+```html
+<ul>
+  <li repeat="items" repeat-invert bind-text="items.text">first item</li>
+</ul>
+```
 
 Note that if node contains other nodes that are targets of Domt,
 the usage of bind-html or bind-text on that parent node is not defined.
 It is strongly advised to avoid that situation:
-
-  <p bind-text>
-    [data.text]
-    <a bind-href="data.href">link</a>
-  </p>
+```html
+<p bind-text>
+  [data.text]
+  <a bind-href="data.href">link</a>
+</p>
+```
 
 Instead, wrap the first text node in a span:
-
-  <p>
-    <span bind-text>[data.text]</span>
-    <a bind-href="data.href">link</a>
-  </p>
-
+```html
+<p>
+  <span bind-text>[data.text]</span>
+  <a bind-href="data.href">link</a>
+</p>
+```
 
 Global settings
 ---------------
 
 Domt.ns object is used to set the prefixes used for the attribute names,
-or change delimiters, like this:
-
-  Domt.ns.expr = '{{*}}';
+or change delimiters, like this: `Domt.ns.expr = '{{*}}';`
 
 Domt.filters stores filters prototype (shared by all domt.filters instances).
 To add per-instance filters, use either
-
-  Domt(parent, {
-    myFilter: function(str) {
-      return '<b>' + this.text(str) + '</b>';
-    }
-  })
-
+```js
+Domt(parent, {
+  myFilter: function(str) {
+    return '<b>' + this.text(str) + '</b>';
+  }
+});
+```
 or
-
-  var inst = Domt(parent);
-  inst.filters.myFilter = function(str) {...};
+```js
+var inst = Domt(parent);
+inst.filters.myFilter = function(str) {...};
+```
 
 In a filter function, `this` refers to `instance.filters` so it is easy
 to call other filters.
@@ -206,10 +211,11 @@ Filters
 
 Filters are called before merging the value in the target.
 A filter is a simple function returning a string.
-
-  Domt.filters.myfilter = function(val) {
-    return "my" + val;
-  };
+```js
+Domt.filters.myfilter = function(val) {
+  return "my" + val;
+};
+```
 
 In the above example, data|myfilter always return something defined,
 meaning the merge will happen even if val === undefined.
