@@ -126,14 +126,14 @@ Operations on instances
 
 The actual data merging is controled by these attributes:
 
-* bind-<attributeName>
+* bind-/attributeName/
   where attribute is the name of the attribute to process.
 
 * bind-text
-  node.innerHTML = <escaped_text(value)>
+  node.innerHTML = escaped_text(value)
 
 * bind-html
-  node.innerHTML = <value>
+  node.innerHTML = value
 
 If a value is :
 - undefined, expressions in the target are evaluated
@@ -228,7 +228,7 @@ Some filters are already availables:
 * esc: encodeURIComponent
 * unesc: decodeURIComponent
 * json: JSON.stringify(val)
-* : returns null if value is undefined
+* : (filter name is empty string "") returns null if value is undefined
 * no: returns empty string if value is null-ish, otherwise returns null
 
 Note that escaping xml entities is usually not needed because we use the
