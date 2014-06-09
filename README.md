@@ -17,7 +17,7 @@ And stick with these constraints :
 * thorough test suites
 * force separation between logic (js), template (html), and data (obj)
 * cross browsers - a legacy.js file is provided for < IE9
-* extensible
+* extensible with filters
 
 
 Quick start
