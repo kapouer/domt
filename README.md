@@ -97,6 +97,7 @@ Which DOM nodes are processed ?
 * the target given as argument of Domt(target)
   target is either a node, a list of nodes, or a selector expression
   supported by document.querySelectorAll.
+  instance.nodes keeps the actual list.
 
 * the descendants with attribute "bind"
   in itself the node doesn't change, the "bind" attributes set the current
