@@ -173,14 +173,16 @@ function iterate(obj, fun) {
 	return len;
 }
 
-function Domt(parent, filters) {
-	if (!(this instanceof Domt)) return new Domt(parent, filters);
-	if (typeof parent == "string") {
-		parent = document.querySelector(parent);
+function Domt(nodes, filters) {
+	if (!(this instanceof Domt)) return new Domt(nodes, filters);
+	if (typeof nodes == "string") {
+		nodes = document.querySelectorAll(nodes);
+	} else if (nodes && nodes.nodeType) {
+		nodes = [nodes];
 	}
-	if (!parent) throw DomtError("missing parent");
+	if (!nodes || nodes.length == 0) throw DomtError("Domt has no nodes to merge");
 	this.filters = new Filters(filters);
-	this.node = parent;
+	this.nodes = nodes;
 
 	this.reBind = new RegExp("^" + Domt.ns.bind + "-(.*)$", "i");
 
@@ -196,58 +198,60 @@ Domt.prototype.empty = function() {
 };
 
 Domt.prototype.merge = function(obj, opts) {
-	var bound, repeated, holder, container, path, len, parentNode;
 	opts = opts || {};
-	var node = opts.node || this.node;
-	var parent = node;
-	var REPEAT = Domt.ns.repeat;
-	var BIND = Domt.ns.bind;
-	var holders = [];
-	do {
-		holder = Holder(node);
-		holders.push(holder);
-		container = holder.container;
-		parentNode = container.parentNode;
-		bound = holder.bind ? find(obj, holder.bind, undefined, this.filters).val : obj;
-		if (holder.repeat !== undefined) {
-			if (opts.empty) {
-				if (holder.invert) {
-					while ((curNode = container.nextSibling) && !curNode.hasAttribute(REPEAT + '-tail')) {
-						parentNode.removeChild(curNode);
+	var nodes = opts.node ? [opts.node] : this.nodes;
+	var that = this;
+	iterate(nodes, function(num, node) {
+		var bound, repeated, holder, container, path, len, parentNode;
+		var parent = node;
+		var REPEAT = Domt.ns.repeat;
+		var BIND = Domt.ns.bind;
+		var holders = [];
+		do {
+			holder = Holder(node);
+			holders.push(holder);
+			container = holder.container;
+			parentNode = container.parentNode;
+			bound = holder.bind ? find(obj, holder.bind, undefined, that.filters).val : obj;
+			if (holder.repeat !== undefined) {
+				if (opts.empty) {
+					if (holder.invert) {
+						while ((curNode = container.nextSibling) && !curNode.hasAttribute(REPEAT + '-tail')) {
+							parentNode.removeChild(curNode);
+						}
+					} else {
+						while ((curNode = container.previousSibling) && !curNode.hasAttribute(REPEAT + '-tail')) {
+							parentNode.removeChild(curNode);
+						}
 					}
-				} else {
-					while ((curNode = container.previousSibling) && !curNode.hasAttribute(REPEAT + '-tail')) {
-						parentNode.removeChild(curNode);
-					}
+					// restore holder.template modified by current.value === undefined (see after)
+					holder.reload();
 				}
-				// restore holder.template modified by current.value === undefined (see after)
-				holder.reload();
-			}
-			repeated = find(bound, holder.repeat, undefined, this.filters);
-			if (repeated.val === undefined) {
-				// merge inside template (that won't be selected because it's now out of the DOM)
-				this.merge(bound, {node: holder.template});
+				repeated = find(bound, holder.repeat, undefined, that.filters);
+				if (repeated.val === undefined) {
+					// merge inside template (that won't be selected because it's now out of the DOM)
+					that.merge(bound, {node: holder.template});
+				} else {
+					iterate(repeated.val, function(key, val) {
+						var clone = holder.template.cloneNode(true);
+						// overwrite obj
+						bound[repeated.name] = val;
+						that.replace(bound, clone, key);
+						parentNode.insertBefore(clone, holder.invert ? container.nextSibling : container);
+					});
+					// restore obj
+					bound[repeated.name] = repeated.val;
+				}
 			} else {
-				var self = this;
-				iterate(repeated.val, function(key, val) {
-					var clone = holder.template.cloneNode(true);
-					// overwrite obj
-					bound[repeated.name] = val;
-					self.replace(bound, clone, key);
-					parentNode.insertBefore(clone, holder.invert ? container.nextSibling : container);
-				});
-				// restore obj
-				bound[repeated.name] = repeated.val;
+				that.replace(bound, node);
 			}
-		} else {
-			this.replace(bound, node);
-		}
-	} while ((node = parent.querySelector('[' + REPEAT + '],[' + BIND + ']')));
+		} while ((node = parent.querySelector('[' + REPEAT + '],[' + BIND + ']')));
 
-	len = holders.length;
-	for (i=0; i < len; i++) {
-		holders[i].close();
-	}
+		len = holders.length;
+		for (i=0; i < len; i++) {
+			holders[i].close();
+		}
+	});
 	return this;
 };
 
