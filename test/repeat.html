@@ -77,9 +77,9 @@
 				{ content: "one" },
 				{ content: "two" }
 			]);
-			var copy = inst.node.cloneNode(true);
+			var copy = inst.nodes[0].cloneNode(true);
 			copy.id = 'cell-copy';
-			inst.node.parentNode.insertBefore(copy, inst.node);
+			inst.nodes[0].parentNode.insertBefore(copy, inst.nodes[0]);
 			Domt('#cell-copy').merge([
 				{ content: "three" },
 				{ content: "four" }

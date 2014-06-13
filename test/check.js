@@ -11,7 +11,11 @@ if (!window.describe) {
 }
 
 Domt.prototype.check = function(expectedId) {
-	var actual = this.node;
+	var actual = this.nodes;
+	if (actual.length != 1) {
+		throw new Error("domt.check() only works with one target node instead of " + actual.length);
+	}
+	actual = actual[0];
 	var id = actual.id;
 	if (!actual) throw new Error("Missing node with id " + id);
 	actual = actual.cloneNode(true);
