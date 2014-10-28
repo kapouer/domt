@@ -13,8 +13,8 @@ Domt.ns = {
 };
 
 function Filters(obj) {
-	if (obj && typeof obj == "object") for (var name in obj) {
-		this[name] = obj[name];
+	for (var name in obj) {
+		if (typeof obj[name] == "function") this[name] = obj[name];
 	}
 }
 
