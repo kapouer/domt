@@ -1,14 +1,15 @@
 domt -- simple DOM Templating tool
-=====================================
+==================================
 
 Merge plain javascript objects into DOM.
 
 Support following workflow :
 
-* add attributes to static html document
-* merge data using DOM
-* serialize document
-* reload document later and merge new data using DOM
+* add template attributes like bind, repeat, or [acc.sess.ors] to static
+  html document
+* load document, merge data into it using those attributes and fields
+* unload document (serialize it)
+* reload document later and merge new data
 
 And stick with these constraints :
 
