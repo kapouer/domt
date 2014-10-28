@@ -10,7 +10,7 @@ fs.readdirSync(__dirname).filter(function(file) {
 		FetchExternalResources   : false,
 		ProcessExternalResources : false
 	}});
-	var win = doc.createWindow();
+	var win = doc.parentWindow;
 	win.console = console;
 	win.describe = describe;
 	win.it = it;
