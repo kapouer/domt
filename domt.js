@@ -297,7 +297,7 @@ Domt.prototype.replace = function(obj, node, key) {
 
 function replace(node, name, val) {
 	if (val === undefined || val !== null && typeof val == "object") return;
-	if (name == "text" || name == "html") node.innerHTML = val;
+	if (name == "text" || name == "html") node.innerHTML = val;
 	else if (val !== null) node.setAttribute(name, val);
 	else node.removeAttribute(name);
 }
