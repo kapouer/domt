@@ -21,7 +21,7 @@
     "url": "https://github.com/kapouer/domt/issues"
   },
   "devDependencies": {
-    "mocha": "~1.0",
-    "jsdom": "~0.10"
+    "jsdom": "^1.0.3",
+    "mocha": "^2.0.1"
   }
 }
