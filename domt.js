@@ -173,15 +173,15 @@ function iterate(obj, fun) {
 	return len;
 }
 
-function Domt(nodes, filters) {
-	if (!(this instanceof Domt)) return new Domt(nodes, filters);
+function Domt(nodes, options) {
+	if (!(this instanceof Domt)) return new Domt(nodes, options);
 	if (typeof nodes == "string") {
 		nodes = document.querySelectorAll(nodes);
 	} else if (nodes && nodes.nodeType) {
 		nodes = [nodes];
 	}
 	if (!nodes || nodes.length == 0) throw DomtError("Domt has no nodes to merge");
-	this.filters = new Filters(filters);
+	this.filters = new Filters(options);
 	this.nodes = nodes;
 
 	this.reBind = new RegExp("^" + Domt.ns.bind + "-(.*)$", "i");
