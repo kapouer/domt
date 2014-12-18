@@ -213,7 +213,7 @@ Domt.prototype.merge = function(obj, opts) {
 			container = holder.container;
 			parentNode = container.parentNode;
 
-			bound = holder.bind ? find(obj, holder.bind, undefined, that.filters).val : obj;
+			bound = holder.bind ? find(obj, holder.bind, undefined, that.filters, node).val : obj;
 			if (holder.repeat !== undefined) {
 				if (opts.empty) {
 					if (holder.invert) {
@@ -285,7 +285,7 @@ Domt.prototype.replace = function(obj, node, key) {
 			if (att.value) initial = att.value;
 			if (initial == null) initial = "";
 			val = initial.replace(reExpr, function(str, path) {
-				var repl = find(obj, path, key, filters).val;
+				var repl = find(obj, path, key, filters, node).val;
 				if (repl === undefined || repl !== null && typeof repl == "object") return "";
 				replacements++;
 				if (repl == null) return "";
@@ -295,7 +295,7 @@ Domt.prototype.replace = function(obj, node, key) {
 			if (replacements) {
 				if (!att.value) att.value = initial;
 			} else {
-				val = find(obj, att.value, key, filters).val;
+				val = find(obj, att.value, key, filters, node).val;
 				if (name == "text" && val != null && typeof val != "object") val = escapeText(val);
 			}
 			replace(node, name, val);
@@ -310,7 +310,7 @@ function replace(node, name, val) {
 	else node.removeAttribute(name);
 }
 
-function find(scope, path, key, filters) {
+function find(scope, path, key, filters, node) {
 	var name, last, val = scope, filterNames, filter;
 	path = (path || "").split('|');
 	filterNames = path;
@@ -339,7 +339,7 @@ function find(scope, path, key, filters) {
 	var obj = {};
 	if (filters) for (var i=0; i < filterNames.length; i++) {
 		filter = filters[filterNames[i]];
-		if (filter) val = filter.call(filters, val);
+		if (filter) val = filter.call(filters, val, node);
 	} else {
 		obj.filters = filterNames;
 	}

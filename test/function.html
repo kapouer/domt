@@ -55,6 +55,16 @@
 				}
 			}).check();
 		});
+		it("should call filter with current node as second argument", function() {
+			Domt('#filternode', {
+				newFilter: function(val, node) {
+					node.className = "meme";
+					return val + ' sure';
+				}
+			}).merge({
+				data: "tata"
+			}).check();
+		});
 	});
   </script>
 	<title>Domt test suite</title>
@@ -72,6 +82,9 @@
 
 	<h1 id="getter-paths" bind-text="path.to.price.euro">old header</h1>
 	<h1 id="expected-getter-paths" bind-text="path.to.price.euro">16.5 €</h1>
+
+	<h1 id="filternode" bind-text="data|newFilter">old header</h1>
+	<h1 id="expected-filternode" bind-text="data|newFilter" class="meme">tata sure</h1>
 
 </body>
 </html>
