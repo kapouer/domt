@@ -242,7 +242,7 @@ Domt.prototype.merge = function(obj, opts) {
 						for (var i=0; i < repeated.filters.length; i++) {
 							var bfilter = that.filters[repeated.filters[i]];
 							if (!bfilter) continue;
-							var maybe = bfilter(val, clone, sibling);
+							var maybe = bfilter.call(that.filters, val, clone, sibling);
 							if (maybe && maybe.nodeType) clone = maybe;
 						}
 						if (clone.parentNode == null) parentNode.insertBefore(clone, sibling);
