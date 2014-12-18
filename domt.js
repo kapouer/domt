@@ -212,7 +212,6 @@ Domt.prototype.merge = function(obj, opts) {
 			holders.push(holder);
 			container = holder.container;
 			parentNode = container.parentNode;
-
 			bound = holder.bind ? find(obj, holder.bind, undefined, that.filters, node).val : obj;
 			if (holder.repeat !== undefined) {
 				if (opts.empty) {
@@ -228,7 +227,8 @@ Domt.prototype.merge = function(obj, opts) {
 					// restore holder.template modified by current.value === undefined (see after)
 					holder.reload();
 				}
-				repeated = find(bound, holder.repeat);
+				var accessor = holder.repeat.split('|');
+				repeated = find(bound, accessor);
 				if (repeated.val === undefined) {
 					// merge inside template (that won't be selected because it's now out of the DOM)
 					that.merge(bound, {node: holder.template});
@@ -239,8 +239,8 @@ Domt.prototype.merge = function(obj, opts) {
 						bound[repeated.name] = val;
 						that.replace(bound, clone, key);
 						var sibling = holder.invert ? container.nextSibling : container;
-						for (var i=0; i < repeated.filters.length; i++) {
-							var bfilter = that.filters[repeated.filters[i]];
+						for (var i=1; i < accessor.length; i++) {
+							var bfilter = that.filters[accessor[i]];
 							if (!bfilter) continue;
 							var maybe = bfilter.call(that.filters, val, clone, sibling);
 							if (maybe && maybe.nodeType) clone = maybe;
@@ -269,8 +269,13 @@ Domt.prototype.replace = function(obj, node, key) {
 	var len = descendants.length;
 	var val, reExpr = this.reExpr, reBind = this.reBind;
 	var filters = this.filters;
+	var willRepeat = {};
 	do {
 		iterate(Array.prototype.slice.call(node.attributes, 0), function(index, att) { // iterates over a copy
+			if (att.name == "repeat" && att.value) {
+				willRepeat[att.value.split('|').shift()] = true;
+				return;
+			}
 			var name = match(reBind, att.name);
 			if (!name) return;
 			if (key != null) {
@@ -285,7 +290,9 @@ Domt.prototype.replace = function(obj, node, key) {
 			if (att.value) initial = att.value;
 			if (initial == null) initial = "";
 			val = initial.replace(reExpr, function(str, path) {
-				var repl = find(obj, path, key, filters, node).val;
+				var accessor = path.split('|');
+				if (willRepeat[accessor[0]]) return;
+				var repl = find(obj, accessor, key, filters, node).val;
 				if (repl === undefined || repl !== null && typeof repl == "object") return "";
 				replacements++;
 				if (repl == null) return "";
@@ -295,7 +302,9 @@ Domt.prototype.replace = function(obj, node, key) {
 			if (replacements) {
 				if (!att.value) att.value = initial;
 			} else {
-				val = find(obj, att.value, key, filters, node).val;
+				var accessor = (att.value || "").split('|');
+				if (willRepeat[accessor[0]]) return;
+				val = find(obj, accessor, key, filters, node).val;
 				if (name == "text" && val != null && typeof val != "object") val = escapeText(val);
 			}
 			replace(node, name, val);
@@ -310,11 +319,11 @@ function replace(node, name, val) {
 	else node.removeAttribute(name);
 }
 
-function find(scope, path, key, filters, node) {
-	var name, last, val = scope, filterNames, filter;
-	path = (path || "").split('|');
-	filterNames = path;
-	path = path.shift();
+function find(scope, accessor, key, filters, node) {
+	var name, last, val = scope, filter;
+	if (!accessor) accessor = [];
+	else if (typeof accessor == "string") accessor = accessor.split('|');
+	var path = accessor[0];
 	if (scope == null) {
 		if (path) val = undefined;
 		return {val: val};
@@ -336,17 +345,12 @@ function find(scope, path, key, filters, node) {
 		if (typeof val == "function") val = val(scope, path);
 		last = name;
 	}
-	var obj = {};
-	if (filters) for (var i=0; i < filterNames.length; i++) {
-		filter = filters[filterNames[i]];
+	if (filters) for (var i=1; i < accessor.length; i++) {
+		filter = filters[accessor[i]];
 		if (filter) val = filter.call(filters, val, node);
-	} else {
-		obj.filters = filterNames;
 	}
 	if (last == null) last = "";
-	obj.name = last;
-	obj.val = val;
-	return obj;
+	return {name: last, val: val};
 }
 
 function DomtError(message) {
