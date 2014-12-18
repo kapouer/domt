@@ -216,7 +216,7 @@ Value Filters
 Filters are called before merging the value in the target.
 A filter is a simple function returning a string.
 ```js
-Domt.filters.myfilter = function(val) {
+Domt.filters.myfilter = function(val, node) {
   return "my" + val;
 };
 ```
@@ -258,8 +258,6 @@ the node was going to be inserted.
 
 ```js
 Domt.filters.myBlockFilter = function(row, node, sibling) {
-  // row.$key is the current index or key, row.myColumnName is user properties,
-  // row.$val is when the iterated object is a hash array - same as accessors.
   if (row.selected) node.selected = true;
   // node can be inserted manually, sibling holds the node before which it would
   // be inserted by default
