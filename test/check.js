@@ -35,6 +35,15 @@ Domt.prototype.check = function(expectedId) {
 
 	if (!actual && !expected) throw new Error("void check " + id);
 
-	if (window.assert) window.assert.equal(actual, expected);
-	else if (actual != expected) throw new Error("Actual\n" + actual + "\n\nExpected\n" + expected);
+	if (window.assert) {
+		try {
+			window.assert.equal(actual, expected);
+		} catch (e) {
+			console.info("actual", actual);
+			console.info("expected", expected);
+			throw e;
+		}
+	}	else if (actual != expected) {
+		throw new Error("Actual\n" + actual + "\n\nExpected\n" + expected);
+	}
 }
