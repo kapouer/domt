@@ -212,6 +212,7 @@ Domt.prototype.merge = function(obj, opts) {
 			holders.push(holder);
 			container = holder.container;
 			parentNode = container.parentNode;
+
 			bound = holder.bind ? find(obj, holder.bind, undefined, that.filters).val : obj;
 			if (holder.repeat !== undefined) {
 				if (opts.empty) {
@@ -227,7 +228,7 @@ Domt.prototype.merge = function(obj, opts) {
 					// restore holder.template modified by current.value === undefined (see after)
 					holder.reload();
 				}
-				repeated = find(bound, holder.repeat, undefined, that.filters);
+				repeated = find(bound, holder.repeat);
 				if (repeated.val === undefined) {
 					// merge inside template (that won't be selected because it's now out of the DOM)
 					that.merge(bound, {node: holder.template});
@@ -237,7 +238,14 @@ Domt.prototype.merge = function(obj, opts) {
 						// overwrite obj
 						bound[repeated.name] = val;
 						that.replace(bound, clone, key);
-						parentNode.insertBefore(clone, holder.invert ? container.nextSibling : container);
+						var sibling = holder.invert ? container.nextSibling : container;
+						for (var i=0; i < repeated.filters.length; i++) {
+							var bfilter = that.filters[repeated.filters[i]];
+							if (!bfilter) continue;
+							var maybe = bfilter(val, clone, sibling);
+							if (maybe && maybe.nodeType) clone = maybe;
+						}
+						if (clone.parentNode == null) parentNode.insertBefore(clone, sibling);
 					});
 					// restore obj
 					bound[repeated.name] = repeated.val;
@@ -328,14 +336,18 @@ function find(scope, path, key, filters) {
 		if (typeof val == "function") val = val(scope, path);
 		last = name;
 	}
-	for (var i=0; i < filterNames.length; i++) {
+	var obj = {};
+	if (filters) for (var i=0; i < filterNames.length; i++) {
 		filter = filters[filterNames[i]];
 		if (filter) val = filter.call(filters, val);
+	} else {
+		obj.filters = filterNames;
 	}
 	if (last == null) last = "";
-	return {val: val, name: last};
-};
-
+	obj.name = last;
+	obj.val = val;
+	return obj;
+}
 
 function DomtError(message) {
 	var error = new Error(message);

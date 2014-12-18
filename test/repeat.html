@@ -148,6 +148,16 @@
 			window.assert.equal(nodes[0].outerHTML, expected.outerHTML);
 			window.assert.equal(nodes[1].outerHTML, expected.outerHTML);
 		});
+		it("should repeat and call the block filter", function() {
+			Domt('#repeat-blockfilter', {myBlockFilter: function(item, node, sibling) {
+				var newnode = document.createElement('p');
+				newnode.innerHTML = node.innerHTML;
+				return newnode;
+			}}).merge({data: [
+				{ content: "one" },
+				{ content: "two" }
+			]}).check();
+		});
 	});
   </script>
 	<title>Domt test suite</title>
@@ -278,6 +288,13 @@
 	</ul>
 	<ul id="expected-two-nodes">
 		<script repeat-tail="" type="text/template"></script><li>one</li><li>two</li><script type="text/template" repeat="data"><li bind-text="data.content"></li></script>
+	</ul>
+
+	<ul id="repeat-blockfilter">
+		<li repeat="data|myBlockFilter" bind-text>[data.content]</li>
+	</ul>
+	<ul id="expected-repeat-blockfilter">
+		<script repeat-tail="" type="text/template"></script><p>one</p><p>two</p><script type="text/template" repeat="data|myBlockFilter"><li bind-text="">[data.content]</li></script>
 	</ul>
 
 </body>

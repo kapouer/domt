@@ -210,8 +210,8 @@ As mentioned above, merging a function will call it with parameters
 (obj, paths). This cannot be used to modify the DOM, only the data.
 
 
-Filters
--------
+Value Filters
+-------------
 
 Filters are called before merging the value in the target.
 A filter is a simple function returning a string.
@@ -239,6 +239,38 @@ Note that escaping xml entities is usually not needed because we use the
 DOM methods and they do the conversions for us.
 
 Filters can accept objects as well, see test/replacement.html.
+
+
+Block Filters
+-------------
+
+While value filters are declarable when merging values, a *block* filter can
+be declared on the repeated accessor
+```html
+<ul>
+<li repeat="items|myBlockFilter" class="[items|valueFilter]">[items.text]</li>
+</ul>
+```
+
+A block filter receives the currently iterated data, the *merged* node
+before it is actually inserted in the DOM, and the current sibling before which
+the node was going to be inserted.
+
+```js
+Domt.filters.myBlockFilter = function(row, node, sibling) {
+  // row.$key is the current index or key, row.myColumnName is user properties,
+  // row.$val is when the iterated object is a hash array - same as accessors.
+  if (row.selected) node.selected = true;
+  // node can be inserted manually, sibling holds the node before which it would
+  // be inserted by default
+  sibling.parentNode.insertBefore(node, sibling); // default insert
+  var oldnode = document.getElementById(row.nodeid);
+  oldnode.parentNode.replaceChild(node, oldnode);
+};
+```
+
+A block filter can also return a node that is going to replace the currently
+merged node.
 
 
 Tables
