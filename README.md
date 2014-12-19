@@ -91,6 +91,11 @@ Domt('#test').empty().merge({
 });
 ```
 
+Domt accepts a jquery object
+```js
+Domt($('div > .test').not('.out'))
+```
+
 
 Which DOM nodes are processed ?
 -------------------------------
