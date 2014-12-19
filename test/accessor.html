@@ -107,8 +107,9 @@
 		<li repeat bind="data.items" bind-text=".content"></li>
 	</ul>
 	<ul id="expected-bind-repeat">
-		<script repeat-tail="" type="text/template"></script><li>one</li><li>two</li><script type="text/template" repeat="" bind="data.items"><li bind-text=".content"></li></script>
+		<script tail="domtX" type="text/template" repeat="" bind="data.items"><li bind-text=".content"></li></script><li>one</li><li>two</li><script id="domtX"></script>
 	</ul>
+
 
 </body>
 </html>

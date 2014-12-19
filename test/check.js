@@ -21,11 +21,11 @@ Domt.prototype.check = function(expectedId) {
 	actual = actual.cloneNode(true);
 	actual.removeAttribute('id');
 
-	id = expectedId || 'expected-' + id;
-	var expected = document.getElementById(id);
+	expectedId = expectedId || 'expected-' + id;
+	var expected = document.getElementById(expectedId);
 	if (!expected) {
 		console.error(actual.outerHTML);
-		throw new Error("Missing expected node with id " + id);
+		throw new Error("Missing expected node with id " + expectedId);
 	}
 	expected = expected.cloneNode(true);
 	expected.removeAttribute('id');
@@ -33,17 +33,23 @@ Domt.prototype.check = function(expectedId) {
 	actual = actual && actual.outerHTML;
 	expected =  expected && expected.outerHTML;
 
-	if (!actual && !expected) throw new Error("void check " + id);
+	if (!actual && !expected) throw new Error("void check " + id + " " + expectedId);
+
+	actual = changeIdNum(actual, "X");
 
 	if (window.assert) {
 		try {
 			window.assert.equal(actual, expected);
 		} catch (e) {
-			console.info("actual", actual);
-			console.info("expected", expected);
+			console.info("actual", id, actual);
+			console.info("expected", expectedId, expected);
 			throw e;
 		}
 	}	else if (actual != expected) {
 		throw new Error("Actual\n" + actual + "\n\nExpected\n" + expected);
 	}
 }
+
+window.changeIdNum = function(htmlStr, id) {
+	return htmlStr.replace(/(tail="domt)(\d+)(")/g, "$1"+id+"$3").replace(/(id="domt)(\d+)(")/g, "$1"+id+"$3");
+};

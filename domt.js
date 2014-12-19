@@ -6,6 +6,7 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
 }
 
 Domt.ns = {
+	id: 'domt',
 	repeat: 'repeat',
 	bind: 'bind',
 	holder: 'holder',
@@ -20,6 +21,8 @@ function Filters(obj) {
 
 Domt.filters = Filters.prototype;
 
+
+// Value Filters
 Filters.prototype.upper = function(val) {
 	if (val == null) return val;
 	return (val + "").toUpperCase();
@@ -56,6 +59,11 @@ Filters.prototype[''] = function(val) {
 	else return val;
 };
 
+// Block Filters
+Filters.prototype.invert = function(row, node, head, tail) {
+	head.parentNode.insertBefore(node, head.nextSibling);
+};
+
 
 var escaper = document.createElement('p');
 escaper.appendChild(document.createTextNode(""));
@@ -69,58 +77,65 @@ function match(re, str) {
 	if (m && m.length == 2) return m[1];
 }
 
+function newId() {
+	var num = Domt.seq;
+	if (!num) num = Domt.seq = 1;
+	var pref = Domt.ns.id;
+	var id;
+	while (true) {
+		id = pref + num++;
+		if (!document.getElementById(id)) break;
+	}
+	Domt.seq = num;
+	return id;
+}
+
 function Holder(node) {
 	if (!(this instanceof Holder)) return new Holder(node);
-	var container, REPEAT = Domt.ns.repeat, BIND = Domt.ns.bind;
+	var REPEAT = Domt.ns.repeat, BIND = Domt.ns.bind;
 	if (node.tagName == "SCRIPT" && node.type == "text/template") {
-		this.container = container = node;
+		this.head = node;
 		var orig = node[Domt.ns.holder];
 		if (orig) {
 			this.repeat = orig.repeat;
 			this.template = orig.template;
-			this.invert = orig.invert;
 			this.bind = orig.bind;
+			this.tail = orig.tail;
+			this.id = orig.id;
 		} else {
 			this.reload();
 		}
 		node.removeAttribute(REPEAT);
 	} else if (node.hasAttribute(REPEAT)) {
+		this.id = newId();
 		this.template = node;
-		this.container = container = document.createElement("script");
-		container.type = "text/template";
+		this.head = document.createElement("script");
+		this.head.setAttribute('tail', this.id);
+		this.head.type = "text/template";
 		this.repeat = node.getAttribute(REPEAT) || "";
-		this.invert = node.hasAttribute(REPEAT + '-invert');
-		if (this.invert) container.setAttribute(REPEAT + '-invert', "");
 		if (node.hasAttribute(BIND)) {
 			this.bind = node.getAttribute(BIND);
 			node.removeAttribute(BIND);
 		}
 		node.removeAttribute(REPEAT);
-		node.removeAttribute(REPEAT + '-invert');
-		node.parentNode.insertBefore(container, node);
-		container.text = node.outerHTML;
+		node.parentNode.insertBefore(this.head, node);
+		this.head.text = node.outerHTML;
+		this.tail = document.createElement("script");
+		this.tail.id = this.id;
+		node.parentNode.insertBefore(this.tail, node);
 		node.parentNode.removeChild(node);
-		var begin = document.createElement("script");
-		begin.setAttribute(Domt.ns.repeat + "-tail", "");
-		begin.setAttribute("type", "text/template");
-		if (this.invert) {
-			if (container.nextSibling) container.parentNode.insertBefore(begin, container.nextSibling);
-			else container.parentNode.appendChild(begin);
-		} else {
-			container.parentNode.insertBefore(begin, container);
-		}
 	} else {
 		if (node.hasAttribute(BIND)) {
 			this.bind = node.getAttribute(BIND);
 			node.removeAttribute(BIND);
 		}
-		this.container = container = node;
+		this.head = node;
 	}
-	container[Domt.ns.holder] = this;
+	this.head[Domt.ns.holder] = this;
 	return this;
 };
 Holder.prototype.close = function() {
-	var node = this.container;
+	var node = this.head;
 	if (this.repeat !== undefined) {
 		node.setAttribute(Domt.ns.repeat, this.repeat);
 	}
@@ -129,15 +144,15 @@ Holder.prototype.close = function() {
 	}
 };
 Holder.prototype.reload = function() {
-	var container = this.container;
+	var head = this.head;
+	this.tail = document.getElementById(head.getAttribute('tail'));
 	var REPEAT = Domt.ns.repeat;
-	this.repeat = container.getAttribute(REPEAT) || this.repeat || "";
-	this.invert = container.hasAttribute(REPEAT + '-invert') || this.invert;
-	this.bind = container.getAttribute(Domt.ns.bind) || this.bind || undefined;
+	this.repeat = head.getAttribute(REPEAT) || this.repeat || "";
+	this.bind = head.getAttribute(Domt.ns.bind) || this.bind || undefined;
 	var doc = document.implementation && document.implementation.createHTMLDocument ?
 		document.implementation.createHTMLDocument() : document;
 	var div = doc.createElement('div');
-	var html = container.text.replace(/^\s+|\s+$/g, '');
+	var html = head.text.replace(/^\s+|\s+$/g, '');
 	var tagName = match(/<(\w+)[\s>]/i, html);
 	if (tagName) {
 		tagName = tagName.toLowerCase();
@@ -202,50 +217,45 @@ Domt.prototype.merge = function(obj, opts) {
 	var nodes = opts.node ? [opts.node] : this.nodes;
 	var that = this;
 	iterate(nodes, function(num, node) {
-		var bound, repeated, holder, container, path, len, parentNode;
+		var bound, repeated, h, head, path, len, parentNode;
 		var parent = node;
 		var REPEAT = Domt.ns.repeat;
 		var BIND = Domt.ns.bind;
 		var holders = [];
 		do {
-			holder = Holder(node);
-			holders.push(holder);
-			container = holder.container;
-			parentNode = container.parentNode;
-			bound = holder.bind ? find(obj, holder.bind, undefined, that.filters, node).val : obj;
-			if (holder.repeat !== undefined) {
+			h = Holder(node);
+			holders.push(h);
+			parentNode = h.head.parentNode;
+			bound = h.bind ? find(obj, h.bind, undefined, that.filters, node).val : obj;
+			if (h.repeat !== undefined) {
 				if (opts.empty) {
-					if (holder.invert) {
-						while ((curNode = container.nextSibling) && !curNode.hasAttribute(REPEAT + '-tail')) {
-							parentNode.removeChild(curNode);
-						}
-					} else {
-						while ((curNode = container.previousSibling) && !curNode.hasAttribute(REPEAT + '-tail')) {
-							parentNode.removeChild(curNode);
-						}
+					while ((curNode = h.head.nextSibling) && curNode.id != h.tail.id) {
+						parentNode.removeChild(curNode);
 					}
 					// restore holder.template modified by current.value === undefined (see after)
-					holder.reload();
+					h.reload();
 				}
-				var accessor = holder.repeat.split('|');
+				var accessor = h.repeat.split('|');
 				repeated = find(bound, accessor);
 				if (repeated.val === undefined) {
 					// merge inside template (that won't be selected because it's now out of the DOM)
-					that.merge(bound, {node: holder.template});
+					that.merge(bound, {node: h.template});
 				} else {
 					iterate(repeated.val, function(key, val) {
-						var clone = holder.template.cloneNode(true);
+						var clone = h.template.cloneNode(true);
 						// overwrite obj
 						bound[repeated.name] = val;
 						that.replace(bound, clone, key);
-						var sibling = holder.invert ? container.nextSibling : container;
 						for (var i=1; i < accessor.length; i++) {
 							var bfilter = that.filters[accessor[i]];
 							if (!bfilter) continue;
-							var maybe = bfilter.call(that.filters, val, clone, sibling);
+							var maybe = bfilter.call(that.filters, val, clone, h.head, h.tail);
 							if (maybe && maybe.nodeType) clone = maybe;
 						}
-						if (clone.parentNode == null) parentNode.insertBefore(clone, sibling);
+						if (clone.parentNode == null) {
+							if (h.head.parentNode != h.tail.parentNode) throw new Error("Head and tail split");
+							parentNode.insertBefore(clone, h.tail);
+						}
 					});
 					// restore obj
 					bound[repeated.name] = repeated.val;

@@ -87,7 +87,7 @@
 	<a id="expected-replace-escape" bind-href="http://localhost/?name=[name|esc]" href="http://localhost/?name=Barns%20%26%20Smiths">Test replace</a>
 
 	<div id="empty"><div repeat><p bind-text>[some][.to.something]</p></div></div>
-	<div id="expected-empty"><script repeat-tail="" type="text/template"></script><script type="text/template" repeat=""><div><p bind-text="">[some][.to.something]</p></div></script></div>
+	<div id="expected-empty"><script tail="domtX" type="text/template" repeat=""><div><p bind-text="">[some][.to.something]</p></div></script><script id="domtX"></script></div>
 
 	<div id="siblings"><p bind-text>[text] shouldn't be <b>test</b></p></div>
 	<div id="expected-siblings"><p bind-text="[text] shouldn't be &lt;b&gt;test&lt;/b&gt;">&lt;b&gt;test&lt;/b&gt; shouldn't be <b>test</b></p></div>
@@ -99,7 +99,7 @@
 	<div id="expected-filter-null" bind-hidden="text|hide">hide me</div>
 
 	<div id="filter-repeat-null"><p repeat="items" bind-hidden="items|hide" bind-text>[items.text]</p></div>
-	<div id="expected-filter-repeat-null"><script repeat-tail="" type="text/template"></script><p>is visible</p><p hidden="hidden">is hidden</p><script type="text/template" repeat="items"><p bind-hidden="items|hide" bind-text="">[items.text]</p></script></div>
+	<div id="expected-filter-repeat-null"><script tail="domtX" type="text/template" repeat="items"><p bind-hidden="items|hide" bind-text="">[items.text]</p></script><p>is visible</p><p hidden="hidden">is hidden</p><script id="domtX"></script></div>
 
 	<p id="replace-escape-br" bind-html="data|text|br"></p>
 	<p id="expected-replace-escape-br" bind-html="data|text|br">&lt;b&gt;no html&lt;/b&gt;<br>and a newline</p>
@@ -111,7 +111,7 @@
 		<li repeat="data" bind-text="data|filter"></li>
 	</ul>
 	<ul id="expected-repeated-accessor">
-		<script repeat-tail="" type="text/template"></script><li>one</li><li>two</li><script type="text/template" repeat="data"><li bind-text="data|filter"></li></script>
+		<script tail="domtX" type="text/template" repeat="data"><li bind-text="data|filter"></li></script><li>one</li><li>two</li><script id="domtX"></script>
 	</ul>
 
 </body>
