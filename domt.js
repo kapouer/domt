@@ -170,7 +170,7 @@ Holder.prototype.reload = function() {
 function iterate(obj, fun) {
 	if (obj == null) return 0;
 	var i, len;
-	if (Object.prototype.toString.call(obj) === '[object Array]') {
+	if (obj.jquery || Object.prototype.toString.call(obj) === '[object Array]') {
 		len = obj.length;
 		for (i=0; i < len; i++) fun(i, obj[i]);
 	} else if (obj.length !== undefined && typeof obj.item == "function") {
