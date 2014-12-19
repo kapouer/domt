@@ -9,3 +9,9 @@
 Somewhat breaking compatibility after having fixed a long-standing bug:
 - repeated accessor was being merged (and its filters called)
 
+2.0.0
+=====
+
+Breaks block filters arguments, breaks serialized HTML, drop support for
+repeat-invert attribute (replaced by block filter).
+
