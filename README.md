@@ -46,12 +46,12 @@ We get:
 ```html
 <div id="test" class="list" bind-class="class">
   <ul>
-    <script repeat-tail="true" type="text/template"></script>
-    <li class="blue">the sea</li>
-    <li>the void</li>
-    <script type="text/template" repeat="items">
+    <script tail="domt1" type="text/template" repeat="items">
       <li class="red" bind-class="items.color" bind-text="items.text">first item</li>
     </script>
+    <li class="blue">the sea</li>
+    <li>the void</li>
+    <script id="domt1"></script>
   </ul>
 </div>
 ```
@@ -152,11 +152,11 @@ non-repeated nodes keep their bind-* attributes.
 Expressions are written as "[path.to.val|optional_filter]" and are
 replaced by their accessed value in the target.
 
-A node is repeated in natural order. To invert that order, just add an
-empty "repeat-invert" attribute like this:
+A node is repeated in natural order. To invert that order, just add a block
+filter like 'invert'. A custom block filter can sort items in any desired order.
 ```html
 <ul>
-  <li repeat="items" repeat-invert bind-text="items.text">first item</li>
+  <li repeat="items|invert" bind-text="items.text">first item</li>
 </ul>
 ```
 
@@ -257,11 +257,11 @@ before it is actually inserted in the DOM, and the current sibling before which
 the node was going to be inserted.
 
 ```js
-Domt.filters.myBlockFilter = function(row, node, sibling) {
+Domt.filters.myBlockFilter = function(row, node, head, tail) {
   if (row.selected) node.selected = true;
   // node can be inserted manually, sibling holds the node before which it would
   // be inserted by default
-  sibling.parentNode.insertBefore(node, sibling); // default insert
+  tail.parentNode.insertBefore(node, tail); // default insert
   var oldnode = document.getElementById(row.nodeid);
   oldnode.parentNode.replaceChild(node, oldnode);
 };
