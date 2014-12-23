@@ -15,3 +15,7 @@ Somewhat breaking compatibility after having fixed a long-standing bug:
 Breaks block filters arguments, breaks serialized HTML, drop support for
 repeat-invert attribute (replaced by block filter).
 
+2.1.0
+=====
+
+Expose Domt.each(arrayLike, function(item, index) {})

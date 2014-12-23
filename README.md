@@ -284,3 +284,11 @@ table data with arbitrary columns.
 There's an example of this in
 test/repeat.html#should repeat within repeat
 
+
+Utilities
+---------
+
+* Domt.each(obj, iter);  
+  obj can be an array, an object, a NodeList, a jQuery object  
+  iter is a function with signature (item, index) called on each element of obj.
+
