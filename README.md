@@ -203,9 +203,16 @@ or
 var inst = Domt(parent);
 inst.filters.myFilter = function(str) {...};
 ```
+or even
+```js
+var inst = Domt(parent);
+inst.merge(data, {
+  myBlockFilter: function(item, key, context) {...}
+});
+```
 
-In a filter function, `this` refers to `instance.filters` so it is easy
-to call other filters.
+In a filter function, the first argument is always the data being merged,
+the last argument an object giving some access to current context, see below.
 
 
 Data getters
@@ -218,13 +225,21 @@ As mentioned above, merging a function will call it with parameters
 Value Filters
 -------------
 
-Filters are called before merging the value in the target.
-A filter is a simple function returning a string.
+Value filters are called before merging the value in the target.
+A value filter is a simple function returning a string.
+
 ```js
-Domt.filters.myfilter = function(val, node) {
+Domt.filters.myfilter = function(val, context) {
   return "my" + val;
 };
 ```
+
+Where context contains {
+  node: the node where the value is being merged,
+  path: the current path accessing the scope,
+  scope: the object being accessed by path,
+  filters: the available filters
+}
 
 In the above example, data|myfilter always return something defined,
 meaning the merge will happen even if val === undefined.
@@ -257,23 +272,43 @@ be declared on the repeated accessor
 </ul>
 ```
 
-A block filter receives the currently iterated data, the *merged* node
-before it is actually inserted in the DOM, and the current sibling before which
-the node was going to be inserted.
+Block filters are called after the current data has been merged into the
+cloned node and before the cloned node is inserted into the list.
 
 ```js
-Domt.filters.myBlockFilter = function(row, node, head, tail) {
+Domt.filters.myBlockFilter = function(row, key, context) {
   if (row.selected) node.selected = true;
   // node can be inserted manually, sibling holds the node before which it would
   // be inserted by default
-  tail.parentNode.insertBefore(node, tail); // default insert
-  var oldnode = document.getElementById(row.nodeid);
-  oldnode.parentNode.replaceChild(node, oldnode);
+  context.tail.parentNode.insertBefore(context.node, context.tail); // default insert
+  // can be replaced by
+  if (row.invalid) {
+    // prevent context.node from being inserted into the list
+    return false;
+  } else {
+    var oldnode = document.getElementById(row.nodeid);
+    oldnode.parentNode.replaceChild(context.node, oldnode);
+   }
 };
 ```
 
-A block filter can also return a node that is going to replace the currently
-merged node, or return false to prevent further processing of the cloned node.
+Where context contains {
+  node: the node where the value is being merged,
+  path: the current path accessing the scope,
+  scope: the object being accessed by path,
+  filters: the available filters,
+  head: the script node bounding the start of the list,
+  tail: the script node bounding the end of the list
+}
+
+A block filter can control how context.node is going to be inserted:
+- by returning a new node, it replaces context.node
+- by returning false, it prevents context.node from being inserted
+- by inserting context.node itself somewhere else
+
+Some filters are already available:
+
+* invert: insert nodes in reverse order
 
 
 Tables

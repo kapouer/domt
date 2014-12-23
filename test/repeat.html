@@ -153,10 +153,11 @@
 			window.assert.equal(changeIdNum(nodes[1].outerHTML, "X"), expectedHTML);
 		});
 		it("should repeat and call the block filter", function() {
-			Domt('#repeat-blockfilter', {myBlockFilter: function(item, node, sibling) {
+			Domt('#repeat-blockfilter', {myBlockFilter: function(item, key, info) {
+				assert.equal(info.scope[info.path][key], item);
 				if (item.not) return false;
 				var newnode = document.createElement('p');
-				newnode.innerHTML = node.innerHTML;
+				newnode.innerHTML = info.node.innerHTML;
 				return newnode;
 			}}).merge({data: [
 				{ content: "one" },

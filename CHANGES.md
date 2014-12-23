@@ -19,3 +19,13 @@ repeat-invert attribute (replaced by block filter).
 =====
 
 Expose Domt.each(arrayLike, function(item, index) {})
+
+3.0.0
+=====
+
+Signatures of filters have changed.
+Value filters are function(val, info)
+Block filters are function(val, key, info)
+
+info contains node, scope, path, filters (and for block filters head, tail).
+

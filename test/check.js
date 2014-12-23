@@ -10,6 +10,12 @@ if (!window.describe) {
 	};
 }
 
+if (!window.assert) window.assert = {equal: function(actual, expected) {
+	if (actual != expected) {
+		throw new Error("Actual\n" + actual + "\n\nExpected\n" + expected);
+	}
+}};
+
 Domt.prototype.check = function(expectedId) {
 	var actual = this.nodes;
 	if (actual.length != 1) {
@@ -37,17 +43,7 @@ Domt.prototype.check = function(expectedId) {
 
 	actual = changeIdNum(actual, "X");
 
-	if (window.assert) {
-		try {
-			window.assert.equal(actual, expected);
-		} catch (e) {
-			console.info("actual", id, actual);
-			console.info("expected", expectedId, expected);
-			throw e;
-		}
-	}	else if (actual != expected) {
-		throw new Error("Actual\n" + actual + "\n\nExpected\n" + expected);
-	}
+	window.assert.equal(actual, expected);
 }
 
 window.changeIdNum = function(htmlStr, id) {

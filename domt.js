@@ -14,13 +14,17 @@ Domt.ns = {
 };
 
 function Filters(obj) {
-	for (var name in obj) {
-		if (typeof obj[name] == "function") this[name] = obj[name];
-	}
+	addToFilters(this, obj);
 }
 
 Domt.filters = Filters.prototype;
 
+function addToFilters(filters, obj) {
+	for (var name in obj) {
+		if (typeof obj[name] == "function") filters[name] = obj[name];
+	}
+	return filters;
+}
 
 // Value Filters
 Filters.prototype.upper = function(val) {
@@ -60,8 +64,8 @@ Filters.prototype[''] = function(val) {
 };
 
 // Block Filters
-Filters.prototype.invert = function(row, node, head, tail) {
-	head.parentNode.insertBefore(node, head.nextSibling);
+Filters.prototype.invert = function(row, key, info) {
+	info.head.parentNode.insertBefore(info.node, info.head.nextSibling);
 };
 
 
@@ -216,6 +220,7 @@ Domt.prototype.empty = function() {
 
 Domt.prototype.merge = function(obj, opts) {
 	opts = opts || {};
+	var filters = addToFilters(this.filters, opts);
 	var nodes = opts.node ? [opts.node] : this.nodes;
 	var that = this;
 	each(nodes, function(node, num) {
@@ -228,7 +233,7 @@ Domt.prototype.merge = function(obj, opts) {
 			h = Holder(node);
 			holders.push(h);
 			parentNode = h.head.parentNode;
-			bound = h.bind ? find(obj, h.bind, undefined, that.filters, node).val : obj;
+			bound = h.bind ? find(obj, h.bind, undefined, filters, node).val : obj;
 			if (h.repeat !== undefined) {
 				if (opts.empty) {
 					while ((curNode = h.head.nextSibling) && curNode.id != h.tail.id) {
@@ -248,20 +253,27 @@ Domt.prototype.merge = function(obj, opts) {
 						// overwrite obj
 						bound[repeated.name] = val;
 						that.replace(bound, clone, key);
+						bound[repeated.name] = repeated.val;
+						var insertNode = true;
 						for (var i=1; i < accessor.length; i++) {
-							var bfilter = that.filters[accessor[i]];
+							var bfilter = filters[accessor[i]];
 							if (!bfilter) continue;
-							var maybe = bfilter.call(that.filters, val, clone, h.head, h.tail);
+							var maybe = bfilter(val, key, {
+								filters: filters,
+								node: clone,
+								scope:bound,
+								path: accessor[0],
+								head: h.head,
+								tail: h.tail
+							});
 							if (maybe && maybe.nodeType) clone = maybe;
-							else if (maybe === false) clone = null;
+							else if (maybe === false) insertNode = false;
 						}
-						if (clone && clone.parentNode == null) {
+						if (insertNode && clone.parentNode == null) {
 							if (h.head.parentNode != h.tail.parentNode) throw new Error("Head and tail split");
 							parentNode.insertBefore(clone, h.tail);
 						}
 					});
-					// restore obj
-					bound[repeated.name] = repeated.val;
 				}
 			} else {
 				that.replace(bound, node);
@@ -360,7 +372,7 @@ function find(scope, accessor, key, filters, node) {
 	}
 	if (filters) for (var i=1; i < accessor.length; i++) {
 		filter = filters[accessor[i]];
-		if (filter) val = filter.call(filters, val, node);
+		if (filter) val = filter(val, {node: node, filters: filters, scope:scope, path:path});
 	}
 	if (last == null) last = "";
 	return {name: last, val: val};

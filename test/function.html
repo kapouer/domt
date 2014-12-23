@@ -8,14 +8,15 @@
   <script>
 	describe("functions", function suite() {
 		it("should call filter when merging data", function() {
-			Domt.filters.price = function(val) {
-				return val + ",00 €";
-			}
 			Domt('#filter').merge({
 				path: {
 					to: {
 						value: 15
 					}
+				}
+			}, {
+				price: function(val) {
+					return val + ",00 €";
 				}
 			}).check();
 		});
@@ -55,10 +56,10 @@
 				}
 			}).check();
 		});
-		it("should call filter with current node as second argument", function() {
+		it("should call filter with info containing info.node as second argument", function() {
 			Domt('#filternode', {
-				newFilter: function(val, node) {
-					node.className = "meme";
+				newFilter: function(val, info) {
+					info.node.className = "meme";
 					return val + ' sure';
 				}
 			}).merge({

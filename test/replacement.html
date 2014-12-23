@@ -30,7 +30,7 @@
 		});
 		it("should use instance filter", function() {
 			Domt('#instance-filter', {
-				myFilter: function(str) { return '<b>'+this.text(str)+'</b>'; }
+				myFilter: function(str, info) { return '<b>'+info.filters.text(str)+'</b>'; }
 			}).merge({text:"escaped <br>"}).check();
 		});
 		it("should remove attribute when filter return null", function() {
