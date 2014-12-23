@@ -167,26 +167,28 @@ Holder.prototype.reload = function() {
 	if (!this.template) throw DomtError("problem parsing template\n" + html);
 };
 
-function iterate(obj, fun) {
+function each(obj, fun) {
 	if (obj == null) return 0;
 	var i, len;
 	if (obj.jquery || Object.prototype.toString.call(obj) === '[object Array]') {
 		len = obj.length;
-		for (i=0; i < len; i++) fun(i, obj[i]);
+		for (i=0; i < len; i++) fun(obj[i], i);
 	} else if (obj.length !== undefined && typeof obj.item == "function") {
 		len = obj.length;
-		for (i=0; i < len; i++) fun(i, obj.item(i));
+		for (i=0; i < len; i++) fun(obj.item(i), i);
 	} else if (obj instanceof Object) {
 		var keys = Object.keys(obj);
 		len = keys.length;
 		var key;
 		for (i=0; i < len; i++) {
 			key = keys[i];
-			fun(key, obj[key]);
+			fun(obj[key], key);
 		}
 	}
 	return len;
 }
+
+Domt.each = each;
 
 function Domt(nodes, options) {
 	if (!(this instanceof Domt)) return new Domt(nodes, options);
@@ -216,7 +218,7 @@ Domt.prototype.merge = function(obj, opts) {
 	opts = opts || {};
 	var nodes = opts.node ? [opts.node] : this.nodes;
 	var that = this;
-	iterate(nodes, function(num, node) {
+	each(nodes, function(node, num) {
 		var bound, repeated, h, head, path, len, parentNode;
 		var parent = node;
 		var REPEAT = Domt.ns.repeat;
@@ -241,7 +243,7 @@ Domt.prototype.merge = function(obj, opts) {
 					// merge inside template (that won't be selected because it's now out of the DOM)
 					that.merge(bound, {node: h.template});
 				} else {
-					iterate(repeated.val, function(key, val) {
+					each(repeated.val, function(val, key) {
 						var clone = h.template.cloneNode(true);
 						// overwrite obj
 						bound[repeated.name] = val;
@@ -281,7 +283,7 @@ Domt.prototype.replace = function(obj, node, key) {
 	var filters = this.filters;
 	var willRepeat = {};
 	do {
-		iterate(Array.prototype.slice.call(node.attributes, 0), function(index, att) { // iterates over a copy
+		each(Array.prototype.slice.call(node.attributes, 0), function(att, index) { // iterates over a copy
 			if (att.name == "repeat" && att.value) {
 				willRepeat[att.value.split('|').shift()] = true;
 				return;
