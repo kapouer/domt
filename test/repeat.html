@@ -155,6 +155,7 @@
 		it("should repeat and call the block filter", function() {
 			Domt('#repeat-blockfilter', {myBlockFilter: function(item, key, info) {
 				assert.equal(info.scope[info.path][key], item);
+				assert.equal(info.scope.meta.some, "info");
 				if (item.not) return false;
 				var newnode = document.createElement('p');
 				newnode.innerHTML = info.node.innerHTML;
@@ -163,7 +164,9 @@
 				{ content: "one" },
 				{ content: "two" },
 				{ content: "three", not: true }
-			]}).check();
+			], meta: {
+				some: "info"
+			}}).check();
 		});
 	});
   </script>
