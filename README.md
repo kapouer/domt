@@ -273,7 +273,7 @@ Domt.filters.myBlockFilter = function(row, node, head, tail) {
 ```
 
 A block filter can also return a node that is going to replace the currently
-merged node.
+merged node, or return false to prevent further processing of the cloned node.
 
 
 Tables
