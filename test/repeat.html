@@ -154,12 +154,14 @@
 		});
 		it("should repeat and call the block filter", function() {
 			Domt('#repeat-blockfilter', {myBlockFilter: function(item, node, sibling) {
+				if (item.not) return false;
 				var newnode = document.createElement('p');
 				newnode.innerHTML = node.innerHTML;
 				return newnode;
 			}}).merge({data: [
 				{ content: "one" },
-				{ content: "two" }
+				{ content: "two" },
+				{ content: "three", not: true }
 			]}).check();
 		});
 	});
