@@ -303,7 +303,8 @@ Where context contains {
 
 A block filter can control how context.node is going to be inserted:
 - by returning a new node, it replaces context.node
-- by returning false, it prevents context.node from being inserted
+- by returning false, it prevents context.node from being inserted  
+  and it stops further block filters from being called
 - by inserting context.node itself somewhere else
 
 Some filters are already available:

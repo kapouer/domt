@@ -267,7 +267,10 @@ Domt.prototype.merge = function(obj, opts) {
 								tail: h.tail
 							});
 							if (maybe && maybe.nodeType) clone = maybe;
-							else if (maybe === false) insertNode = false;
+							else if (maybe === false) {
+								insertNode = false;
+								break;
+							}
 						}
 						if (insertNode && clone.parentNode == null) {
 							if (h.head.parentNode != h.tail.parentNode) throw new Error("Head and tail split");

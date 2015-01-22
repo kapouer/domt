@@ -29,3 +29,8 @@ Block filters are function(val, key, info)
 
 info contains node, scope, path, filters (and for block filters head, tail).
 
+3.1.0
+=====
+
+If a block filter returns false, it stops further block filters from being called.
+(and it still prevents default insertion).
