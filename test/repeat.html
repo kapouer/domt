@@ -168,6 +168,26 @@
 				some: "info"
 			}}).check();
 		});
+		it("should repeat and call the block filter and prevent second filter to be called", function() {
+			var secondCalled = 0;
+			Domt('#repeat-blockfilterstop', {myBlockFilter: function(item, key, info) {
+				assert.equal(info.scope[info.path][key], item);
+				assert.equal(info.scope.meta.some, "info");
+				if (item.not) return false;
+				var newnode = document.createElement('p');
+				newnode.innerHTML = info.node.innerHTML;
+				return newnode;
+			}, mySecondBlockFilter: function(item, key, info) {
+				secondCalled++;
+			}}).merge({data: [
+				{ content: "one" },
+				{ content: "two" },
+				{ content: "three", not: true }
+			], meta: {
+				some: "info"
+			}}).check();
+			assert.equal(secondCalled, 2);
+		});
 	});
   </script>
 	<title>Domt test suite</title>
@@ -305,6 +325,13 @@
 	</ul>
 	<ul id="expected-repeat-blockfilter">
 		<script tail="domtX" type="text/template" repeat="data|myBlockFilter"><li bind-text="">[data.content]</li></script><p>one</p><p>two</p><script id="domtX"></script>
+	</ul>
+
+	<ul id="repeat-blockfilterstop">
+		<li repeat="data|myBlockFilter|mySecondBlockFilter" bind-text>[data.content]</li>
+	</ul>
+	<ul id="expected-repeat-blockfilterstop">
+		<script tail="domtX" type="text/template" repeat="data|myBlockFilter|mySecondBlockFilter"><li bind-text="">[data.content]</li></script><p>one</p><p>two</p><script id="domtX"></script>
 	</ul>
 
 </body>
