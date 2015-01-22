@@ -189,6 +189,12 @@
 			assert.equal(secondCalled, 2);
 		});
 	});
+	it("should repeat node and process 'in-place' attributes", function() {
+		Domt('#repeat-replace-inplace').merge({data: [
+			{ content: "one", className: 'classOne' },
+			{ content: "two", className: 'classTwo' }
+		]}).check();
+	});
   </script>
 	<title>Domt test suite</title>
 </head>
@@ -332,6 +338,13 @@
 	</ul>
 	<ul id="expected-repeat-blockfilterstop">
 		<script tail="domtX" type="text/template" repeat="data|myBlockFilter|mySecondBlockFilter"><li bind-text="">[data.content]</li></script><p>one</p><p>two</p><script id="domtX"></script>
+	</ul>
+
+	<ul id="repeat-replace-inplace">
+		<li repeat="data" class="bop [data.className]" bind-text="data.content"></li>
+	</ul>
+	<ul id="expected-repeat-replace-inplace">
+		<script tail="domtX" type="text/template" repeat="data"><li class="bop [data.className]" bind-text="data.content"></li></script><li class="bop classOne">one</li><li class="bop classTwo">two</li><script id="domtX"></script>
 	</ul>
 
 </body>
