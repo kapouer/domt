@@ -305,14 +305,10 @@ Domt.prototype.replace = function(obj, node, key) {
 				return;
 			}
 			var name = match(reBind, att.name);
-			if (!name) return;
-			if (key != null) {
-				node.removeAttribute(att.name);
-			}
 			if (name == "text" || name == "html") {
 				val = node.innerHTML;
 			}	else {
-				val = node.getAttribute(name);
+				val = att.value;
 			}
 			var replacements = 0, initial = val;
 			if (att.value) initial = att.value;
@@ -327,6 +323,14 @@ Domt.prototype.replace = function(obj, node, key) {
 				else if (name == "text") return escapeText(repl);
 				else return repl;
 			});
+			if (key != null && name) {
+				node.removeAttribute(att.name);
+			} else if (replacements) {
+				if (!name) {
+					name = att.name;
+					if (key == null) node.setAttribute(Domt.ns.bind + '-' + name, initial);
+				}
+			}
 			if (replacements) {
 				if (!att.value) att.value = initial;
 			} else {
@@ -335,7 +339,7 @@ Domt.prototype.replace = function(obj, node, key) {
 				val = find(obj, accessor, key, filters, node).val;
 				if (name == "text" && val != null && typeof val != "object") val = escapeText(val);
 			}
-			replace(node, name, val);
+			if (name) replace(node, name, val);
 		});
 	} while (i < len && (node = descendants.item(i++)));
 };
