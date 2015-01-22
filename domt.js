@@ -300,7 +300,7 @@ Domt.prototype.replace = function(obj, node, key) {
 	var willRepeat = {};
 	do {
 		each(Array.prototype.slice.call(node.attributes, 0), function(att, index) { // iterates over a copy
-			if (att.name == "repeat" && att.value) {
+			if (att.name == Domt.ns.repeat && att.value) {
 				willRepeat[att.value.split('|').shift()] = true;
 				return;
 			}
