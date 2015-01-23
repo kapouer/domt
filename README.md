@@ -244,6 +244,9 @@ Where context contains {
 In the above example, data|myfilter always return something defined,
 meaning the merge will happen even if val === undefined.
 
+Value filters are not called if the first key in the accessor matches undefined
+data. Any other case (> first key, null or empty data) will call the filter.
+
 Some filters are already availables:
 
 * upper, lower: change string case

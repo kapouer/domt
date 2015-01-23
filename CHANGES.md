@@ -34,3 +34,15 @@ info contains node, scope, path, filters (and for block filters head, tail).
 
 If a block filter returns false, it stops further block filters from being called.
 (and it still prevents default insertion).
+
+3.2.0
+=====
+
+All attributes are processed, those having [accessor|filter] pattern in their
+value are promoted to bind-* attributes.
+
+3.3.0
+=====
+
+Value filters applying to first-level undefined data are not called.
+
