@@ -46,6 +46,19 @@
 				{show: false, text:"is hidden"}
 			]}).check();
 		});
+		it("should not call filter when first accessor key is undefined", function() {
+			var called = false;
+			var notcalled = false;
+			Domt('#filter-notcalled', {
+				notcalled: function(str) { notcalled = true; },
+				called: function(str) { called = true; }
+			}).merge({
+				obj: null,
+				undef: undefined
+			}).check();
+			assert.equal(notcalled, false);
+			assert.equal(called, true);
+		});
 		it("should escape value as text and replace newlines by br", function() {
 			Domt('#replace-escape-br').merge({
 				data: '<b>no html</b>\nand a newline'
@@ -97,6 +110,9 @@
 
 	<div id="filter-null" bind-hidden="text|hide">hide me</div>
 	<div id="expected-filter-null" bind-hidden="text|hide">hide me</div>
+
+	<div id="filter-notcalled" bind-hidden="obj.text.try|called" class="[undef.style|notcalled]">hide me</div>
+	<div id="expected-filter-notcalled" bind-hidden="obj.text.try|called" class="[undef.style|notcalled]">hide me</div>
 
 	<div id="filter-repeat-null"><p repeat="items" bind-hidden="items|hide" bind-text>[items.text]</p></div>
 	<div id="expected-filter-repeat-null"><script tail="domtX" type="text/template" repeat="items"><p bind-hidden="items|hide" bind-text="">[items.text]</p></script><p>is visible</p><p hidden="hidden">is hidden</p><script id="domtX"></script></div>
