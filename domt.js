@@ -362,6 +362,7 @@ function find(scope, accessor, key, filters, node) {
 	}
 	path = path ? path.split('.') : [];
 	if (typeof val == "function") val = val(scope, path);
+	var first = true;
 	while ((name = path.shift()) !== undefined) {
 		scope = val;
 		if (key !== undefined && path.length == 0) {
@@ -374,6 +375,10 @@ function find(scope, accessor, key, filters, node) {
 		}
 		if (!scope || name == "" && !(typeof scope == "object")) break;
 		val = scope[name];
+		if (first) {
+			first = false;
+			if (val === undefined) return {val: val};
+		}
 		if (typeof val == "function") val = val(scope, path);
 		last = name;
 	}
