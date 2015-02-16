@@ -1,9 +1,13 @@
-(function() {
+(function domtModule() {
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
 	module.exports = Domt;
 } else {
 	window.Domt = Domt;
 }
+
+Domt.toString = function() {
+	return '(' + domtModule.toString() + ')()';
+};
 
 Domt.ns = {
 	id: 'domt',
@@ -69,9 +73,12 @@ Filters.prototype.invert = function(row, key, info) {
 };
 
 
-var escaper = document.createElement('p');
-escaper.appendChild(document.createTextNode(""));
+var escaper;
 function escapeText(str) {
+	if (!escaper) {
+		escaper = document.createElement('p');
+		escaper.appendChild(document.createTextNode(""));
+	}
 	escaper.firstChild.nodeValue = str;
 	return escaper.innerHTML;
 }
