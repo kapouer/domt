@@ -330,32 +330,36 @@ Domt.prototype.replace = function(obj, node, key) {
 				else if (name == "text") return escapeText(repl);
 				else return repl;
 			});
-			if (key != null && name) {
-				node.removeAttribute(att.name);
-			} else if (replacements) {
-				if (!name) {
-					name = att.name;
-					if (key == null) node.setAttribute(Domt.ns.bind + '-' + name, initial);
-				}
-			}
 			if (replacements) {
 				if (!att.value) att.value = initial;
+				if (!name) {
+					name = att.name;
+					if (key == null) {
+						node.setAttribute(Domt.ns.bind + '-' + name, initial);
+					}
+				}
 			} else {
 				var accessor = (att.value || "").split('|');
 				if (willRepeat[accessor[0]]) return;
 				val = find(obj, accessor, key, filters, node).val;
 				if (name == "text" && val != null && typeof val != "object") val = escapeText(val);
 			}
-			if (name) replace(node, name, val);
+			if (name) {
+				if (replace(node, name, val)) replacements++;
+			}
+			if (replacements && key != null && name != att.name) {
+				node.removeAttribute(att.name);
+			}
 		});
 	} while (i < len && (node = descendants.item(i++)));
 };
 
 function replace(node, name, val) {
-	if (val === undefined || val !== null && typeof val == "object") return;
+	if (val === undefined || val !== null && typeof val == "object") return false;
 	if (name == "text" || name == "html") node.innerHTML = val;
 	else if (val !== null) node.setAttribute(name, val);
 	else node.removeAttribute(name);
+	return true;
 }
 
 function find(scope, accessor, key, filters, node) {
