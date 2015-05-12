@@ -10,7 +10,7 @@ if (!window.describe) {
 	};
 }
 
-if (!window.assert) window.assert = {equal: function(actual, expected) {
+window.assert = {equal: function(actual, expected) {
 	if (actual != expected) {
 		throw new Error("Actual\n" + actual + "\n\nExpected\n" + expected);
 	}
