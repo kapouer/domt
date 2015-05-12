@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <script src="../domt.js"></script>
+  <script src="check.js"></script>
+  <script>
+	describe("nested repeat", function suite() {
+		it("should repeat within repeat", function() {
+			var data = [
+				{ content: {
+					title: 'one',
+					list: [{sub: 'subone'}, {sub: 'subtwo'}]
+				} },
+				{ content: {
+					title: 'two',
+					list: [{sub: 'subthree'}, {sub: 'subfour'}, {sub: 'sfg'}]
+				} }
+			];
+			Domt('#repeat').merge({data: data}).merge({data: data}).check();
+		});
+	});
+	</script>
+	<title>Domt test suite</title>
+</head>
+<body>
+	<div id="repeat">
+		<div repeat="data">
+			<h4 bind-text>[data.content.title]</h4>
+			<ul>
+				<li bind-repeat="data.[data.#key].content.list"><span bind-text="list.sub">ta</span></li>
+			</ul>
+		</div>
+	</div>
+	<div id="expected-repeat">
+		<script tail="domtX" type="text/template" repeat="data"><div>
+			<h4 bind-text="">[data.content.title]</h4>
+			<ul>
+				<li bind-repeat="data.[data.#key].content.list"><span bind-text="list.sub">ta</span></li>
+			</ul>
+		</div></script><div>
+			<h4>one</h4>
+			<ul>
+				<script tail="domtX" type="text/template" repeat="data.0.content.list"><li><span bind-text="list.sub">ta</span></li></script><li><span>subone</span></li><li><span>subtwo</span></li><li><span>subone</span></li><li><span>subtwo</span></li><script id="domtX"></script>
+			</ul>
+		</div><div>
+			<h4>two</h4>
+			<ul>
+				<script tail="domtX" type="text/template" repeat="data.1.content.list"><li><span bind-text="list.sub">ta</span></li></script><li><span>subthree</span></li><li><span>subfour</span></li><li><span>sfg</span></li><li><span>subthree</span></li><li><span>subfour</span></li><li><span>sfg</span></li><script id="domtX"></script>
+			</ul>
+		</div><div>
+			<h4>one</h4>
+			<ul>
+				<script tail="domtX" type="text/template" repeat="data.0.content.list"><li><span bind-text="list.sub">ta</span></li></script><li><span>subone</span></li><li><span>subtwo</span></li><script id="domtX"></script>
+			</ul>
+		</div><div>
+			<h4>two</h4>
+			<ul>
+				<script tail="domtX" type="text/template" repeat="data.1.content.list"><li><span bind-text="list.sub">ta</span></li></script><li><span>subthree</span></li><li><span>subfour</span></li><li><span>sfg</span></li><script id="domtX"></script>
+			</ul>
+		</div><script id="domtX"></script>
+	</div>
+
+</body>
+</html>
+
