@@ -236,7 +236,8 @@ Domt.filters.myfilter = function(val, context) {
 
 Where context contains {
   node: the node where the value is being merged,
-  path: the current path accessing the scope,
+  path: array of path components,
+  index: current index in array of path,
   scope: the object being accessed by path,
   filters: the available filters
 }
@@ -297,7 +298,8 @@ Domt.filters.myBlockFilter = function(row, key, context) {
 
 Where context contains {
   node: the node where the value is being merged,
-  path: the current path accessing the scope,
+  path: array of path components,
+  index: current index in array of path,
   scope: the object being accessed by path,
   filters: the available filters,
   head: the script node bounding the start of the list,
