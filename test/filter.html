@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <script src="../domt.js"></script>
+  <script src="check.js"></script>
+  <script>
+	describe("filter", function suite() {
+		it("should receive path as an array in context", function() {
+			var data = [
+				{ content: {
+					title: 'one',
+					list: [{sub: 'subone'}, {sub: 'subtwo'}]
+				} },
+				{ content: {
+					title: 'two',
+					list: [{sub: 'subthree'}, {sub: 'subfour'}, {sub: 'sfg'}]
+				} }
+			];
+			Domt('#repeat').merge({data: data}, {
+				myfilter: function(val, context) {
+					window.assert.equal(JSON.stringify(context.path), '["data","content","title"]');
+					window.assert.equal(context.path[context.index], "title");
+				},
+				myfilter2: function(val, context) {
+					window.assert.equal(JSON.stringify(context.path), '["data","content","unknown"]');
+					window.assert.equal(context.path[context.index], "unknown");
+				},
+				myfilter3: function(val, context) {
+					window.assert.equal(JSON.stringify(context.path), '["data","content","unknown","toto"]');
+					window.assert.equal(context.path[context.index], "unknown");
+				}
+				});
+		});
+	});
+	</script>
+	<title>Domt test suite</title>
+</head>
+<body>
+	<div id="repeat">
+		<h4 bind-text>[data.content.title|myfilter]</h4>
+		<h4 bind-text>[data.content.unknown|myfilter2]</h4>
+		<h4 bind-text>[data.content.unknown.toto|myfilter3]</h4>
+	</div>
+
+</body>
+</html>
+
