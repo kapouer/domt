@@ -46,3 +46,11 @@ value are promoted to bind-* attributes.
 
 Value filters applying to first-level undefined data are not called.
 
+3.5.0
+=====
+
+Filters receive context.path as the array of accessors, and context.index as
+the current index in the array.
+This breaks software using context.path but it's unlikely it was ever useful as
+it was badly implemented and untested.
+
