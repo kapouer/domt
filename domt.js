@@ -374,9 +374,10 @@ function find(scope, accessor, key, filters, node) {
 	path = path ? path.split('.') : [];
 	if (typeof val == "function") val = val(scope, path);
 	var first = true;
-	while ((name = path.shift()) !== undefined) {
+	for (var index = 0; index < path.length; index++) {
+		name = path[index];
 		scope = val;
-		if (key !== undefined && path.length == 0) {
+		if (key !== undefined && path.length == index + 1) {
 			if (name == '#key') {
 				val = key;
 				break;
@@ -395,7 +396,7 @@ function find(scope, accessor, key, filters, node) {
 	}
 	if (filters) for (var i=1; i < accessor.length; i++) {
 		filter = filters[accessor[i]];
-		if (filter) val = filter(val, {node: node, filters: filters, scope:scope, path:path});
+		if (filter) val = filter(val, {node: node, filters: filters, scope:scope, index:index, path:path});
 	}
 	if (last == null) last = "";
 	return {name: last, val: val};
