@@ -363,7 +363,7 @@ function replace(node, name, val) {
 }
 
 function find(scope, accessor, key, filters, node) {
-	var name, last, val = scope, filter;
+	var name, last, val = scope, prev = scope, filter;
 	if (!accessor) accessor = [];
 	else if (typeof accessor == "string") accessor = accessor.split('|');
 	var path = accessor[0];
@@ -376,7 +376,7 @@ function find(scope, accessor, key, filters, node) {
 	var first = true;
 	for (var index = 0; index < path.length; index++) {
 		name = path[index];
-		scope = val;
+		prev = val;
 		if (key !== undefined && path.length == index + 1) {
 			if (name == '#key') {
 				val = key;
@@ -385,18 +385,18 @@ function find(scope, accessor, key, filters, node) {
 				break;
 			}
 		}
-		if (!scope || name == "" && !(typeof scope == "object")) break;
-		val = scope[name];
+		if (!prev || name == "" && !(typeof prev == "object")) break;
+		val = prev[name];
 		if (first) {
 			first = false;
 			if (val === undefined) return {val: val};
 		}
-		if (typeof val == "function") val = val(scope, path);
+		if (typeof val == "function") val = val(prev, path);
 		last = name;
 	}
 	if (filters) for (var i=1; i < accessor.length; i++) {
 		filter = filters[accessor[i]];
-		if (filter) val = filter(val, {node: node, filters: filters, scope:scope, index:index, path:path});
+		if (filter) val = filter(val, {node: node, filters: filters, scope:scope, index:index-1, path:path, name: last});
 	}
 	if (last == null) last = "";
 	return {name: last, val: val};
