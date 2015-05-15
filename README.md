@@ -238,7 +238,8 @@ Where context contains {
   node: the node where the value is being merged,
   path: array of path components,
   index: current index in array of path,
-  scope: the object being accessed by path,
+  name: the last name of the path before this filter was called,
+  scope: the root object being accessed by path,
   filters: the available filters
 }
 
@@ -300,7 +301,8 @@ Where context contains {
   node: the node where the value is being merged,
   path: array of path components,
   index: current index in array of path,
-  scope: the object being accessed by path,
+  name: the last name of the path before this filter was called,
+  scope: the root object being accessed by path,
   filters: the available filters,
   head: the script node bounding the start of the list,
   tail: the script node bounding the end of the list

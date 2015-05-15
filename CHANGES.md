@@ -54,3 +54,8 @@ the current index in the array.
 This breaks software using context.path but it's unlikely it was ever useful as
 it was badly implemented and untested.
 
+3.5.1
+=====
+
+Like 3.5.0, but properly tested and with the addition of context.name.
+
