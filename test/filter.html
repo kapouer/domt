@@ -6,8 +6,44 @@
   <script src="../domt.js"></script>
   <script src="check.js"></script>
   <script>
-	describe("filter", function suite() {
-		it("should receive path as an array in context", function() {
+	describe("filter context", function suite() {
+		it("should receive path as an array", function() {
+			var data = {
+				content: {title: 'test'}
+			};
+			Domt('#path').merge({data: data}, {pathFilter: function(val, context) {
+				window.assert.equal(JSON.stringify(context.path), '["data","content","title"]');
+			}});
+		});
+		it("should receive index of last defined accessed data from path", function() {
+			var data = {
+				content: {title: 'test'}
+			};
+			Domt('#index').merge({data: data}, {
+				pathDefined: function(val, context) {
+					window.assert.equal(context.index, 2);
+				},
+				pathUndefined: function(val, context) {
+					window.assert.equal(context.index, 2);
+					window.assert.equal(context.name, 'summer');
+				},
+				pathUndefinedTwice: function(val, context) {
+					window.assert.equal(context.index, 2);
+					window.assert.equal(context.name, 'summer');
+					window.assert.equal(context.path.pop(), 'spring');
+				}
+			});
+		});
+		it("should received bounded scope", function() {
+			var data = {
+				content: {title: 'test'}
+			};
+			Domt('#bindscope').merge({data: data}, {boundFilter: function(val, context) {
+				window.assert.equal(JSON.stringify(context.scope), JSON.stringify(data.content));
+			}});
+		});
+
+		it("should work sensibly with repeated block", function() {
 			var data = [
 				{ content: {
 					title: 'one',
@@ -21,27 +57,44 @@
 			Domt('#repeat').merge({data: data}, {
 				myfilter: function(val, context) {
 					window.assert.equal(JSON.stringify(context.path), '["data","content","title"]');
-					window.assert.equal(context.path[context.index], "title");
+					window.assert.equal(context.name == 'content' && context.index == 1 || context.name == "title" && context.index == 2, true);
+					window.assert.equal(context.path[context.index], context.name);
 				},
 				myfilter2: function(val, context) {
 					window.assert.equal(JSON.stringify(context.path), '["data","content","unknown"]');
-					window.assert.equal(context.path[context.index], "unknown");
+					window.assert.equal(context.path[context.index], context.name);
 				},
 				myfilter3: function(val, context) {
+					window.assert.equal(context.name == 'content' && context.index == 1 || context.name == "unknown" && context.index == 2, true);
 					window.assert.equal(JSON.stringify(context.path), '["data","content","unknown","toto"]');
-					window.assert.equal(context.path[context.index], "unknown");
+					window.assert.equal(context.path[context.index], context.name);
 				}
-				});
+			});
 		});
 	});
 	</script>
 	<title>Domt test suite</title>
 </head>
 <body>
+	<div id="path">
+		<h4 bind-text>[data.content.title|pathFilter]</h4>
+	</div>
+	<div id="index">
+		<h4 bind-text>[data.content.title|pathDefined]</h4>
+		<h4 bind-text>[data.content.summer|pathUndefined]</h4>
+		<h4 bind-text>[data.content.summer.spring|pathUndefinedTwice]</h4>
+	</div>
+	<div id="bindscope">
+		<div bind="data.content">
+			<h4 bind-text>[title|boundFilter]</h4>
+		</div>
+	</div>
 	<div id="repeat">
-		<h4 bind-text>[data.content.title|myfilter]</h4>
-		<h4 bind-text>[data.content.unknown|myfilter2]</h4>
-		<h4 bind-text>[data.content.unknown.toto|myfilter3]</h4>
+		<div repeat="data">
+			<h4 bind-text>[data.content.title|myfilter]</h4>
+			<h4 bind-text>[data.content.unknown|myfilter2]</h4>
+			<h4 bind-text>[data.content.unknown.toto|myfilter3]</h4>
+		</div>
 	</div>
 
 </body>
