@@ -266,6 +266,7 @@ Domt.prototype.merge = function(obj, opts) {
 							var bfilter = filters[accessor[i]];
 							if (!bfilter) continue;
 							var maybe = bfilter(val, key, {
+								parent: h.head.parentNode,
 								filters: filters,
 								node: clone,
 								scope:bound,

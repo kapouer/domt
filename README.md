@@ -299,6 +299,7 @@ Domt.filters.myBlockFilter = function(row, key, context) {
 
 Where context contains {
   node: the node where the value is being merged,
+  parent: the parent where the node will be inserted by default,
   path: array of path components,
   index: current index in array of path,
   name: the last name of the path before this filter was called,
