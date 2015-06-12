@@ -161,7 +161,7 @@ Holder.prototype.reload = function() {
 	this.repeat = head.getAttribute(REPEAT) || this.repeat || "";
 	this.bind = head.getAttribute(Domt.ns.bind) || this.bind || undefined;
 	var doc = document.implementation && document.implementation.createHTMLDocument ?
-		document.implementation.createHTMLDocument() : document;
+		document.implementation.createHTMLDocument('') : document;
 	var div = doc.createElement('div');
 	var html = head.text.replace(/^\s+|\s+$/g, '');
 	var tagName = match(/<(\w+)[\s>]/i, html);
