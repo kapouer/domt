@@ -20,6 +20,14 @@
 			];
 			Domt('#repeat').merge({data: data}).merge({data: data}).check();
 		});
+		it("sould repeat within repeat2", function() {
+			var data = [
+				{title: '12', kws: []},
+				{title: 'aa', kws: [{tag: 'bbb'}, {tag: 'ccc'}]},
+				{title: 'ww', kws: []}
+			];
+			Domt('#repeat2').merge({news: data}).check();
+		});
 	});
 	</script>
 	<title>Domt test suite</title>
@@ -59,6 +67,37 @@
 			<ul>
 				<script tail="domtX" type="text/template" repeat="data.1.content.list"><li><span bind-text="list.sub">ta</span></li></script><li><span>subthree</span></li><li><span>subfour</span></li><li><span>sfg</span></li><script id="domtX"></script>
 			</ul>
+		</div><script id="domtX"></script>
+	</div>
+	<div id="repeat2">
+		<div repeat="news">
+			<p bind-text>[news.title]</p>
+			<div>
+				<a bind-repeat="news.[news.#key].kws" bind-text>#[kws.tag]</a>
+			</div>
+		</div>
+	</div>
+	<div id="expected-repeat2">
+		<script tail="domtX" type="text/template" repeat="news"><div>
+			<p bind-text="">[news.title]</p>
+			<div>
+				<a bind-repeat="news.[news.#key].kws" bind-text="">#[kws.tag]</a>
+			</div>
+		</div></script><div>
+			<p>12</p>
+			<div>
+				<script tail="domtX" type="text/template" repeat="news.0.kws"><a bind-text="">#[kws.tag]</a></script><script id="domtX"></script>
+			</div>
+		</div><div>
+			<p>aa</p>
+			<div>
+				<script tail="domtX" type="text/template" repeat="news.1.kws"><a bind-text="">#[kws.tag]</a></script><a>#bbb</a><a>#ccc</a><script id="domtX"></script>
+			</div>
+		</div><div>
+			<p>ww</p>
+			<div>
+				<script tail="domtX" type="text/template" repeat="news.2.kws"><a bind-text="">#[kws.tag]</a></script><script id="domtX"></script>
+			</div>
 		</div><script id="domtX"></script>
 	</div>
 
