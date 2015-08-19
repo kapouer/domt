@@ -110,6 +110,9 @@ function Holder(node) {
 		if (orig) {
 			this.repeat = orig.repeat;
 			this.template = orig.template;
+			if (this.template && this.template.ownerDocument != document && document.importNode) {
+				this.template = document.importNode(this.template, true);
+			}
 			this.bind = orig.bind;
 			this.tail = orig.tail;
 			this.id = orig.id;
