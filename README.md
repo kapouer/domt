@@ -336,3 +336,16 @@ Utilities
   obj can be an array, an object, a NodeList, a jQuery object  
   iter is a function with signature (item, index) called on each element of obj.
 
+
+Best practices
+--------------
+
+# Use bind-data-*
+
+Avoid `<div data-test="[test|json]">` and use
+`<div bind-data-test="test|json">` instead - avoiding the risk
+of having $(div).data('test') returning "[test|json]", in case
+the data wasn't merged.
+
+
+
