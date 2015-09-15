@@ -147,7 +147,7 @@ function Holder(node) {
 	}
 	this.head[Domt.ns.holder] = this;
 	return this;
-};
+}
 Holder.prototype.close = function() {
 	var node = this.head;
 	if (this.repeat !== undefined) {
@@ -221,7 +221,7 @@ function Domt(nodes, options) {
 	if (delims.length != 2) throw DomtError("bad Domt.ns.expr");
 	var start = '\\' + delims[0], end = '\\' + delims[1];
 	this.reExpr = new RegExp(start + '([^' + start + end + ']*)' + end, "g");
-};
+}
 
 Domt.prototype.empty = function() {
 	this.merge(undefined, {empty:true});
@@ -233,8 +233,8 @@ Domt.prototype.merge = function(obj, opts) {
 	var filters = addToFilters(this.filters, opts);
 	var nodes = opts.node ? [opts.node] : this.nodes;
 	var that = this;
-	each(nodes, function(node, num) {
-		var bound, repeated, h, head, path, len, parentNode;
+	each(nodes, function(node) {
+		var bound, repeated, h, len, parentNode, curNode, i;
 		var parent = node;
 		var REPEAT = Domt.ns.repeat;
 		var BIND = Domt.ns.bind;
@@ -310,7 +310,7 @@ Domt.prototype.replace = function(obj, node, key) {
 	var filters = this.filters;
 	var willRepeat = {};
 	do {
-		each(Array.prototype.slice.call(node.attributes, 0), function(att, index) { // iterates over a copy
+		each(Array.prototype.slice.call(node.attributes, 0), function(att) { // iterates over a copy
 			if (att.name == Domt.ns.repeat && att.value) {
 				willRepeat[att.value.split('|').shift()] = true;
 				return;
