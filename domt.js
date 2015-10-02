@@ -110,9 +110,6 @@ function Holder(node) {
 		if (orig) {
 			this.repeat = orig.repeat;
 			this.template = orig.template;
-			if (this.template && this.template.ownerDocument != document && document.importNode) {
-				this.template = document.importNode(this.template, true);
-			}
 			this.bind = orig.bind;
 			this.tail = orig.tail;
 			this.id = orig.id;
@@ -123,7 +120,7 @@ function Holder(node) {
 	} else if (node.hasAttribute(REPEAT)) {
 		this.id = newId();
 		this.template = node;
-		this.head = document.createElement("script");
+		this.head = node.ownerDocument.createElement("script");
 		this.head.setAttribute('tail', this.id);
 		this.head.type = "text/template";
 		this.repeat = node.getAttribute(REPEAT) || "";
@@ -134,7 +131,7 @@ function Holder(node) {
 		node.removeAttribute(REPEAT);
 		node.parentNode.insertBefore(this.head, node);
 		this.head.text = node.outerHTML;
-		this.tail = document.createElement("script");
+		this.tail = node.ownerDocument.createElement("script");
 		this.tail.id = this.id;
 		node.parentNode.insertBefore(this.tail, node);
 		node.parentNode.removeChild(node);
@@ -259,7 +256,7 @@ Domt.prototype.merge = function(obj, opts) {
 					that.merge(bound, {node: h.template});
 				} else {
 					each(repeated.val, function(val, key) {
-						var clone = h.template.cloneNode(true);
+						var clone = h.template.ownerDocument != parentNode.ownerDocument && document.importNode ? parentNode.ownerDocument.importNode(h.template, true) : h.template.cloneNode(true);
 						// overwrite obj
 						bound[repeated.name] = val;
 						that.replace(bound, clone, key);
