@@ -6,11 +6,17 @@ var assert = require('assert');
 fs.readdirSync(__dirname).filter(function(file) {
 	if (path.extname(file) != ".html") return;
 	var str = fs.readFileSync(path.join(__dirname, file)).toString();
-	var doc = jsdom.jsdom(str, null, {features: {
-		FetchExternalResources   : false,
-		ProcessExternalResources : false
-	}});
-	var win = doc.parentWindow;
+	var doc = jsdom.jsdom(str, {
+		virtualConsole: jsdom.createVirtualConsole && jsdom.createVirtualConsole().sendTo(console),
+		features: {
+			FetchExternalResources   : false,
+			ProcessExternalResources : false
+		}
+	});
+	var win = doc.parentWindow || doc.defaultView;
+	if (!win.run) {
+		win.run = runShim.bind(null, require('vm').createContext(win));
+	}
 	win.console = console;
 	win.describe = describe;
 	win.it = it;
@@ -30,3 +36,8 @@ fs.readdirSync(__dirname).filter(function(file) {
 		}
 	});
 });
+
+function runShim(context, script) {
+	var vmscript = new (require('vm').Script)(script);
+	return vmscript.runInContext(context);
+}
