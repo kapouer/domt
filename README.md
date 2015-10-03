@@ -100,6 +100,18 @@ Domt($('div > .test').not('.out'))
 Which DOM nodes are processed ?
 -------------------------------
 
+Attributes "bind-*" that are not descendents of a node with a "repeat"
+attribute are *not* processed unless they have a "bind" (empty or not)
+attribute.
+
+Example: `Domt('body').merge({myval: 'test'});` won't merge the span.
+Either call Domt on that span, or add a bind attribute to it.
+
+```
+<body><div id="test"><span bind-text>[myval]</span></div></body>
+```
+
+
 * the target given as argument of Domt(target)
   target is either a node, a list of nodes, or a selector expression
   supported by document.querySelectorAll.
@@ -346,6 +358,4 @@ Avoid `<div data-test="[test|json]">` and use
 `<div bind-data-test="test|json">` instead - avoiding the risk
 of having $(div).data('test') returning "[test|json]", in case
 the data wasn't merged.
-
-
 
