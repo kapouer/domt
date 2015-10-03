@@ -203,15 +203,8 @@ Domt.each = each;
 
 function Domt(nodes, options) {
 	if (!(this instanceof Domt)) return new Domt(nodes, options);
-	if (typeof nodes == "string") {
-		nodes = document.querySelectorAll(nodes);
-	} else if (nodes && nodes.nodeType) {
-		nodes = [nodes];
-	}
-	if (!nodes || nodes.length == 0) throw DomtError("Domt has no nodes to merge");
 	this.filters = new Filters(options);
-	this.nodes = nodes;
-
+	this._nodes = nodes;
 	this.reBind = new RegExp("^" + Domt.ns.bind + "-(.*)$", "i");
 
 	var delims = Domt.ns.expr.split('*');
@@ -220,12 +213,25 @@ function Domt(nodes, options) {
 	this.reExpr = new RegExp(start + '([^' + start + end + ']*)' + end, "g");
 }
 
+Domt.prototype.init = function() {
+	var nodes = this._nodes;
+	delete this._nodes;
+	if (typeof nodes == "string") {
+		nodes = document.querySelectorAll(nodes);
+	} else if (nodes && nodes.nodeType) {
+		nodes = [nodes];
+	}
+	if (!nodes || nodes.length == 0) throw DomtError("Domt has no nodes to merge");
+	this.nodes = nodes;
+};
+
 Domt.prototype.empty = function() {
 	this.merge(undefined, {empty:true});
 	return this;
 };
 
 Domt.prototype.merge = function(obj, opts) {
+	if (this._nodes) this.init();
 	opts = opts || {};
 	var filters = addToFilters(this.filters, opts);
 	var nodes = opts.node ? [opts.node] : this.nodes;
