@@ -59,3 +59,9 @@ it was badly implemented and untested.
 
 Like 3.5.0, but properly tested and with the addition of context.name.
 
+3.6.0
+=====
+
+Domt(thing) can be called before document is ready, for thing won't be
+used until `merge` or `empty` methods are called.
+
