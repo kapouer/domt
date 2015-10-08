@@ -120,6 +120,11 @@ Either call Domt on that span, or add a bind attribute to it.
 * the descendants with attribute "bind"
   in itself the node doesn't change, the "bind" attributes set the current
   base path for all accessors in the same node or its descendants.
+  A "bind" attribute is always processed before a "repeat" attribute when
+  they are on the same node.
+  For example ```<span bind="person.date" bind-text="date.year"></span>```, or
+  ```<div bind="article.items|lastTwo" repeat="items">...</div>``` where lastTwo
+  is a value filter like `function(val) { return val.slice(-2); }`.
 
 * the descendants with attributes starting with "bind-"
   The attribute value is an object accessor of the form "path.to.key",

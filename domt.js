@@ -246,7 +246,15 @@ Domt.prototype.merge = function(obj, opts) {
 			h = Holder(node);
 			holders.push(h);
 			parentNode = h.head.parentNode;
-			bound = h.bind ? find(obj, h.bind, undefined, filters, node).val : obj;
+			if (h.bind) {
+				obj = find(obj, h.bind, undefined, filters, node);
+				bound = {};
+				bound[obj.name] = obj.val;
+				obj = bound;
+			} else {
+				bound = obj;
+			}
+
 			if (h.repeat !== undefined) {
 				if (opts.empty) {
 					while ((curNode = h.head.nextSibling) && curNode.id != h.tail.id) {
@@ -263,7 +271,6 @@ Domt.prototype.merge = function(obj, opts) {
 				} else {
 					each(repeated.val, function(val, key) {
 						var clone = h.template.ownerDocument != parentNode.ownerDocument && document.importNode ? parentNode.ownerDocument.importNode(h.template, true) : h.template.cloneNode(true);
-						// overwrite obj
 						bound[repeated.name] = val;
 						that.replace(bound, clone, key);
 						bound[repeated.name] = repeated.val;
@@ -348,6 +355,7 @@ Domt.prototype.replace = function(obj, node, key) {
 			} else {
 				var accessor = (att.value || "").split('|');
 				if (willRepeat[accessor[0]]) return;
+				if (att.name == Domt.ns.bind) return;
 				val = find(obj, accessor, key, filters, node).val;
 				if (name == "text" && val != null && typeof val != "object") val = escapeText(val);
 			}
@@ -396,7 +404,9 @@ function find(scope, accessor, key, filters, node) {
 		val = prev[name];
 		if (first) {
 			first = false;
-			if (val === undefined) return {val: val};
+			if (val === undefined) {
+				return {val: val};
+			}
 		}
 		if (typeof val == "function") val = val(prev, path);
 		last = name;

@@ -48,6 +48,29 @@
 				unused: 1
 			}).check();
 		});
+
+		it("should bind and apply value filter, then repeat and apply block filter", function() {
+			var valueFilterCalls = 0;
+			var blockFilterCalls = 0;
+			Domt('#bindrepeat').merge({
+				article: {
+					list: [
+						{txt: "a"},
+						{txt: "b"},
+						{txt: "c"}
+					]
+				}
+			}, {
+				myValueFilter: function(val) {
+					if (++valueFilterCalls > 1) throw new Error("value filter in bind should be called only once");
+					return val.slice(-2);
+				},
+				myBlockFilter: function(val, key, context) {
+					blockFilterCalls++;
+				}
+			}).check();
+			assert.equal(blockFilterCalls, 2);
+		});
 	});
   </script>
 	<title>Domt test suite</title>
@@ -77,6 +100,13 @@
 
 	<h1 id="create" bind-anything>stuff</h1>
 	<h1 id="expected-create" bind-anything>stuff</h1>
+
+	<h1 id="bindrepeat">bind then repeat
+		<span bind="article.list|myValueFilter" repeat="list|myBlockFilter" bind-text>[list.txt]</span>
+	</h1>
+	<h1 id="expected-bindrepeat">bind then repeat
+		<script tail="domtX" type="text/template" repeat="list|myBlockFilter" bind="article.list|myValueFilter"><span bind-text="">[list.txt]</span></script><span>b</span><span>c</span><script id="domtX"></script>
+	</h1>
 
 </body>
 </html>

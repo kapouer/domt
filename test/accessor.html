@@ -45,15 +45,21 @@
 		});
 		it("should bind data to item then merge item.name", function() {
 			Domt('#bind').merge({
-				item: {
-					name: "Da"
+				article: {
+					item: {
+						name: "Da"
+					}
 				}
 			}).check();
 		});
 		it("should bind within bind then merge items.item.name", function() {
 			Domt('#bind-in-bind').merge({
-				item: {
-					name: "Da"
+				article: {
+					items: {
+						item: {
+							name: "Da"
+						}
+					}
 				}
 			}).check();
 		});
@@ -82,32 +88,32 @@
 	<h1 id="expected-path-null" bind-text="path.to.value"></h1>
 
 	<div id="bind">
-		<p bind="item"><span bind-text="name">Doe</span></p>
+		<p bind="article.item"><span bind-text="item.name">Doe</span></p>
 	</div>
 	<div id="expected-bind">
-		<p bind="item"><span bind-text="name">Da</span></p>
+		<p bind="article.item"><span bind-text="item.name">Da</span></p>
 	</div>
 
 	<div id="bind-in-bind">
-		<div bind="items">
-			<div bind="item">
-				<span bind-text="name">Doe</span>
+		<div bind="article.items">
+			<div bind="items.item">
+				<span bind-text="item.name">Doe</span>
 			</div>
 		</div>
 	</div>
 	<div id="expected-bind-in-bind">
-		<div bind="items">
-			<div bind="item">
-				<span bind-text="name">Da</span>
+		<div bind="article.items">
+			<div bind="items.item">
+				<span bind-text="item.name">Da</span>
 			</div>
 		</div>
 	</div>
 
 	<ul id="bind-repeat">
-		<li repeat bind="data.items" bind-text=".content"></li>
+		<li repeat="items" bind="data.items" bind-text="items.content"></li>
 	</ul>
 	<ul id="expected-bind-repeat">
-		<script tail="domtX" type="text/template" repeat="" bind="data.items"><li bind-text=".content"></li></script><li>one</li><li>two</li><script id="domtX"></script>
+		<script tail="domtX" type="text/template" repeat="items" bind="data.items"><li bind-text="items.content"></li></script><li>one</li><li>two</li><script id="domtX"></script>
 	</ul>
 
 
