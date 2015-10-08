@@ -326,43 +326,64 @@ Domt.prototype.replace = function(obj, node, key) {
 				return;
 			}
 			var name = match(reBind, att.name);
+			var target;
 			if (name == "text" || name == "html") {
 				val = node.innerHTML;
 			}	else {
+				target = name || att.name;
 				val = att.value;
 			}
 			var replacements = 0, initial = val;
 			if (att.value) initial = att.value;
 			if (initial == null) initial = "";
+			// set an attribute that can be removed by filters
+			var hadAtt = node.hasAttribute(target);
+			if (target && !hadAtt) {
+				node.setAttribute(target, "");
+			}
 			val = initial.replace(reExpr, function(str, path) {
 				var accessor = path.split('|');
 				if (willRepeat[accessor[0]]) return;
-				var repl = find(obj, accessor, key, filters, node).val;
+				var repl = find(obj, accessor, key, filters, node, target).val;
 				if (repl === undefined || repl !== null && typeof repl == "object") return "";
 				replacements++;
 				if (repl == null) return "";
 				else if (name == "text") return escapeText(repl);
 				else return repl;
 			});
+			function clean() {
+				if (!hadAtt && target) {
+					node.removeAttribute(target);
+				}
+			}
 			if (replacements) {
+				// set bind-<name> attribute to be able to merge again
 				if (!att.value) att.value = initial;
 				if (!name) {
-					name = att.name;
+					name = target;
 					if (key == null) {
-						node.setAttribute(Domt.ns.bind + '-' + name, initial);
+						node.setAttribute(Domt.ns.bind + '-' + target, initial);
 					}
 				}
 			} else {
 				var accessor = (att.value || "").split('|');
-				if (willRepeat[accessor[0]]) return;
-				if (att.name == Domt.ns.bind) return;
-				val = find(obj, accessor, key, filters, node).val;
+				if (willRepeat[accessor[0]]) {
+					return clean();
+				}
+				if (att.name == Domt.ns.bind) {
+					return clean();
+				}
+				val = find(obj, accessor, key, filters, node, target).val;
 				if (name == "text" && val != null && typeof val != "object") val = escapeText(val);
 			}
 			if (name) {
-				if (replace(node, name, val)) replacements++;
+				if (replace(node, name, val)) {
+					replacements++;
+				}
 			}
+			if (!replacements) clean();
 			if (replacements && key != null && name != att.name) {
+				// get rid of initial attributes in a repeated block
 				node.removeAttribute(att.name);
 			}
 		});
@@ -370,14 +391,22 @@ Domt.prototype.replace = function(obj, node, key) {
 };
 
 function replace(node, name, val) {
-	if (val === undefined || val !== null && typeof val == "object") return false;
-	if (name == "text" || name == "html") node.innerHTML = val == null ? "" : val;
-	else if (val !== null) node.setAttribute(name, val);
-	else node.removeAttribute(name);
+	if (val === undefined || val !== null && typeof val == "object") {
+		return false;
+	}
+	if (name == "text" || name == "html") {
+		node.innerHTML = val == null ? "" : val;
+	} else if (node.hasAttribute(name)) {
+		if (val !== null) node.setAttribute(name, val);
+		else node.removeAttribute(name);
+	} else {
+		// no replacement because attribute was removed
+		return false;
+	}
 	return true;
 }
 
-function find(scope, accessor, key, filters, node) {
+function find(scope, accessor, key, filters, node, att) {
 	var name, last, val = scope, prev = scope, filter;
 	if (!accessor) accessor = [];
 	else if (typeof accessor == "string") accessor = accessor.split('|');
@@ -413,7 +442,7 @@ function find(scope, accessor, key, filters, node) {
 	}
 	if (filters) for (var i=1; i < accessor.length; i++) {
 		filter = filters[accessor[i]];
-		if (filter) val = filter(val, {node: node, filters: filters, scope:scope, index:index-1, path:path, name: last});
+		if (filter) val = filter(val, {node: node, att: att, filters: filters, scope:scope, index:index-1, path:path, name: last});
 	}
 	if (last == null) last = "";
 	return {name: last, val: val};

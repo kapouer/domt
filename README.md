@@ -257,6 +257,7 @@ Domt.filters.myfilter = function(val, context) {
 
 Where context contains {
   node: the node where the value is being merged,
+  att: the name of the target attribute (it cannot be "text" or "html"), if any,
   path: array of path components,
   index: current index in array of path,
   name: the last name of the path before this filter was called,
