@@ -239,9 +239,13 @@ Value Filters
 
 Value filters are called before merging the value in the target.
 A value filter is a simple function returning a string.
+If the a value (returned by filter or not) is undefined, the target is not merged.
+If the a value (returned by filter or not) is null, it is merged as empty string
+but if it's an attribute it doesn't create it (use empty string for that).
 
 ```js
 Domt.filters.myfilter = function(val, context) {
+  // this will always merge something since it casts undefined to string
   return "my" + val;
 };
 ```
@@ -255,9 +259,6 @@ Where context contains {
   filters: the available filters
 }
 
-In the above example, data|myfilter always return something defined,
-meaning the merge will happen even if val === undefined.
-
 Value filters are not called if the first key in the accessor matches undefined
 data. Any other case (> first key, null or empty data) will call the filter.
 
@@ -269,7 +270,8 @@ Some filters are already availables:
 * esc: encodeURIComponent
 * unesc: decodeURIComponent
 * json: JSON.stringify(val)
-* : (filter name is empty string "") returns null if value is undefined
+* : (filter name is empty string "") returns null if value is undefined,
+  thus ensuring the merge happens
 * no: returns empty string if value is null-ish, otherwise returns null
 
 Note that escaping xml entities is usually not needed because we use the
