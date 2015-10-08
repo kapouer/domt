@@ -270,15 +270,23 @@ data. Any other case (> first key, null or empty data) will call the filter.
 
 Some filters are already availables:
 
-* upper, lower: change string case
-* br: replace newlines by <br>
-* text: escape html, the combination text|br is useful
-* esc: encodeURIComponent
-* unesc: decodeURIComponent
-* json: JSON.stringify(val)
-* : (filter name is empty string "") returns null if value is undefined,
-  thus ensuring the merge happens
-* no: returns empty string if value is null-ish, otherwise returns null
+* upper : toUpperCase
+* lower : toLowerCase
+* br    : replace newlines by <br>, to be used with in bind-html.
+* text  : escape html, the combination text|br is useful
+* esc   : encodeURIComponent
+* unesc : decodeURIComponent
+* json  : JSON.stringify
+* int   : parseInt or ""
+* float : parseFloat or ""
+* att   : return attribute name if current value evaluates to true
+* drop  : remove target attribute if current value evaluates to false - does not
+  modify val.
+* !     : return !val
+* ?     : return val.toString() if it's not empty, else return null or undefined or ""
+
+More filters could be written, but they would typically depend on features
+like Element.classList or jQuery - they're not fit to be in domt.
 
 Note that escaping xml entities is usually not needed because we use the
 DOM methods and they do the conversions for us.

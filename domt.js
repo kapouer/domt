@@ -82,15 +82,13 @@ Filters.prototype['!'] = function(val) {
 };
 Filters.prototype['?'] = function(val) {
 	if (val != null && val !== "") return val + '';
-	else return null;
+	else return val;
 };
 Filters.prototype.drop = function(val, context) {
-	if (val) {
-		return val;
-	} else if (context.att) {
+	if (!val && context.att) {
 		context.node.removeAttribute(context.att);
-		return null;
 	}
+	return val;
 };
 
 // Block Filters
