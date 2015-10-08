@@ -65,3 +65,15 @@ Like 3.5.0, but properly tested and with the addition of context.name.
 Domt(thing) can be called before document is ready, for thing won't be
 used until `merge` or `empty` methods are called.
 
+4.0.0
+=====
+
+### Breaking changes
+* bind now replaces by {lastkey: val} instead of just the value, otherwise it
+  was confusing to have an empty accessor.
+* no and "" filters have been removed in favor of !, ?, att and drop.
+
+### Non-breaking changes
+* bind is documented to be processed before repeat if both attributes are on
+the same node - this is the same behavior as before.
+
