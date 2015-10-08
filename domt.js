@@ -76,7 +76,7 @@ Filters.prototype.invert = function(row, key, info) {
 var escaper;
 function escapeText(str) {
 	if (!escaper) {
-		escaper = document.createElement('p');
+		escaper = document.createElement('div');
 		escaper.appendChild(document.createTextNode(""));
 	}
 	escaper.firstChild.nodeValue = str;
