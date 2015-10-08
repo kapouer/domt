@@ -58,13 +58,39 @@ Filters.prototype.unesc = function(val) {
 Filters.prototype.json = function(val) {
 	return JSON.stringify(val);
 };
-Filters.prototype.no = function(val) {
-	if (val == null) return "";
+Filters.prototype.int = function(val) {
+	var n = parseInt(val);
+	if (!isNaN(n)) return "";
+};
+Filters.prototype.float = function(val) {
+	var f = parseFloat(val);
+	if (!isNaN(f)) return "";
+};
+Filters.prototype.bool = function(val) {
+	if (val) return true;
+	else return false;
+};
+Filters.prototype.att = function(val, context) {
+	if (val && context.att) {
+		return context.att;
+	} else {
+		return null;
+	}
+};
+Filters.prototype['!'] = function(val) {
+	return !val;
+};
+Filters.prototype['?'] = function(val) {
+	if (val != null && val !== "") return val + '';
 	else return null;
 };
-Filters.prototype[''] = function(val) {
-	if (val === undefined) return null;
-	else return val;
+Filters.prototype.drop = function(val, context) {
+	if (val) {
+		return val;
+	} else if (context.att) {
+		context.node.removeAttribute(context.att);
+		return null;
+	}
 };
 
 // Block Filters
