@@ -25,6 +25,10 @@
 			}).check();
 		});
 
+		it("should not create an empty attribute data is undefined", function() {
+			Domt('#undef').merge({obj:{}}).check();
+		});
+
 		it("should use bind-class to add class attribute", function() {
 			Domt('#class-add').merge({
 				"class": "list"
@@ -85,6 +89,9 @@
 
 	<h1 id="html" bind-html="content">old header</h1>
 	<h1 id="expected-html" bind-html="content"><a href="http://localhost:7000/?test=1">link</a></h1>
+
+	<h1 id="undef" bind-hidden="obj.undef"></h1>
+	<h1 id="expected-undef" bind-hidden="obj.undef"></h1>
 
 	<div id="class-add" bind-class="class">a</div>
 	<div id="expected-class-add" bind-class="class" class="list">a</div>

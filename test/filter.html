@@ -71,6 +71,46 @@
 				}
 			});
 		});
+
+		it("should uppercase value", function() {
+			Domt('#upper').merge({str: "upper"}).check();
+		});
+
+		it("should lowercase value", function() {
+			Domt('#lower').merge({str: "LOWER"}).check();
+		});
+
+		it("should replace newlines by <br>", function() {
+			Domt('#br').merge({str: "line one\nline two"}).check();
+		});
+
+		it("should escape html", function() {
+			Domt('#text').merge({str: "<" + "script type='text/javascript'>alert('alert');" + "<" + "/script>"}).check();
+		});
+
+		it("should encodeURIComponent", function() {
+			Domt('#esc').merge({str: "hello/carol"}).check();
+		});
+
+		it("should decodeURIComponent", function() {
+			Domt('#unesc').merge({str: "hello%2Fcarol"}).check();
+		});
+
+		it("should output json", function() {
+			Domt('#json').merge({obj: {test: true}}).check();
+		});
+
+		it("should output attribute name if true", function() {
+			Domt('#att').merge({obj: {test: true}}).check();
+		});
+
+		it("should output attribute name if falsey", function() {
+			Domt('#not').merge({obj: {test: true}}).check();
+		});
+
+		it("should output attribute if not empty", function() {
+			Domt('#notempty').merge({zerolength: 0, length: 1}).check();
+		});
 	});
 	</script>
 	<title>Domt test suite</title>
@@ -79,22 +119,103 @@
 	<div id="path">
 		<h4 bind-text>[data.content.title|pathFilter]</h4>
 	</div>
+
 	<div id="index">
 		<h4 bind-text>[data.content.title|pathDefined]</h4>
 		<h4 bind-text>[data.content.summer|pathUndefined]</h4>
 		<h4 bind-text>[data.content.summer.spring|pathUndefinedTwice]</h4>
 	</div>
+
 	<div id="bindscope">
 		<div bind="data.content">
 			<h4 bind-text>[title|boundFilter]</h4>
 		</div>
 	</div>
+
 	<div id="repeat">
 		<div repeat="data">
 			<h4 bind-text>[data.content.title|myfilter]</h4>
 			<h4 bind-text>[data.content.unknown|myfilter2]</h4>
 			<h4 bind-text>[data.content.unknown.toto|myfilter3]</h4>
 		</div>
+	</div>
+
+	<div id="upper">
+		<h4 bind-text>[str|upper]</h4>
+	</div>
+	<div id="expected-upper">
+		<h4 bind-text="[str|upper]">UPPER</h4>
+	</div>
+
+	<div id="lower">
+		<h4 bind-text>[str|lower]</h4>
+	</div>
+	<div id="expected-lower">
+		<h4 bind-text="[str|lower]">lower</h4>
+	</div>
+
+	<div id="br">
+		<h4 bind-html>[str|br]</h4>
+	</div>
+	<div id="expected-br">
+		<h4 bind-html="[str|br]">line one<br>line two</h4>
+	</div>
+
+	<div id="text">
+		<h4 bind-html>[str|text]</h4>
+	</div>
+	<div id="expected-text">
+		<h4 bind-html="[str|text]">&lt;script type='text/javascript'&gt;alert('alert');&lt;/script&gt;</h4>
+	</div>
+
+	<div id="esc">
+		<h4 bind-text>[str|esc]</h4>
+	</div>
+	<div id="expected-esc">
+		<h4 bind-text="[str|esc]">hello%2Fcarol</h4>
+	</div>
+
+	<div id="unesc">
+		<h4 bind-text>[str|unesc]</h4>
+	</div>
+	<div id="expected-unesc">
+		<h4 bind-text="[str|unesc]">hello/carol</h4>
+	</div>
+
+	<div id="json">
+		<h4 bind-data="obj|json">data</h4>
+	</div>
+	<div id="expected-json">
+		<h4 bind-data="obj|json" data="{&quot;test&quot;:true}">data</h4>
+	</div>
+
+	<div id="att">
+		<h4 bind-hidden="obj.test|att">not hidden</h4>
+		<h4 bind-hidden="obj.test2|att">hidden</h4>
+	</div>
+	<div id="expected-att">
+		<h4 bind-hidden="obj.test|att" hidden="hidden">not hidden</h4>
+		<h4 bind-hidden="obj.test2|att">hidden</h4>
+	</div>
+
+	<div id="not">
+		<h4 bind-hidden="obj.test|!|att">hidden</h4>
+		<h4 bind-hidden="obj.test2|!|att">not hidden</h4>
+	</div>
+	<div id="expected-not">
+		<h4 bind-hidden="obj.test|!|att">hidden</h4>
+		<h4 bind-hidden="obj.test2|!|att" hidden="hidden">not hidden</h4>
+	</div>
+
+	<div id="notempty">
+		<input bind-size="zerolength|?|drop">
+		<input bind-size="zerolength|drop">
+		<input bind-size="length|?|drop">
+	</div>
+	<div id="expected-notempty">
+		<input bind-size="zerolength|?|drop" size="0">
+		<input bind-size="zerolength|drop">
+		<input bind-size="length|?|drop" size="1">
 	</div>
 
 </body>

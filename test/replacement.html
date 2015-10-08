@@ -38,9 +38,9 @@
 				hide: function(str) { return null; }
 			}).merge({text:"plus0"}).check();
 		});
-		it("should remove attribute when filter return null on an object", function() {
+		it("should remove attribute when filter returns null on an object", function() {
 			Domt('#filter-repeat-null', {
-				hide: function(obj) { return obj.show ? null : "hidden"; }
+				hide: function(obj, context) { return obj.show ? null : "hidden"; }
 			}).merge({items:[
 				{show: true, text:"is visible"},
 				{show: false, text:"is hidden"}

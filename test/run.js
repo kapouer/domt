@@ -32,6 +32,7 @@ fs.readdirSync(__dirname).filter(function(file) {
 			}
 		} catch(e) {
 			console.error("Error while trying to execute script sourced by\n" + file);
+			console.error(e.name, e.message, e.description, e.stack);
 			process.exit(1);
 		}
 	});
