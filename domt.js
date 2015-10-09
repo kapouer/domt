@@ -14,7 +14,8 @@ Domt.ns = {
 	repeat: 'repeat',
 	bind: 'bind',
 	holder: 'holder',
-	expr: '[*]'
+	expr: '[*]',
+	query: ['html', 'text', 'src', 'href', 'lowsrc', 'srcset', 'class', 'value', 'data', 'action', 'hidden', 'id', 'name', 'style']
 };
 
 function Filters(obj) {
@@ -225,12 +226,23 @@ function each(obj, fun) {
 
 Domt.each = each;
 
-function Domt(nodes, options) {
-	if (!(this instanceof Domt)) return new Domt(nodes, options);
-	this.filters = new Filters(options);
+function Domt(nodes, opts) {
+	if (!(this instanceof Domt)) return new Domt(nodes, opts);
+	if (!opts) opts = {};
+	this.filters = new Filters(opts);
 	this._nodes = nodes;
 	this.reBind = new RegExp("^" + Domt.ns.bind + "-(.*)$", "i");
-
+	var atts = [Domt.ns.bind, Domt.ns.repeat].concat(Domt.ns.query);
+	var query = opts.query;
+	if (query) {
+		if (typeof query == "string") query = [query];
+		atts = atts.concat(query);
+	}
+	query = [Domt.ns.bind, Domt.ns.repeat];
+	for (var i=0; i < atts.length; i++) {
+		query.push('[' + Domt.ns.bind + '-' + atts[i] + ']');
+	}
+	this.query = query.join(',');
 	var delims = Domt.ns.expr.split('*');
 	if (delims.length != 2) throw DomtError("bad Domt.ns.expr");
 	var start = '\\' + delims[0], end = '\\' + delims[1];
@@ -337,7 +349,7 @@ Domt.prototype.merge = function(obj, opts) {
 };
 
 Domt.prototype.replace = function(obj, node, key) {
-	var descendants = node.querySelectorAll('*');
+	var descendants = node.querySelectorAll(this.query);
 	var i = 0;
 	var len = descendants.length;
 	var val, reExpr = this.reExpr, reBind = this.reBind;
