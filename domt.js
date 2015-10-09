@@ -269,7 +269,7 @@ Domt.prototype.empty = function() {
 Domt.prototype.merge = function(obj, opts) {
 	if (this._nodes) this.init();
 	opts = opts || {};
-	var filters = addToFilters(this.filters, opts);
+	var filters = addToFilters(this.filters.slice(), opts);
 	var nodes = opts.node ? [opts.node] : this.nodes;
 	var that = this;
 	each(nodes, function(node) {
