@@ -109,7 +109,7 @@
 		});
 
 		it("should output attribute if not empty", function() {
-			Domt('#notempty').merge({zerolength: 0, length: 1}).check();
+			Domt('#notempty', {query: 'size'}).merge({zerolength: 0, length: 1}).check();
 		});
 	});
 	</script>
