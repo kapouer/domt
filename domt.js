@@ -295,6 +295,9 @@ Domt.prototype.merge = function(obj, opts) {
 			}
 
 			if (h.repeat !== undefined) {
+				if (node.hasAttribute('id')) {
+					console.warn("Repeated nodes should not have an 'id' attribute", node.cloneNode().outerHTML);
+				}
 				if (opts.empty) {
 					while ((curNode = h.head.nextSibling) && curNode.id != h.tail.id) {
 						parentNode.removeChild(curNode);
