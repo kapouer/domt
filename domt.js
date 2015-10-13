@@ -276,6 +276,9 @@ Domt.prototype.merge = function(obj, opts) {
 		var bound, repeated, h, len, parentNode, curNode, i;
 		var parent = node;
 		var REPEAT = Domt.ns.repeat;
+		if (node.hasAttribute(REPEAT)) {
+			console.error("Repeated nodes must not be selected directly", node.cloneNode().outerHTML);
+		}
 		var BIND = Domt.ns.bind;
 		var holders = [];
 		do {
