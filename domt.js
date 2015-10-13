@@ -308,7 +308,7 @@ Domt.prototype.merge = function(obj, opts) {
 				var accessor = h.repeat.split('|');
 				repeated = find(bound, accessor);
 				if (repeated.val === undefined) {
-					// merge inside template (that won't be selected because it's now out of the DOM)
+					// h.template is out of DOM so it won't be found by querySelector
 					that.merge(bound, {node: h.template});
 				} else {
 					each(repeated.val, function(val, key) {
