@@ -23,7 +23,6 @@ fs.readdirSync(__dirname).filter(function(file) {
 	win.assert = assert;
 
 	Array.prototype.forEach.call(doc.querySelectorAll('script'), function(script) {
-		if (script.type == "text/template") return;
 		try {
 			if (script.textContent) {
 				win.run(script.textContent);

@@ -41,33 +41,28 @@
 			</ul>
 		</div>
 	</div>
-	<div id="expected-repeat">
-		<script tail="domtX" type="text/template" repeat="data"><div>
-			<h4 bind-text="">[data.content.title]</h4>
-			<ul>
-				<li bind-repeat="data.[data.#key].content.list"><span bind-text="list.sub">ta</span></li>
-			</ul>
-		</div></script><div>
+	<div id="expected-repeat" domt="">
+		<!--{"id":"domtX","repeat":"data","template":"<div>\n\t\t\t<h4 bind-text=\"\">[data.content.title]</h4>\n\t\t\t<ul>\n\t\t\t\t<li bind-repeat=\"data.[data.#key].content.list\"><span bind-text=\"list.sub\">ta</span></li>\n\t\t\t</ul>\n\t\t</div>","domt":4}--><div>
 			<h4>one</h4>
-			<ul>
-				<script tail="domtX" type="text/template" repeat="data.0.content.list"><li><span bind-text="list.sub">ta</span></li></script><li><span>subone</span></li><li><span>subtwo</span></li><li><span>subone</span></li><li><span>subtwo</span></li><script id="domtX"></script>
+			<ul domt="">
+				<!--{"id":"domtX","repeat":"data.0.content.list","template":"<li><span bind-text=\"list.sub\">ta</span></li>","domt":4}--><li><span>subone</span></li><li><span>subtwo</span></li><li><span>subone</span></li><li><span>subtwo</span></li><!--{"id":"domtX","domt":4}-->
 			</ul>
 		</div><div>
 			<h4>two</h4>
-			<ul>
-				<script tail="domtX" type="text/template" repeat="data.1.content.list"><li><span bind-text="list.sub">ta</span></li></script><li><span>subthree</span></li><li><span>subfour</span></li><li><span>sfg</span></li><li><span>subthree</span></li><li><span>subfour</span></li><li><span>sfg</span></li><script id="domtX"></script>
+			<ul domt="">
+				<!--{"id":"domtX","repeat":"data.1.content.list","template":"<li><span bind-text=\"list.sub\">ta</span></li>","domt":4}--><li><span>subthree</span></li><li><span>subfour</span></li><li><span>sfg</span></li><li><span>subthree</span></li><li><span>subfour</span></li><li><span>sfg</span></li><!--{"id":"domtX","domt":4}-->
 			</ul>
 		</div><div>
 			<h4>one</h4>
-			<ul>
-				<script tail="domtX" type="text/template" repeat="data.0.content.list"><li><span bind-text="list.sub">ta</span></li></script><li><span>subone</span></li><li><span>subtwo</span></li><script id="domtX"></script>
+			<ul domt="">
+				<!--{"id":"domtX","repeat":"data.0.content.list","template":"<li><span bind-text=\"list.sub\">ta</span></li>","domt":4}--><li><span>subone</span></li><li><span>subtwo</span></li><!--{"id":"domtX","domt":4}-->
 			</ul>
 		</div><div>
 			<h4>two</h4>
-			<ul>
-				<script tail="domtX" type="text/template" repeat="data.1.content.list"><li><span bind-text="list.sub">ta</span></li></script><li><span>subthree</span></li><li><span>subfour</span></li><li><span>sfg</span></li><script id="domtX"></script>
+			<ul domt="">
+				<!--{"id":"domtX","repeat":"data.1.content.list","template":"<li><span bind-text=\"list.sub\">ta</span></li>","domt":4}--><li><span>subthree</span></li><li><span>subfour</span></li><li><span>sfg</span></li><!--{"id":"domtX","domt":4}-->
 			</ul>
-		</div><script id="domtX"></script>
+		</div><!--{"id":"domtX","domt":4}-->
 	</div>
 	<div id="repeat2">
 		<div repeat="news">
@@ -77,28 +72,23 @@
 			</div>
 		</div>
 	</div>
-	<div id="expected-repeat2">
-		<script tail="domtX" type="text/template" repeat="news"><div>
-			<p bind-text="">[news.title]</p>
-			<div>
-				<a bind-repeat="news.[news.#key].kws" bind-text="">#[kws.tag]</a>
-			</div>
-		</div></script><div>
+	<div id="expected-repeat2" domt="">
+		<!--{"id":"domtX","repeat":"news","template":"<div>\n\t\t\t<p bind-text=\"\">[news.title]</p>\n\t\t\t<div>\n\t\t\t\t<a bind-repeat=\"news.[news.#key].kws\" bind-text=\"\">#[kws.tag]</a>\n\t\t\t</div>\n\t\t</div>","domt":4}--><div>
 			<p>12</p>
-			<div>
-				<script tail="domtX" type="text/template" repeat="news.0.kws"><a bind-text="">#[kws.tag]</a></script><script id="domtX"></script>
+			<div domt="">
+				<!--{"id":"domtX","repeat":"news.0.kws","template":"<a bind-text=\"\">#[kws.tag]</a>","domt":4}--><!--{"id":"domtX","domt":4}-->
 			</div>
 		</div><div>
 			<p>aa</p>
-			<div>
-				<script tail="domtX" type="text/template" repeat="news.1.kws"><a bind-text="">#[kws.tag]</a></script><a>#bbb</a><a>#ccc</a><script id="domtX"></script>
+			<div domt="">
+				<!--{"id":"domtX","repeat":"news.1.kws","template":"<a bind-text=\"\">#[kws.tag]</a>","domt":4}--><a>#bbb</a><a>#ccc</a><!--{"id":"domtX","domt":4}-->
 			</div>
 		</div><div>
 			<p>ww</p>
-			<div>
-				<script tail="domtX" type="text/template" repeat="news.2.kws"><a bind-text="">#[kws.tag]</a></script><script id="domtX"></script>
+			<div domt="">
+				<!--{"id":"domtX","repeat":"news.2.kws","template":"<a bind-text=\"\">#[kws.tag]</a>","domt":4}--><!--{"id":"domtX","domt":4}-->
 			</div>
-		</div><script id="domtX"></script>
+		</div><!--{"id":"domtX","domt":4}-->
 	</div>
 
 </body>

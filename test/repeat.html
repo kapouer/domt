@@ -80,9 +80,9 @@
 			]);
 			var copy = inst.nodes[0].cloneNode(true);
 			copy.id = 'cell-copy';
-			copy.querySelector('[id]').setAttribute('id', 'domt100');
-			copy.querySelector('script[type="text/template"]').setAttribute('tail', 'domt100');
-			inst.nodes[0].parentNode.insertBefore(copy, inst.nodes[0]);
+			var div = document.createElement("div");
+			div.innerHTML = copy.outerHTML.replace(/"id":"domt\d"/g, '"id":"domt100"');
+			inst.nodes[0].parentNode.insertBefore(div.firstChild, inst.nodes[0]);
 			Domt('#cell-copy').merge([
 				{ content: "three" },
 				{ content: "four" }
@@ -147,7 +147,8 @@
 			]}).nodes;
 			var expected = document.getElementById('expected-two-nodes').cloneNode(true);
 			expected.removeAttribute('id');
-			expected.className = 'two nodes';
+			nodes[0].removeAttribute('class');
+			nodes[1].removeAttribute('class');
 			var expectedHTML = changeIdNum(expected.outerHTML, "X");
 			window.assert.equal(changeIdNum(nodes[0].outerHTML, "X"), expectedHTML);
 			window.assert.equal(changeIdNum(nodes[1].outerHTML, "X"), expectedHTML);
@@ -203,67 +204,67 @@
 	<ul id="repeat">
 		<li repeat="data" bind-text="data.content"></li>
 	</ul>
-	<ul id="expected-repeat">
-		<script tail="domtX" type="text/template" repeat="data"><li bind-text="data.content"></li></script><li>one</li><li>two</li><script id="domtX"></script>
+	<ul id="expected-repeat" domt="">
+		<!--{"id":"domtX","repeat":"data","template":"<li bind-text=\"data.content\"></li>","domt":4}--><li>one</li><li>two</li><!--{"id":"domtX","domt":4}-->
 	</ul>
-	<ul id="expected-expected-repeat">
-		<script tail="domtX" type="text/template" repeat="data"><li bind-text="data.content"></li></script><li>one</li><li>two</li><li>one</li><li>two</li><script id="domtX"></script>
+	<ul id="expected-expected-repeat" domt="">
+		<!--{"id":"domtX","repeat":"data","template":"<li bind-text=\"data.content\"></li>","domt":4}--><li>one</li><li>two</li><li>one</li><li>two</li><!--{"id":"domtX","domt":4}-->
 	</ul>
 
 	<ul id="repeat-root">
 		<li repeat bind-text=".content"></li>
 	</ul>
-	<ul id="expected-repeat-root">
-		<script tail="domtX" type="text/template" repeat><li bind-text=".content"></li></script><li>one</li><li>two</li><script id="domtX"></script>
+	<ul id="expected-repeat-root" domt="">
+		<!--{"id":"domtX","repeat":"","template":"<li bind-text=\".content\"></li>","domt":4}--><li>one</li><li>two</li><!--{"id":"domtX","domt":4}-->
 	</ul>
 
 	<ul id="repeat-strings">
 		<li repeat bind-text="."></li>
 	</ul>
-	<ul id="expected-repeat-strings">
-		<script tail="domtX" type="text/template" repeat><li bind-text="."></li></script><li>one</li><li>two</li><script id="domtX"></script>
+	<ul id="expected-repeat-strings" domt="">
+		<!--{"id":"domtX","repeat":"","template":"<li bind-text=\".\"></li>","domt":4}--><li>one</li><li>two</li><!--{"id":"domtX","domt":4}-->
 	</ul>
 
 	<ul id="repeat-key">
 		<li repeat bind-text=".#key|inc">re</li>
 	</ul>
-	<ul id="expected-repeat-key">
-		<script tail="domtX" type="text/template" repeat><li bind-text=".#key|inc">re</li></script><li>1</li><li>2</li><script id="domtX"></script>
+	<ul id="expected-repeat-key" domt="">
+		<!--{"id":"domtX","repeat":"","template":"<li bind-text=\".#key|inc\">re</li>","domt":4}--><li>1</li><li>2</li><!--{"id":"domtX","domt":4}-->
 	</ul>
 
 	<ul id="repeat-process">
 		<li repeat="table" bind-text="table.content"></li>
 	</ul>
-	<ul id="expected-repeat-process">
-		<script tail="domtX" type="text/template" repeat="table"><li bind-text="table.content"></li></script><script id="domtX"></script>
+	<ul id="expected-repeat-process" domt="">
+		<!--{"id":"domtX","repeat":"table","template":"<li bind-text=\"table.content\"></li>","domt":4}--><!--{"id":"domtX","domt":4}-->
 	</ul>
 
 	<ul id="repeat-strip">
 		<li repeat><span bind-text=".content"></span></li>
 	</ul>
-	<ul id="expected-repeat-strip">
-		<script tail="domtX" type="text/template" repeat=""><li><span bind-text=".content"></span></li></script><li><span>one</span></li><li><span>two</span></li><script id="domtX"></script>
+	<ul id="expected-repeat-strip" domt="">
+		<!--{"id":"domtX","repeat":"","template":"<li><span bind-text=\".content\"></span></li>","domt":4}--><li><span>one</span></li><li><span>two</span></li><!--{"id":"domtX","domt":4}-->
 	</ul>
 
 	<ul id="repeat-strip-bind-bind">
 		<li repeat><span bind-text=".content" bind-bind-class=".[.class]"></span></li>
 	</ul>
-	<ul id="expected-repeat-strip-bind-bind">
-		<script tail="domtX" type="text/template" repeat=""><li><span bind-text=".content" bind-bind-class=".[.class]"></span></li></script><li><span bind-class=".test1">one</span></li><li><span bind-class=".test2">two</span></li><script id="domtX"></script>
+	<ul id="expected-repeat-strip-bind-bind" domt="">
+		<!--{"id":"domtX","repeat":"","template":"<li><span bind-text=\".content\" bind-bind-class=\".[.class]\"></span></li>","domt":4}--><li><span bind-class=".test1">one</span></li><li><span bind-class=".test2">two</span></li><!--{"id":"domtX","domt":4}-->
 	</ul>
 
 	<ul id="repeat-invert">
 		<li repeat="|invert" bind-text=".content"></li>
 	</ul>
-	<ul id="expected-repeat-invert">
-		<script tail="domtX" type="text/template" repeat="|invert"><li bind-text=".content"></li></script><li>two</li><li>one</li><script id="domtX"></script>
+	<ul id="expected-repeat-invert" domt="">
+		<!--{"id":"domtX","repeat":"|invert","template":"<li bind-text=\".content\"></li>","domt":4}--><li>two</li><li>one</li><!--{"id":"domtX","domt":4}-->
 	</ul>
 
 	<ul id="repeat-empty">
 		<li repeat bind-text="content"></li>
 	</ul>
-	<ul id="expected-repeat-empty">
-		<script tail="domtX" type="text/template" repeat=""><li bind-text="content"></li></script><script id="domtX"></script>
+	<ul id="expected-repeat-empty" domt="">
+		<!--{"id":"domtX","repeat":"","template":"<li bind-text=\"content\"></li>","domt":4}--><!--{"id":"domtX","domt":4}-->
 	</ul>
 
 	<table id="cell">
@@ -272,16 +273,16 @@
 		</tr>
 	</table>
 	<table id="expected-cell-copy">
-		<tr>
-			<script tail="domtX" type="text/template" repeat=""><td bind-text=".content"></td></script><td>one</td><td>two</td><td>three</td><td>four</td><script id="domtX"></script>
+		<tr domt="">
+			<!--{"id":"domtX","repeat":"","template":"<td bind-text=\".content\"></td>","domt":4}--><td>one</td><td>two</td><td>three</td><td>four</td><!--{"id":"domtX","domt":4}-->
 		</tr>
 	</table>
 
 	<ul id="repeat-object">
 		<li repeat bind-text>[.#key] - [.#val]</li>
 	</ul>
-	<ul id="expected-repeat-object">
-		<script tail="domtX" type="text/template" repeat><li bind-text="">[.#key] - [.#val]</li></script><li>a - one</li><li>b - two</li><script id="domtX"></script>
+	<ul id="expected-repeat-object" domt="">
+		<!--{"id":"domtX","repeat":"","template":"<li bind-text=\"\">[.#key] - [.#val]</li>","domt":4}--><li>a - one</li><li>b - two</li><!--{"id":"domtX","domt":4}-->
 	</ul>
 
 	<table id="repeat-repeat">
@@ -289,31 +290,31 @@
 		<tr repeat="table"><td bind-bind-text="table.[col.#key]" repeat="col"></td></tr>
 	</table>
 	<table id="expected-repeat-repeat">
-		<tr><script tail="domtX" type="text/template" repeat="col"><td bind-text="col.#val"></td></script><td>A</td><td>B</td><script id="domtX"></script></tr>
-		<script tail="domtX" type="text/template" repeat="table"><tr><td bind-bind-text="table.[col.#key]" repeat="col"></td></tr></script><tr><script tail="domtX" type="text/template" repeat="col"><td bind-bind-text="table.[col.#key]"></td></script><td>1</td><td>2</td><script id="domtX"></script></tr><tr><script tail="domtX" type="text/template" repeat="col"><td bind-bind-text="table.[col.#key]"></td></script><td>3</td><td>4</td><script id="domtX"></script></tr><script id="domtX"></script>
-	</table>
+		<tbody domt=""><tr domt=""><!--{"id":"domtX","repeat":"col","template":"<td bind-text=\"col.#val\"></td>","domt":4}--><td>A</td><td>B</td><!--{"id":"domtX","domt":4}--></tr>
+		<!--{"id":"domtX","repeat":"table","template":"<tr><td bind-bind-text=\"table.[col.#key]\" repeat=\"col\"></td></tr>","domt":4}--><tr domt=""><!--{"id":"domtX","repeat":"col","template":"<td bind-bind-text=\"table.[col.#key]\"></td>","domt":4}--><td>1</td><td>2</td><!--{"id":"domtX","domt":4}--></tr><tr domt=""><!--{"id":"domtX","repeat":"col","template":"<td bind-bind-text=\"table.[col.#key]\"></td>","domt":4}--><td>3</td><td>4</td><!--{"id":"domtX","domt":4}--></tr><!--{"id":"domtX","domt":4}-->
+	</tbody></table>
 
 	<table id="repeat-repeat-reload">
 		<tr><td bind-text="col.#val" repeat="col"></td></tr>
 		<tr repeat="table"><td bind-bind-text="table.[col.#key]" repeat="col"></td></tr>
 	</table>
 	<table id="expected-repeat-repeat-reload">
-		<tr><script tail="domtX" type="text/template" repeat="col"><td bind-text="col.#val"></td></script><td>A</td><td>B</td><td>C</td><script id="domtX"></script></tr>
-		<script tail="domtX" type="text/template" repeat="table"><tr><td bind-bind-text="table.[col.#key]" repeat="col"></td></tr></script><tr><script tail="domtX" type="text/template" repeat="col"><td bind-bind-text="table.[col.#key]"></td></script><td>1</td><td>2</td><td>5</td><script id="domtX"></script></tr><tr><script tail="domtX" type="text/template" repeat="col"><td bind-bind-text="table.[col.#key]"></td></script><td>3</td><td>4</td><td>6</td><script id="domtX"></script></tr><script id="domtX"></script>
-	</table>
+		<tbody domt=""><tr domt=""><!--{"id":"domtX","repeat":"col","template":"<td bind-text=\"col.#val\"></td>","domt":4}--><td>A</td><td>B</td><td>C</td><!--{"id":"domtX","domt":4}--></tr>
+		<!--{"id":"domtX","repeat":"table","template":"<tr><td bind-bind-text=\"table.[col.#key]\" repeat=\"col\"></td></tr>","domt":4}--><tr domt=""><!--{"id":"domtX","repeat":"col","template":"<td bind-bind-text=\"table.[col.#key]\"></td>","domt":4}--><td>1</td><td>2</td><td>5</td><!--{"id":"domtX","domt":4}--></tr><tr domt=""><!--{"id":"domtX","repeat":"col","template":"<td bind-bind-text=\"table.[col.#key]\"></td>","domt":4}--><td>3</td><td>4</td><td>6</td><!--{"id":"domtX","domt":4}--></tr><!--{"id":"domtX","domt":4}-->
+	</tbody></table>
 
 	<ul id="repeat-scope">
 		<li repeat="list" bind-text>[path] - [list.#val]</li>
 	</ul>
-	<ul id="expected-repeat-scope">
-		<script tail="domtX" type="text/template" repeat="list"><li bind-text="[path] - [list.#val]">mypath - </li></script><li>mypath - 12</li><li>mypath - 13</li><script id="domtX"></script>
+	<ul id="expected-repeat-scope" domt="">
+		<!--{"id":"domtX","repeat":"list","template":"<li bind-text=\"[path] - [list.#val]\">mypath - </li>","domt":4}--><li>mypath - 12</li><li>mypath - 13</li><!--{"id":"domtX","domt":4}-->
 	</ul>
 
 	<ul id="repeat-list">
 		<li repeat="data" bind-text="data.content"></li>
 	</ul>
-	<ul id="expected-repeat-list">
-		<script tail="domtX" type="text/template" repeat="data"><li bind-text="data.content"></li></script><li>three</li><li>four</li><script id="domtX"></script>
+	<ul id="expected-repeat-list" domt="">
+		<!--{"id":"domtX","repeat":"data","template":"<li bind-text=\"data.content\"></li>","domt":4}--><li>three</li><li>four</li><!--{"id":"domtX","domt":4}-->
 	</ul>
 
 	<ul class="two nodes">
@@ -322,29 +323,29 @@
 	<ul class="two nodes">
 		<li repeat="data" bind-text="data.content"></li>
 	</ul>
-	<ul id="expected-two-nodes">
-		<script tail="domtX" type="text/template" repeat="data"><li bind-text="data.content"></li></script><li>one</li><li>two</li><script id="domtX"></script>
+	<ul id="expected-two-nodes" domt="">
+		<!--{"id":"domtX","repeat":"data","template":"<li bind-text=\"data.content\"></li>","domt":4}--><li>one</li><li>two</li><!--{"id":"domtX","domt":4}-->
 	</ul>
 
 	<ul id="repeat-blockfilter">
 		<li repeat="data|myBlockFilter" bind-text>[data.content]</li>
 	</ul>
-	<ul id="expected-repeat-blockfilter">
-		<script tail="domtX" type="text/template" repeat="data|myBlockFilter"><li bind-text="">[data.content]</li></script><p>one</p><p>two</p><script id="domtX"></script>
+	<ul id="expected-repeat-blockfilter" domt="">
+		<!--{"id":"domtX","repeat":"data|myBlockFilter","template":"<li bind-text=\"\">[data.content]</li>","domt":4}--><p>one</p><p>two</p><!--{"id":"domtX","domt":4}-->
 	</ul>
 
 	<ul id="repeat-blockfilterstop">
 		<li repeat="data|myBlockFilter|mySecondBlockFilter" bind-text>[data.content]</li>
 	</ul>
-	<ul id="expected-repeat-blockfilterstop">
-		<script tail="domtX" type="text/template" repeat="data|myBlockFilter|mySecondBlockFilter"><li bind-text="">[data.content]</li></script><p>one</p><p>two</p><script id="domtX"></script>
+	<ul id="expected-repeat-blockfilterstop" domt="">
+		<!--{"id":"domtX","repeat":"data|myBlockFilter|mySecondBlockFilter","template":"<li bind-text=\"\">[data.content]</li>","domt":4}--><p>one</p><p>two</p><!--{"id":"domtX","domt":4}-->
 	</ul>
 
 	<ul id="repeat-replace-inplace">
 		<li repeat="data" class="bop [data.className]" bind-text="data.content"></li>
 	</ul>
-	<ul id="expected-repeat-replace-inplace">
-		<script tail="domtX" type="text/template" repeat="data"><li class="bop [data.className]" bind-text="data.content"></li></script><li class="bop classOne">one</li><li class="bop classTwo">two</li><script id="domtX"></script>
+	<ul id="expected-repeat-replace-inplace" domt="">
+		<!--{"id":"domtX","repeat":"data","template":"<li class=\"bop [data.className]\" bind-text=\"data.content\"></li>","domt":4}--><li class="bop classOne">one</li><li class="bop classTwo">two</li><!--{"id":"domtX","domt":4}-->
 	</ul>
 
 </body>

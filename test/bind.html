@@ -111,8 +111,8 @@
 	<h1 id="bindrepeat">bind then repeat
 		<span bind="article.list|myValueFilter" repeat="list|myBlockFilter" bind-text>[list.txt]</span>
 	</h1>
-	<h1 id="expected-bindrepeat">bind then repeat
-		<script tail="domtX" type="text/template" repeat="list|myBlockFilter" bind="article.list|myValueFilter"><span bind-text="">[list.txt]</span></script><span>b</span><span>c</span><script id="domtX"></script>
+	<h1 id="expected-bindrepeat" domt="">bind then repeat
+		<!--{"id":"domtX","bind":"article.list|myValueFilter","repeat":"list|myBlockFilter","template":"<span bind-text=\"\">[list.txt]</span>","domt":4}--><span>b</span><span>c</span><!--{"id":"domtX","domt":4}-->
 	</h1>
 
 </body>

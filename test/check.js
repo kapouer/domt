@@ -47,5 +47,5 @@ Domt.prototype.check = function(expectedId) {
 }
 
 window.changeIdNum = function(htmlStr, id) {
-	return htmlStr.replace(/(tail="domt)(\d+)(")/g, "$1"+id+"$3").replace(/(id="domt)(\d+)(")/g, "$1"+id+"$3");
+	return htmlStr.replace(/("id":"domt)(\d+)(")/g, "$1"+id+"$3");
 };
