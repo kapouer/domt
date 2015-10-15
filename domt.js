@@ -9,11 +9,13 @@ Domt.toString = function() {
 	return '(' + domtModule.toString() + ')()';
 };
 
+Domt.version = 4;
+
 Domt.ns = {
 	id: 'domt',
 	repeat: 'repeat',
 	bind: 'bind',
-	holder: 'holder',
+	holder: 'domt',
 	expr: '[*]',
 	query: ['html', 'text', 'src', 'href', 'lowsrc', 'srcset', 'class', 'value', 'data', 'action', 'hidden', 'id', 'name', 'style']
 };
@@ -127,37 +129,42 @@ function newId() {
 }
 
 function Holder(node) {
+	var orig = node[Domt.ns.holder];
+	if (orig) {
+		return orig;
+	}
 	if (!(this instanceof Holder)) return new Holder(node);
 	var REPEAT = Domt.ns.repeat, BIND = Domt.ns.bind;
-	if (node.tagName == "SCRIPT" && node.type == "text/template") {
+	if (node.nodeType == Node.COMMENT_NODE) {
 		this.head = node;
-		var orig = node[Domt.ns.holder];
-		if (orig) {
-			this.repeat = orig.repeat;
-			this.template = orig.template;
-			this.bind = orig.bind;
-			this.tail = orig.tail;
-			this.id = orig.id;
-		} else {
-			this.reload();
-		}
-		node.removeAttribute(REPEAT);
+		this.reload();
 	} else if (node.hasAttribute(REPEAT)) {
+		if (node.hasAttribute('id')) {
+			console.warn("Repeated nodes should not have an 'id' attribute", node.cloneNode().outerHTML);
+		}
 		this.id = newId();
 		this.template = node;
-		this.head = node.ownerDocument.createElement("script");
-		this.head.setAttribute('tail', this.id);
-		this.head.type = "text/template";
-		this.repeat = node.getAttribute(REPEAT) || "";
+		this.head = node.ownerDocument.createComment("");
+		if (node.hasAttribute(REPEAT)) {
+			this.repeat = node.getAttribute(REPEAT);
+			node.removeAttribute(REPEAT);
+		}
 		if (node.hasAttribute(BIND)) {
 			this.bind = node.getAttribute(BIND);
 			node.removeAttribute(BIND);
 		}
-		node.removeAttribute(REPEAT);
+		this.head.nodeValue = JSON.stringify({
+			id: this.id,
+			bind: this.bind,
+			repeat: this.repeat,
+			template: this.template.outerHTML,
+			domt: Domt.version
+		}).replace(/--/g, "\\x2D\\x2D"); // HTML Comments escaping
 		node.parentNode.insertBefore(this.head, node);
-		this.head.text = node.outerHTML;
-		this.tail = node.ownerDocument.createElement("script");
-		this.tail.id = this.id;
+		this.tail = node.ownerDocument.createComment(JSON.stringify({
+			id: this.id,
+			domt: Domt.version
+		}));
 		node.parentNode.insertBefore(this.tail, node);
 		node.parentNode.removeChild(node);
 	} else {
@@ -170,25 +177,46 @@ function Holder(node) {
 	this.head[Domt.ns.holder] = this;
 	return this;
 }
+
 Holder.prototype.close = function() {
-	var node = this.head;
-	if (this.repeat !== undefined) {
-		node.setAttribute(Domt.ns.repeat, this.repeat);
+	var parent = this.head.parentNode;
+	if (!parent) {
+		console.error("Missing parentNode for holder of", this.head.cloneNode().outerHTML);
+	} else if (this.repeat != null && !parent.hasAttribute(Domt.ns.holder)) {
+		parent.setAttribute(Domt.ns.holder, "");
 	}
-	if (this.bind !== undefined) {
-		node.setAttribute(Domt.ns.bind, this.bind);
+	if (this.bind != null && this.head.nodeType != Node.COMMENT_NODE && !this.head.hasAttribute(Domt.ns.bind)) {
+		this.head.setAttribute(Domt.ns.bind, this.bind);
 	}
 };
+
 Holder.prototype.reload = function() {
-	var head = this.head;
-	this.tail = document.getElementById(head.getAttribute('tail'));
-	var REPEAT = Domt.ns.repeat;
-	this.repeat = head.getAttribute(REPEAT) || this.repeat || "";
-	this.bind = head.getAttribute(Domt.ns.bind) || this.bind || undefined;
+	var obj = parse(this.head);
+	if (!obj) return;
+	else if (!obj.template) {
+		console.error("Node holder missing template", obj);
+		return;
+	}
+	// search tail
+	this.tail = next(this.head, Node.COMMENT_NODE);
+	if (!this.tail) {
+		console.error("Node holder missing tail", obj);
+		return;
+	}
+	var tobj = parse(this.tail);
+	if (!tobj || tobj.id != obj.id) {
+		this.tail = null;
+		console.error("Node holder wrong tail", tobj, obj);
+		return;
+	}
+	this.repeat = obj.repeat;
+	this.bind = obj.bind;
+	this.id = obj.id;
+
 	var doc = document.implementation && document.implementation.createHTMLDocument ?
 		document.implementation.createHTMLDocument('') : document;
 	var div = doc.createElement('div');
-	var html = head.text.replace(/^\s+|\s+$/g, '');
+	var html = obj.template;
 	var tagName = match(/<(\w+)[\s>]/i, html);
 	if (tagName) {
 		tagName = tagName.toLowerCase();
@@ -269,20 +297,40 @@ Domt.prototype.empty = function() {
 Domt.prototype.merge = function(obj, opts) {
 	if (this._nodes) this.init();
 	opts = opts || {};
-	var filters = addToFilters(this.filters.slice(), opts);
+	var filters = addToFilters(this.filters, opts); // TODO copy current filters
 	var nodes = opts.node ? [opts.node] : this.nodes;
 	var that = this;
+	var REPEAT = Domt.ns.repeat;
+	var BIND = Domt.ns.bind;
+	var HOLDER = Domt.ns.holder;
 	each(nodes, function(node) {
 		var bound, repeated, h, len, parentNode, curNode, i;
 		var parent = node;
-		var REPEAT = Domt.ns.repeat;
 		if (node.hasAttribute(REPEAT)) {
 			console.error("Repeated nodes must not be selected directly", node.cloneNode().outerHTML);
 		}
-		var BIND = Domt.ns.bind;
 		var holders = [];
 		do {
-			h = Holder(node);
+			if (node.hasAttribute(HOLDER)) {
+				node.removeAttribute(HOLDER);
+				var subnode = node.firstChild;
+				while (subnode) {
+					if (subnode.nodeType == Node.COMMENT_NODE) {
+						h = Holder(subnode);
+						if (h.tail) {
+							processNode(subnode, h);
+							subnode = h.tail;
+						}
+					}
+					subnode = subnode.nextSibling;
+				}
+			} else {
+				h = Holder(node);
+				processNode(node, h);
+			}
+		} while ((node = parent.querySelector('[' + HOLDER + '],[' + REPEAT + '],[' + BIND + ']')));
+
+		function processNode(node, h) {
 			holders.push(h);
 			parentNode = h.head.parentNode;
 			if (h.bind) {
@@ -295,9 +343,6 @@ Domt.prototype.merge = function(obj, opts) {
 			}
 
 			if (h.repeat !== undefined) {
-				if (node.hasAttribute('id')) {
-					console.warn("Repeated nodes should not have an 'id' attribute", node.cloneNode().outerHTML);
-				}
 				if (opts.empty) {
 					while ((curNode = h.head.nextSibling) && curNode.id != h.tail.id) {
 						parentNode.removeChild(curNode);
@@ -344,7 +389,7 @@ Domt.prototype.merge = function(obj, opts) {
 			} else {
 				that.replace(bound, node);
 			}
-		} while ((node = parent.querySelector('[' + REPEAT + '],[' + BIND + ']')));
+		}
 
 		len = holders.length;
 		for (i=0; i < len; i++) {
@@ -488,6 +533,23 @@ function find(scope, accessor, key, filters, node, att) {
 	}
 	if (last == null) last = "";
 	return {name: last, val: val};
+}
+
+function next(node, nodeType) {
+	while (node = node.nextSibling) {
+		if (node.nodeType == nodeType) {
+			return node;
+		}
+	}
+}
+
+function parse(node) {
+	var obj;
+	try { obj = JSON.parse(node.nodeValue); } catch(ex) {}
+	if (obj && obj.domt) {
+		if (obj.id) return obj;
+		else console.error("Node holder missing id", obj);
+	}
 }
 
 function DomtError(message) {
