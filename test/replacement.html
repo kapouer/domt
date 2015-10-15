@@ -100,7 +100,7 @@
 	<a id="expected-replace-escape" bind-href="http://localhost/?name=[name|esc]" href="http://localhost/?name=Barns%20%26%20Smiths">Test replace</a>
 
 	<div id="empty"><div repeat><p bind-text>[some][.to.something]</p></div></div>
-	<div id="expected-empty" domt=""><!--{"id":"domtX","repeat":"","template":"<div><p bind-text=\"\">[some][.to.something]</p></div>","domt":4}--><!--{"id":"domtX","domt":4}--></div>
+	<div id="expected-empty" domt=""><!--<div repeat=""><p bind-text="">[some][.to.something]</p></div>--><!----></div>
 
 	<div id="siblings"><p bind-text>[text] shouldn't be <b>test</b></p></div>
 	<div id="expected-siblings"><p bind-text="[text] shouldn't be &lt;b&gt;test&lt;/b&gt;">&lt;b&gt;test&lt;/b&gt; shouldn't be <b>test</b></p></div>
@@ -115,7 +115,7 @@
 	<div id="expected-filter-notcalled" bind-hidden="obj.text.try|called" class="[undef.style|notcalled]">hide me</div>
 
 	<div id="filter-repeat-null"><p repeat="items" bind-hidden="items|hide" bind-text>[items.text]</p></div>
-	<div id="expected-filter-repeat-null" domt=""><!--{"id":"domtX","repeat":"items","template":"<p bind-hidden=\"items|hide\" bind-text=\"\">[items.text]</p>","domt":4}--><p>is visible</p><p hidden="hidden">is hidden</p><!--{"id":"domtX","domt":4}--></div>
+	<div id="expected-filter-repeat-null" domt=""><!--<p repeat="items" bind-hidden="items|hide" bind-text="">[items.text]</p>--><p>is visible</p><p hidden="hidden">is hidden</p><!----></div>
 
 	<p id="replace-escape-br" bind-html="data|text|br"></p>
 	<p id="expected-replace-escape-br" bind-html="data|text|br">&lt;b&gt;no html&lt;/b&gt;<br>and a newline</p>
@@ -127,7 +127,7 @@
 		<li repeat="data" bind-text="data|filter"></li>
 	</ul>
 	<ul id="expected-repeated-accessor" domt="">
-		<!--{"id":"domtX","repeat":"data","template":"<li bind-text=\"data|filter\"></li>","domt":4}--><li>one</li><li>two</li><!--{"id":"domtX","domt":4}-->
+		<!--<li repeat="data" bind-text="data|filter"></li>--><li>one</li><li>two</li><!---->
 	</ul>
 
 </body>
