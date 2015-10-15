@@ -115,19 +115,6 @@ function match(re, str) {
 	if (m && m.length == 2) return m[1];
 }
 
-function newId() {
-	var num = Domt.seq;
-	if (!num) num = Domt.seq = 1;
-	var pref = Domt.ns.id;
-	var id;
-	while (true) {
-		id = pref + num++;
-		if (!document.getElementById(id)) break;
-	}
-	Domt.seq = num;
-	return id;
-}
-
 function Holder(node) {
 	var orig = node[Domt.ns.holder];
 	if (orig) {
@@ -142,9 +129,10 @@ function Holder(node) {
 		if (node.hasAttribute('id')) {
 			console.warn("Repeated nodes should not have an 'id' attribute", node.cloneNode().outerHTML);
 		}
-		this.id = newId();
 		this.template = node;
-		this.head = node.ownerDocument.createComment("");
+		// double-dashes need escaping and browsers don't do it
+		this.head = node.ownerDocument.createComment(node.outerHTML.replace(/--/g, "\\-\\-"));
+
 		if (node.hasAttribute(REPEAT)) {
 			this.repeat = node.getAttribute(REPEAT);
 			node.removeAttribute(REPEAT);
@@ -153,18 +141,8 @@ function Holder(node) {
 			this.bind = node.getAttribute(BIND);
 			node.removeAttribute(BIND);
 		}
-		this.head.nodeValue = JSON.stringify({
-			id: this.id,
-			bind: this.bind,
-			repeat: this.repeat,
-			template: this.template.outerHTML,
-			domt: Domt.version
-		}).replace(/--/g, "\\\\-\\\\-"); // HTML Comments escaping
 		node.parentNode.insertBefore(this.head, node);
-		this.tail = node.ownerDocument.createComment(JSON.stringify({
-			id: this.id,
-			domt: Domt.version
-		}));
+		this.tail = node.ownerDocument.createComment("");
 		node.parentNode.insertBefore(this.tail, node);
 		node.parentNode.removeChild(node);
 	} else {
@@ -190,32 +168,16 @@ Holder.prototype.close = function() {
 };
 
 Holder.prototype.reload = function() {
-	var obj = parse(this.head);
-	if (!obj) return;
-	else if (!obj.template) {
-		console.error("Node holder missing template", obj);
-		return;
-	}
-	// search tail
 	this.tail = next(this.head, Node.COMMENT_NODE);
 	if (!this.tail) {
 		console.error("Node holder missing tail", obj);
 		return;
 	}
-	var tobj = parse(this.tail);
-	if (!tobj || tobj.id != obj.id) {
-		this.tail = null;
-		console.error("Node holder wrong tail", tobj, obj);
-		return;
-	}
-	this.repeat = obj.repeat;
-	this.bind = obj.bind;
-	this.id = obj.id;
 
 	var doc = document.implementation && document.implementation.createHTMLDocument ?
 		document.implementation.createHTMLDocument('') : document;
 	var div = doc.createElement('div');
-	var html = obj.template.replace(/\\-\\-/g, "--"); // HTML Comments unescaping
+	var html = this.head.nodeValue.replace(/\\-\\-/g, "--"); // HTML Comments unescaping
 	var tagName = match(/<(\w+)[\s>]/i, html);
 	if (tagName) {
 		tagName = tagName.toLowerCase();
@@ -227,7 +189,17 @@ Holder.prototype.reload = function() {
 		div.innerHTML = html;
 		this.template = div.querySelector(tagName);
 	}
-	if (!this.template) throw DomtError("problem parsing template\n" + html);
+	var node = this.template;
+	if (!node) throw DomtError("problem parsing template\n" + html);
+	var REPEAT = Domt.ns.repeat, BIND = Domt.ns.bind;
+	if (node.hasAttribute(REPEAT)) {
+		this.repeat = node.getAttribute(REPEAT);
+		node.removeAttribute(REPEAT);
+	}
+	if (node.hasAttribute(BIND)) {
+		this.bind = node.getAttribute(BIND);
+		node.removeAttribute(BIND);
+	}
 };
 
 function each(obj, fun) {
@@ -539,15 +511,6 @@ function next(node, nodeType) {
 		if (node.nodeType == nodeType) {
 			return node;
 		}
-	}
-}
-
-function parse(node) {
-	var obj;
-	try { obj = JSON.parse(node.nodeValue); } catch(ex) {}
-	if (obj && obj.domt) {
-		if (obj.id) return obj;
-		else console.error("Node holder missing id", obj);
 	}
 }
 
