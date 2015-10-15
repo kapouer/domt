@@ -159,7 +159,7 @@ function Holder(node) {
 			repeat: this.repeat,
 			template: this.template.outerHTML,
 			domt: Domt.version
-		}).replace(/--/g, "\\x2D\\x2D"); // HTML Comments escaping
+		}).replace(/--/g, "\\\\-\\\\-"); // HTML Comments escaping
 		node.parentNode.insertBefore(this.head, node);
 		this.tail = node.ownerDocument.createComment(JSON.stringify({
 			id: this.id,
@@ -216,7 +216,7 @@ Holder.prototype.reload = function() {
 	var doc = document.implementation && document.implementation.createHTMLDocument ?
 		document.implementation.createHTMLDocument('') : document;
 	var div = doc.createElement('div');
-	var html = obj.template;
+	var html = obj.template.replace(/\\-\\-/g, "--"); // HTML Comments unescaping
 	var tagName = match(/<(\w+)[\s>]/i, html);
 	if (tagName) {
 		tagName = tagName.toLowerCase();
