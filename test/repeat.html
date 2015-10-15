@@ -196,6 +196,23 @@
 			{ content: "two", className: 'classTwo' }
 		]}).check();
 	});
+	it("should repeat node with a comment within", function() {
+		Domt('#repeat-with-comment').merge({data: [
+			{ content: "one" },
+			{ content: "two" }
+		]}).check();
+	});
+	it("should repeat reloaded node with a comment within", function() {
+		Domt('#repeat-reload-with-comment').merge({data: [
+			{ content: "three" }
+		]}).check();
+	});
+	it("should repeat node and keep comment within", function() {
+		Domt('#repeat-keep-comment').merge({data: [
+			{ content: "one" },
+			{ content: "two" }
+		]}).check();
+	});
   </script>
 	<title>Domt test suite</title>
 </head>
@@ -346,6 +363,27 @@
 	</ul>
 	<ul id="expected-repeat-replace-inplace" domt="">
 		<!--{"id":"domtX","repeat":"data","template":"<li class=\"bop [data.className]\" bind-text=\"data.content\"></li>","domt":4}--><li class="bop classOne">one</li><li class="bop classTwo">two</li><!--{"id":"domtX","domt":4}-->
+	</ul>
+
+	<ul id="repeat-with-comment">
+		<li repeat="data" bind-text="data.content"><!-- a comment --></li>
+	</ul>
+	<ul id="expected-repeat-with-comment" domt="">
+		<!--{"id":"domtX","repeat":"data","template":"<li bind-text=\"data.content\"><!\\-\\- a comment \\-\\-></li>","domt":4}--><li>one</li><li>two</li><!--{"id":"domtX","domt":4}-->
+	</ul>
+
+	<ul id="repeat-keep-comment">
+		<li repeat="data"><span bind-text>[data.content]</span><!-- a comment --></li>
+	</ul>
+	<ul id="expected-repeat-keep-comment" domt="">
+		<!--{"id":"domtX","repeat":"data","template":"<li><span bind-text=\"\">[data.content]</span><!\\-\\- a comment \\-\\-></li>","domt":4}--><li><span>one</span><!-- a comment --></li><li><span>two</span><!-- a comment --></li><!--{"id":"domtX","domt":4}-->
+	</ul>
+
+	<ul id="repeat-reload-with-comment" domt="">
+		<!--{"id":"domtX","repeat":"data","template":"<li><span bind-text=\"\">[data.content]</span><!\\-\\- a comment \\-\\-></li>","domt":4}--><li><span>one</span><!-- a comment --></li><li><span>two</span><!-- a comment --></li><!--{"id":"domtX","domt":4}-->
+	</ul>
+	<ul id="expected-repeat-reload-with-comment" domt="">
+		<!--{"id":"domtX","repeat":"data","template":"<li><span bind-text=\"\">[data.content]</span><!\\-\\- a comment \\-\\-></li>","domt":4}--><li><span>one</span><!-- a comment --></li><li><span>two</span><!-- a comment --></li><li><span>three</span><!-- a comment --></li><!--{"id":"domtX","domt":4}-->
 	</ul>
 
 </body>
