@@ -121,10 +121,36 @@ function Holder(node) {
 		return orig;
 	}
 	if (!(this instanceof Holder)) return new Holder(node);
+	this.load(node);
+	this.head[Domt.ns.holder] = this;
+	return this;
+}
+
+Holder.prototype.load = function(node) {
 	var REPEAT = Domt.ns.repeat, BIND = Domt.ns.bind;
 	if (node.nodeType == Node.COMMENT_NODE) {
+		this.tail = next(node, Node.COMMENT_NODE);
+		if (!this.tail) {
+			throw new Error("Node holder missing tail\n" + node.cloneNode().outerHTML);
+		}
 		this.head = node;
-		this.reload();
+		var doc = (document.implementation && document.implementation.createHTMLDocument) ?
+			document.implementation.createHTMLDocument('') : document;
+		var div = doc.createElement('div');
+		var html = node.nodeValue.replace(/\\-\\-/g, "--"); // HTML Comments unescaping
+		var tagName = match(/<(\w+)[\s>]/i, html);
+		if (tagName) {
+			tagName = tagName.toLowerCase();
+			if (tagName == "td") {
+				html = '<table><tr>' + html + '</tr></table>';
+			} else if (tagName == "tr") {
+				html = '<table>' + html + '</table>';
+			}
+			div.innerHTML = html;
+			this.template = div.querySelector(tagName);
+		}
+		if (!this.template) throw DomtError("Problem parsing template\n" + html);
+		node = this.template;
 	} else if (node.hasAttribute(REPEAT)) {
 		if (node.hasAttribute('id')) {
 			console.warn("Repeated nodes should not have an 'id' attribute", node.cloneNode().outerHTML);
@@ -132,29 +158,22 @@ function Holder(node) {
 		this.template = node;
 		// double-dashes need escaping and browsers don't do it
 		this.head = node.ownerDocument.createComment(node.outerHTML.replace(/--/g, "\\-\\-"));
-
-		if (node.hasAttribute(REPEAT)) {
-			this.repeat = node.getAttribute(REPEAT);
-			node.removeAttribute(REPEAT);
-		}
-		if (node.hasAttribute(BIND)) {
-			this.bind = node.getAttribute(BIND);
-			node.removeAttribute(BIND);
-		}
 		node.parentNode.insertBefore(this.head, node);
 		this.tail = node.ownerDocument.createComment("");
 		node.parentNode.insertBefore(this.tail, node);
 		node.parentNode.removeChild(node);
 	} else {
-		if (node.hasAttribute(BIND)) {
-			this.bind = node.getAttribute(BIND);
-			node.removeAttribute(BIND);
-		}
 		this.head = node;
 	}
-	this.head[Domt.ns.holder] = this;
-	return this;
-}
+	if (node.hasAttribute(REPEAT)) {
+		this.repeat = node.getAttribute(REPEAT);
+		node.removeAttribute(REPEAT);
+	}
+	if (node.hasAttribute(BIND)) {
+		this.bind = node.getAttribute(BIND);
+		node.removeAttribute(BIND);
+	}
+};
 
 Holder.prototype.close = function() {
 	var head = this.head;
@@ -168,38 +187,7 @@ Holder.prototype.close = function() {
 };
 
 Holder.prototype.reload = function() {
-	this.tail = next(this.head, Node.COMMENT_NODE);
-	if (!this.tail) {
-		console.error("Node holder missing tail", obj);
-		return;
-	}
-
-	var doc = document.implementation && document.implementation.createHTMLDocument ?
-		document.implementation.createHTMLDocument('') : document;
-	var div = doc.createElement('div');
-	var html = this.head.nodeValue.replace(/\\-\\-/g, "--"); // HTML Comments unescaping
-	var tagName = match(/<(\w+)[\s>]/i, html);
-	if (tagName) {
-		tagName = tagName.toLowerCase();
-		if (tagName == "td") {
-			html = '<table><tr>' + html + '</tr></table>';
-		} else if (tagName == "tr") {
-			html = '<table>' + html + '</table>';
-		}
-		div.innerHTML = html;
-		this.template = div.querySelector(tagName);
-	}
-	var node = this.template;
-	if (!node) throw DomtError("problem parsing template\n" + html);
-	var REPEAT = Domt.ns.repeat, BIND = Domt.ns.bind;
-	if (node.hasAttribute(REPEAT)) {
-		this.repeat = node.getAttribute(REPEAT);
-		node.removeAttribute(REPEAT);
-	}
-	if (node.hasAttribute(BIND)) {
-		this.bind = node.getAttribute(BIND);
-		node.removeAttribute(BIND);
-	}
+	this.load(this.head);
 };
 
 function each(obj, fun) {
