@@ -179,14 +179,13 @@ function Holder(node) {
 }
 
 Holder.prototype.close = function() {
-	var parent = this.head.parentNode;
-	if (!parent) {
-		console.error("Missing parentNode for holder of", this.head.cloneNode().outerHTML);
-	} else if (this.repeat != null && !parent.hasAttribute(Domt.ns.holder)) {
+	var head = this.head;
+	var parent = head.parentNode;
+	if (parent && this.repeat != null && !parent.hasAttribute(Domt.ns.holder)) {
 		parent.setAttribute(Domt.ns.holder, "");
 	}
-	if (this.bind != null && this.head.nodeType != Node.COMMENT_NODE && !this.head.hasAttribute(Domt.ns.bind)) {
-		this.head.setAttribute(Domt.ns.bind, this.bind);
+	if (this.bind != null && head.nodeType != Node.COMMENT_NODE && !head.hasAttribute(Domt.ns.bind)) {
+		head.setAttribute(Domt.ns.bind, this.bind);
 	}
 };
 
