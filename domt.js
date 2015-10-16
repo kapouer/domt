@@ -125,6 +125,7 @@ function Template(node) {
 	this.head[Domt.ns.lookup] = this;
 	return this;
 }
+Domt.Template = Template;
 
 Template.prototype.load = function(node) {
 	var REPEAT = Domt.ns.repeat, BIND = Domt.ns.bind;
@@ -247,7 +248,7 @@ Domt.prototype.init = function() {
 	delete this._nodes;
 	if (typeof nodes == "string") {
 		nodes = document.querySelectorAll(nodes);
-	} else if (nodes && nodes.nodeType) {
+	} else if (nodes && (nodes.nodeType || nodes instanceof Template)) {
 		nodes = [nodes];
 	}
 	if (!nodes || nodes.length == 0) throw DomtError("Domt has no nodes to merge");
@@ -269,10 +270,16 @@ Domt.prototype.merge = function(obj, opts) {
 	var BIND = Domt.ns.bind;
 	var LOOKUP = Domt.ns.lookup;
 	each(nodes, function(node) {
-		var bound, repeated, h, len, parentNode, curNode, i;
-		var parent = node;
-		if (node.hasAttribute(REPEAT)) {
-			console.error("Repeated nodes must not be selected directly", node.cloneNode().outerHTML);
+		var parent;
+		if (node instanceof Template) {
+			parent = node.head;
+			processNode(parent, node);
+			node = parent;
+		} else {
+			parent = node;
+			if (node.hasAttribute(REPEAT)) {
+				console.error("Repeated nodes must not be selected directly", node.cloneNode().outerHTML);
+			}
 		}
 		var templates = [];
 		do {
@@ -281,7 +288,7 @@ Domt.prototype.merge = function(obj, opts) {
 				var subnode = node.firstChild;
 				while (subnode) {
 					if (subnode.nodeType == Node.COMMENT_NODE) {
-						h = Template(subnode);
+						var h = Template(subnode);
 						if (h.tail) {
 							processNode(subnode, h);
 							subnode = h.tail;
@@ -290,12 +297,12 @@ Domt.prototype.merge = function(obj, opts) {
 					subnode = subnode.nextSibling;
 				}
 			} else {
-				h = Template(node);
-				processNode(node, h);
+				processNode(node, Template(node));
 			}
 		} while ((node = parent.querySelector('[' + LOOKUP + '],[' + REPEAT + '],[' + BIND + ']')));
 
 		function processNode(node, h) {
+			var bound, repeated, len, parentNode, curNode, i;
 			templates.push(h);
 			parentNode = h.head.parentNode;
 			if (h.bind) {
