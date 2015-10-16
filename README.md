@@ -366,9 +366,17 @@ test/repeat.html#should repeat within repeat
 Utilities
 ---------
 
-* Domt.each(obj, iter);  
+* Domt.each(obj, iter)  
   obj can be an array, an object, a NodeList, a jQuery object  
   iter is a function with signature (item, index) called on each element of obj.
+
+* Domt.load(selectorOrNode)  
+  returns an instance of a template, upon which the following method is useful
+
+* template.place(node)  
+  place a template somewhere in the DOM. Useful when templates are not
+  embedded where they are merged.
+  See test/repeat.html#should load template from elsewhere and merge it in target
 
 
 Best practices
