@@ -95,3 +95,7 @@ This avoids having same id repeated over and over by mistake.
 
 Initialize it on the parent node.
 
+### A template can be loaded first and placed somewhere else to be merged
+
+This allows reusing templates through the web page, using load() and place().
+
