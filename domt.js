@@ -121,7 +121,7 @@ function Template(node) {
 		return orig;
 	}
 	if (!(this instanceof Template)) return new Template(node);
-	this.place(node);
+	this.place(node, true);
 	return this;
 }
 Domt.Template = Template;
@@ -211,11 +211,12 @@ Template.prototype.close = function() {
 	}
 };
 
-Template.prototype.place = function(head) {
+Template.prototype.place = function(head, noclose) {
 	if (head) {
 		this.head = head;
 	}
 	this.init(this.head);
+	if (!noclose && head) this.close();
 	return this;
 };
 

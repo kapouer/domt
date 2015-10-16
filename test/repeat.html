@@ -215,7 +215,7 @@
 	});
 	it("should load template from elsewhere and merge it in target", function() {
 		var template = Domt.load('#repeat-load-template > script');
-		template.place(document.querySelector("#repeat-load-template > .target").firstChild).close();
+		template.place(document.querySelector("#repeat-load-template > .target").firstChild);
 		Domt('#repeat-load-template').merge({data: [
 			{ content: "one" },
 			{ content: "two" }
