@@ -53,7 +53,7 @@
 			var expected = document.getElementById('expected-expected-repeat').cloneNode(true);
 			actual.id = 'repeat-copy';
 			expected.id = 'expected-repeat-copy';
-			document.body.innerHTML += changeIdNum(actual.outerHTML, 99) + expected.outerHTML;
+			document.body.innerHTML += actual.outerHTML + expected.outerHTML;
 
 			Domt('#repeat-copy').merge({data: [
 				{ content: "one" },
@@ -149,9 +149,9 @@
 			expected.removeAttribute('id');
 			nodes[0].removeAttribute('class');
 			nodes[1].removeAttribute('class');
-			var expectedHTML = changeIdNum(expected.outerHTML, "X");
-			window.assert.equal(changeIdNum(nodes[0].outerHTML, "X"), expectedHTML);
-			window.assert.equal(changeIdNum(nodes[1].outerHTML, "X"), expectedHTML);
+			var expectedHTML = expected.outerHTML;
+			window.assert.equal(nodes[0].outerHTML, expectedHTML);
+			window.assert.equal(nodes[1].outerHTML, expectedHTML);
 		});
 		it("should repeat and call the block filter", function() {
 			Domt('#repeat-blockfilter', {myBlockFilter: function(item, key, info) {
@@ -209,6 +209,14 @@
 	});
 	it("should repeat node and keep comment within", function() {
 		Domt('#repeat-keep-comment').merge({data: [
+			{ content: "one" },
+			{ content: "two" }
+		]}).check();
+	});
+	it("should load template from elsewhere and merge it in target", function() {
+		var template = Domt.load('#repeat-load-template > script');
+		template.place(document.querySelector("#repeat-load-template > .target").firstChild).close();
+		Domt('#repeat-load-template').merge({data: [
 			{ content: "one" },
 			{ content: "two" }
 		]}).check();
@@ -384,6 +392,15 @@
 	</ul>
 	<ul id="expected-repeat-reload-with-comment" domt="">
 		<!--<li repeat="data"><span bind-text="">[data.content]</span><!\-\- a comment \-\-></li>--><li><span>one</span><!-- a comment --></li><li><span>two</span><!-- a comment --></li><li><span>three</span><!-- a comment --></li><!---->
+	</ul>
+
+	<ul id="repeat-load-template">
+		<script type="text/template"><div repeat="data"><span bind-text>[data.content]</span></div></script>
+		<div class="target"><!----></div>
+	</ul>
+	<ul id="expected-repeat-load-template">
+		<script type="text/template"><div repeat="data"><span bind-text>[data.content]</span></div></script>
+		<div class="target" domt=""><!----><div><span>one</span></div><div><span>two</span></div><!----></div>
 	</ul>
 
 </body>

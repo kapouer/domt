@@ -41,11 +41,6 @@ Domt.prototype.check = function(expectedId) {
 
 	if (!actual && !expected) throw new Error("void check " + id + " " + expectedId);
 
-	actual = changeIdNum(actual, "X");
-
 	window.assert.equal(actual, expected);
 }
 
-window.changeIdNum = function(htmlStr, id) {
-	return htmlStr.replace(/("id":"domt)(\d+)(")/g, "$1"+id+"$3");
-};
