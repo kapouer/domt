@@ -15,7 +15,7 @@ Domt.ns = {
 	id: 'domt',
 	repeat: 'repeat',
 	bind: 'bind',
-	holder: 'domt',
+	lookup: 'domt',
 	expr: '[*]',
 	query: ['html', 'text', 'src', 'href', 'lowsrc', 'srcset', 'class', 'value', 'data', 'action', 'hidden', 'id', 'name', 'style']
 };
@@ -115,29 +115,35 @@ function match(re, str) {
 	if (m && m.length == 2) return m[1];
 }
 
-function Holder(node) {
-	var orig = node[Domt.ns.holder];
+function Template(node) {
+	var orig = node[Domt.ns.lookup];
 	if (orig) {
 		return orig;
 	}
-	if (!(this instanceof Holder)) return new Holder(node);
+	if (!(this instanceof Template)) return new Template(node);
 	this.load(node);
-	this.head[Domt.ns.holder] = this;
+	this.head[Domt.ns.lookup] = this;
 	return this;
 }
 
-Holder.prototype.load = function(node) {
+Template.prototype.load = function(node) {
 	var REPEAT = Domt.ns.repeat, BIND = Domt.ns.bind;
 	if (node.nodeType == Node.COMMENT_NODE) {
+		this.head = node;
 		this.tail = next(node, Node.COMMENT_NODE);
 		if (!this.tail) {
-			throw new Error("Node holder missing tail\n" + node.cloneNode().outerHTML);
+			// restore it
+			this.tail = node.ownerDocument.createComment("");
+			if (node.nextSibling) {
+				node.parentNode.insertBefore(this.tail, node.nextSibling);
+			} else {
+				node.parentNode.appendChild(this.tail);
+			}
 		}
-		this.head = node;
+		var html = (node.nodeValue || node.textContent).replace(/\\-\\-/g, "--"); // HTML Comments unescaping
 		var doc = (document.implementation && document.implementation.createHTMLDocument) ?
 			document.implementation.createHTMLDocument('') : document;
 		var div = doc.createElement('div');
-		var html = node.nodeValue.replace(/\\-\\-/g, "--"); // HTML Comments unescaping
 		var tagName = match(/<(\w+)[\s>]/i, html);
 		if (tagName) {
 			tagName = tagName.toLowerCase();
@@ -175,18 +181,18 @@ Holder.prototype.load = function(node) {
 	}
 };
 
-Holder.prototype.close = function() {
+Template.prototype.close = function() {
 	var head = this.head;
 	var parent = head.parentNode;
-	if (parent && this.repeat != null && !parent.hasAttribute(Domt.ns.holder)) {
-		parent.setAttribute(Domt.ns.holder, "");
+	if (parent && this.repeat != null && !parent.hasAttribute(Domt.ns.lookup)) {
+		parent.setAttribute(Domt.ns.lookup, "");
 	}
 	if (this.bind != null && head.nodeType != Node.COMMENT_NODE && !head.hasAttribute(Domt.ns.bind)) {
 		head.setAttribute(Domt.ns.bind, this.bind);
 	}
 };
 
-Holder.prototype.reload = function() {
+Template.prototype.reload = function() {
 	this.load(this.head);
 };
 
@@ -261,21 +267,21 @@ Domt.prototype.merge = function(obj, opts) {
 	var that = this;
 	var REPEAT = Domt.ns.repeat;
 	var BIND = Domt.ns.bind;
-	var HOLDER = Domt.ns.holder;
+	var LOOKUP = Domt.ns.lookup;
 	each(nodes, function(node) {
 		var bound, repeated, h, len, parentNode, curNode, i;
 		var parent = node;
 		if (node.hasAttribute(REPEAT)) {
 			console.error("Repeated nodes must not be selected directly", node.cloneNode().outerHTML);
 		}
-		var holders = [];
+		var templates = [];
 		do {
-			if (node.hasAttribute(HOLDER)) {
-				node.removeAttribute(HOLDER);
+			if (node.hasAttribute(LOOKUP)) {
+				node.removeAttribute(LOOKUP);
 				var subnode = node.firstChild;
 				while (subnode) {
 					if (subnode.nodeType == Node.COMMENT_NODE) {
-						h = Holder(subnode);
+						h = Template(subnode);
 						if (h.tail) {
 							processNode(subnode, h);
 							subnode = h.tail;
@@ -284,13 +290,13 @@ Domt.prototype.merge = function(obj, opts) {
 					subnode = subnode.nextSibling;
 				}
 			} else {
-				h = Holder(node);
+				h = Template(node);
 				processNode(node, h);
 			}
-		} while ((node = parent.querySelector('[' + HOLDER + '],[' + REPEAT + '],[' + BIND + ']')));
+		} while ((node = parent.querySelector('[' + LOOKUP + '],[' + REPEAT + '],[' + BIND + ']')));
 
 		function processNode(node, h) {
-			holders.push(h);
+			templates.push(h);
 			parentNode = h.head.parentNode;
 			if (h.bind) {
 				obj = find(obj, h.bind, undefined, filters, node);
@@ -306,7 +312,7 @@ Domt.prototype.merge = function(obj, opts) {
 					while ((curNode = h.head.nextSibling) && curNode.id != h.tail.id) {
 						parentNode.removeChild(curNode);
 					}
-					// restore holder.template modified by current.value === undefined (see after)
+					// template modified by current.value === undefined (see after)
 					h.reload();
 				}
 				var accessor = h.repeat.split('|');
@@ -350,9 +356,9 @@ Domt.prototype.merge = function(obj, opts) {
 			}
 		}
 
-		len = holders.length;
+		len = templates.length;
 		for (i=0; i < len; i++) {
-			holders[i].close();
+			templates[i].close();
 		}
 	});
 	return this;
