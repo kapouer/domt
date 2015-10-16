@@ -77,3 +77,21 @@ used until `merge` or `empty` methods are called.
 * bind is documented to be processed before repeat if both attributes are on
 the same node - this is the same behavior as before.
 
+
+4.1.0
+=====
+
+### Serialization is done in comment nodes
+* comment nodes are used in place of script nodes, it solves the problem with
+  stylesheets and selectors like :first-child.
+* it's also easier to define a template directly inside a comment node
+
+### Setting an id upon a repeated node triggers a warning
+
+Use bind-id.
+This avoids having same id repeated over and over by mistake.
+
+### Domt cannot be initialized directly on a repeated node
+
+Initialize it on the parent node.
+

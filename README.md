@@ -45,13 +45,11 @@ Starting with a template and a call to Domt:
 We get:
 ```html
 <div id="test" class="list" bind-class="class">
-  <ul>
-    <script tail="domt1" type="text/template" repeat="items">
-      <li class="red" bind-class="items.color" bind-text="items.text">first item</li>
-    </script>
+  <ul domt="">
+    <!--<li repeat="items" class="red" bind-class="items.color" bind-text="items.text">first item</li>-->
     <li class="blue">the sea</li>
     <li>the void</li>
-    <script id="domt1"></script>
+    <!---->
   </ul>
 </div>
 ```
@@ -341,8 +339,8 @@ Where context contains {
   name: the last name of the path before this filter was called,
   scope: the root object being accessed by path,
   filters: the available filters,
-  head: the script node bounding the start of the list,
-  tail: the script node bounding the end of the list
+  head: the comment node bounding the start of the list,
+  tail: the comment node bounding the end of the list
 }
 
 A block filter can control how context.node is going to be inserted:
