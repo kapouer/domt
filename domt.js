@@ -121,14 +121,15 @@ function Template(node) {
 		return orig;
 	}
 	if (!(this instanceof Template)) return new Template(node);
-	this.load(node);
-	this.head[Domt.ns.lookup] = this;
+	this.place(node);
 	return this;
 }
 Domt.Template = Template;
 
-Template.prototype.load = function(node) {
+Template.prototype.init = function(node) {
 	var REPEAT = Domt.ns.repeat, BIND = Domt.ns.bind;
+	var html, replacing = false;
+	this.head = this.tail = null;
 	if (node.nodeType == Node.COMMENT_NODE) {
 		this.head = node;
 		this.tail = next(node, Node.COMMENT_NODE);
@@ -141,7 +142,16 @@ Template.prototype.load = function(node) {
 				node.parentNode.appendChild(this.tail);
 			}
 		}
-		var html = (node.nodeValue || node.textContent).replace(/\\-\\-/g, "--"); // HTML Comments unescaping
+		html = (node.nodeValue || node.textContent).replace(/\\-\\-/g, "--"); // HTML Comments unescaping
+		if (!html && this.template) {
+			node = this.template;
+			replacing = true;
+		}
+	} else if (node.nodeName == "SCRIPT") {
+		html = node.textContent || node.innerText;
+	}
+	if (html) {
+		this.template = null;
 		var doc = (document.implementation && document.implementation.createHTMLDocument) ?
 			document.implementation.createHTMLDocument('') : document;
 		var div = doc.createElement('div');
@@ -154,22 +164,29 @@ Template.prototype.load = function(node) {
 				html = '<table>' + html + '</table>';
 			}
 			div.innerHTML = html;
-			this.template = div.querySelector(tagName);
+			node = div.querySelector(tagName);
 		}
-		if (!this.template) throw DomtError("Problem parsing template\n" + html);
-		node = this.template;
-	} else if (node.hasAttribute(REPEAT)) {
+		if (!node && !this.template) throw DomtError("Problem parsing template\n" + html);
+		if (node) this.template = node;
+	} else if (!replacing && node.hasAttribute(REPEAT)) {
 		if (node.hasAttribute('id')) {
 			console.warn("Repeated nodes should not have an 'id' attribute", node.cloneNode().outerHTML);
 		}
 		this.template = node;
-		// double-dashes need escaping and browsers don't do it
-		this.head = node.ownerDocument.createComment(node.outerHTML.replace(/--/g, "\\-\\-"));
-		node.parentNode.insertBefore(this.head, node);
-		this.tail = node.ownerDocument.createComment("");
-		node.parentNode.insertBefore(this.tail, node);
-		node.parentNode.removeChild(node);
-	} else {
+
+		var remove = false;
+		if (!this.head) {
+			// browsers do not escape double dashes in comment
+			this.head = node.ownerDocument.createComment(node.outerHTML.replace(/--/g, "\\-\\-"));
+			node.parentNode.insertBefore(this.head, node);
+			remove = true;
+		}
+		if (!this.tail) {
+			this.tail = node.ownerDocument.createComment("");
+			node.parentNode.insertBefore(this.tail, node);
+		}
+		if (remove) node.parentNode.removeChild(node);
+	} else if (!replacing) {
 		this.head = node;
 	}
 	if (node.hasAttribute(REPEAT)) {
@@ -180,6 +197,7 @@ Template.prototype.load = function(node) {
 		this.bind = node.getAttribute(BIND);
 		node.removeAttribute(BIND);
 	}
+	if (this.head) this.head[Domt.ns.lookup] = this;
 };
 
 Template.prototype.close = function() {
@@ -193,8 +211,12 @@ Template.prototype.close = function() {
 	}
 };
 
-Template.prototype.reload = function() {
-	this.load(this.head);
+Template.prototype.place = function(head) {
+	if (head) {
+		this.head = head;
+	}
+	this.init(this.head);
+	return this;
 };
 
 function each(obj, fun) {
@@ -253,6 +275,13 @@ Domt.prototype.init = function() {
 	}
 	if (!nodes || nodes.length == 0) throw DomtError("Domt has no nodes to merge");
 	this.nodes = nodes;
+};
+
+Domt.load = function(node) {
+	if (typeof node == "string") {
+		node = document.querySelector(node);
+	}
+	return new Template(node);
 };
 
 Domt.prototype.empty = function() {
@@ -320,7 +349,7 @@ Domt.prototype.merge = function(obj, opts) {
 						parentNode.removeChild(curNode);
 					}
 					// template modified by current.value === undefined (see after)
-					h.reload();
+					h.place();
 				}
 				var accessor = h.repeat.split('|');
 				repeated = find(bound, accessor);
