@@ -1,0 +1,9 @@
+How to use ?
+============
+
+npm install -g node-inspector
+
+Set a "debugger;" call in domt.js, and
+
+node-debug debug.js
+

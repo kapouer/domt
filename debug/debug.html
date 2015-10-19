@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <script src="domt.js"></script>
+  <script>
+  /*
+		var inst = Domt('#repeat-repeat-reload').merge({col:
+			{ a: "A", b: "B" }
+		});
+		console.log("merged columns", document.body.innerHTML);
+		inst.merge({table: [
+			{ a: 1, b: 2 },
+			{ a: 3, b: 4 },
+		]});
+		console.log("merge rows", document.body.innerHTML);
+		inst.empty();
+		console.log("empty", document.body.innerHTML);
+		inst.merge({col:
+			{ a: "A", b: "B", c: "C" }
+		});
+		console.log("merged columns", document.body.innerHTML);
+		inst.merge({table: [
+			{ a: 1, b: 2, c: 5 },
+			{ a: 3, b: 4, c: 6 },
+		]});
+		console.log("merged rows", document.body.innerHTML);
+	*/
+
+		var inst = Domt('#expected-repeat-repeat-reload-loop').merge({col:
+			{ a: "A", b: "B" }
+		}).merge({table: [
+				{ a: 1, b: 2, c: 5 }
+			]
+		});
+		console.log("merged rows", document.body.innerHTML);
+  </script>
+	<title>Domt test suite</title>
+</head>
+<body>
+
+
+	<table id="repeat-repeat-reload">
+		<tr><td bind-text="col.#val" repeat="col"></td></tr>
+		<tr repeat="table"><td bind-bind-text="table.[col.#key]" repeat="col"></td></tr>
+	</table>
+	<table id="expected-repeat-repeat-reload">
+		<tbody domt=""><tr domt=""><!--<td bind-text="col.#val" repeat="col"></td>--><td>A</td><td>B</td><td>C</td><!----></tr>
+		<!--<tr repeat="table"><td bind-bind-text="table.[col.#key]" repeat="col"></td></tr>--><tr domt=""><!--<td bind-bind-text="table.[col.#key]" repeat="col"></td>--><td>1</td><td>2</td><td>5</td><!----></tr><tr domt=""><!--<td bind-bind-text="table.[col.#key]" repeat="col"></td>--><td>3</td><td>4</td><td>6</td><!----></tr><!---->
+	</tbody></table>
+	<table id="expected-repeat-repeat-reload-loop">
+		<tbody domt=""><!--<tr repeat="table"><td bind-bind-text="table.[col.#key]" repeat="col"></td></tr>--><!----></tbody>
+	</table>
+
+</body>
+</html>
+
