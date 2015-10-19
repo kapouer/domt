@@ -377,7 +377,6 @@ Domt.prototype.empty = function() {
 };
 
 Domt.prototype.merge = function(obj, opts) {
-	debugger;
 	if (this._nodes) this.init();
 	opts = opts || {};
 	var filters = addToFilters(this.filters, opts); // TODO copy current filters
