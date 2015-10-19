@@ -81,7 +81,7 @@
 			var copy = inst.nodes[0].cloneNode(true);
 			copy.id = 'cell-copy';
 			var div = document.createElement("div");
-			div.innerHTML = copy.outerHTML.replace(/"id":"domt\d"/g, '"id":"domt100"');
+			div.innerHTML = copy.outerHTML;
 			inst.nodes[0].parentNode.insertBefore(div.firstChild, inst.nodes[0]);
 			Domt('#cell-copy').merge([
 				{ content: "three" },
