@@ -144,6 +144,9 @@ Either call Domt on that span, or add a bind attribute to it.
   - an object with length property and .item(i) method
   - finally the object is looped as an hash array
 
+* the next siblings with attribute "repeat-with" of a node with attribute "repeat"
+  this allows repeating several nodes at once, as a fragment.  
+  When doing this, the block filter context.node argument is a fragment.
 
 Operations on instances
 -----------------------
@@ -332,7 +335,7 @@ Domt.filters.myBlockFilter = function(row, key, context) {
 ```
 
 Where context contains {
-  node: the node where the value is being merged,
+  node: the documentFragment (or the only child node of it) being merged,
   parent: the parent where the node will be inserted by default,
   path: array of path components,
   index: current index in array of path,
@@ -344,7 +347,9 @@ Where context contains {
 }
 
 A block filter can control how context.node is going to be inserted:
-- by returning a new node, it replaces context.node
+- by returning a fragment, it replaces the previous fragment
+- by returning a new node, it replaces context.node (if there was only one
+  node in the fragment)
 - by returning false, it prevents context.node from being inserted  
   and it stops further block filters from being called
 - by inserting context.node itself somewhere else

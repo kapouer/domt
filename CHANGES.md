@@ -99,3 +99,7 @@ Initialize it on the parent node.
 
 This allows reusing templates through the web page, using load() and place().
 
+### A repeated node can be extended to repeat its following siblings
+
+Internally, Domt now manages repeated nodes in document fragments.
+
