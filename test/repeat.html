@@ -233,6 +233,22 @@
 				{ content: "two" }
 			]}).check();
 		});
+		it("should repeat a node and use a block filter to replace it by a fragment", function() {
+			Domt('#repeat-return-fragment').merge({data: [
+				{ content: "one" },
+				{ content: "two" },
+				{ content: "three" }
+			]}, {
+				bFilter: function(row, key, context) {
+					if (context.scope.data.length == key + 1) return;
+					var doc = context.node.ownerDocument;
+					var frag = doc.createDocumentFragment();
+					frag.appendChild(context.node);
+					frag.appendChild(doc.createElement('br'));
+					return frag;
+				}
+			}).check();
+		});
 	});
   </script>
 	<title>Domt test suite</title>
@@ -430,6 +446,13 @@
 		<li class="second">one</li><li class="first">two</li>
 		<li class="second">two</li><!---->
 	</ul>
+
+	<div id="repeat-return-fragment">
+		<span repeat="data|bFilter" bind-text="data.content"></span>
+	</div>
+	<div id="expected-repeat-return-fragment" domt="">
+		<!--<span repeat="data|bFilter" bind-text="data.content"></span>--><span>one</span><br><span>two</span><br><span>three</span><!---->
+	</div>
 
 </body>
 </html>
