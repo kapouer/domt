@@ -189,44 +189,50 @@
 			}}).check();
 			assert.equal(secondCalled, 2);
 		});
-	});
-	it("should repeat node and process 'in-place' attributes", function() {
-		Domt('#repeat-replace-inplace').merge({data: [
-			{ content: "one", className: 'classOne' },
-			{ content: "two", className: 'classTwo' }
-		]}).check();
-	});
-	it("should repeat node with a comment within", function() {
-		Domt('#repeat-with-comment').merge({data: [
-			{ content: "one" },
-			{ content: "two" }
-		]}).check();
-	});
-	it("should repeat reloaded node with a comment within", function() {
-		Domt('#repeat-reload-with-comment').merge({data: [
-			{ content: "three" }
-		]}).check();
-	});
-	it("should repeat node and keep comment within", function() {
-		Domt('#repeat-keep-comment').merge({data: [
-			{ content: "one" },
-			{ content: "two" }
-		]}).check();
-	});
-	it("should load template from elsewhere and merge it in target", function() {
-		var template = Domt.load('#repeat-load-template > script');
-		template.place(document.querySelector("#repeat-load-template > .target").firstChild);
-		Domt('#repeat-load-template').merge({data: [
-			{ content: "one" },
-			{ content: "two" }
-		]}).check();
-	});
-	it("should load template from elsewhere and merge it in target from a reload", function() {
-		var template = Domt.load('#expected-repeat-load-template > script');
-		template.place(document.querySelector("#expected-repeat-load-template > .target").firstChild);
-		Domt('#expected-repeat-load-template').merge({data: [
-			{ content: "three" }
-		]}).check();
+		it("should repeat node and process 'in-place' attributes", function() {
+			Domt('#repeat-replace-inplace').merge({data: [
+				{ content: "one", className: 'classOne' },
+				{ content: "two", className: 'classTwo' }
+			]}).check();
+		});
+		it("should repeat node with a comment within", function() {
+			Domt('#repeat-with-comment').merge({data: [
+				{ content: "one" },
+				{ content: "two" }
+			]}).check();
+		});
+		it("should repeat reloaded node with a comment within", function() {
+			Domt('#repeat-reload-with-comment').merge({data: [
+				{ content: "three" }
+			]}).check();
+		});
+		it("should repeat node and keep comment within", function() {
+			Domt('#repeat-keep-comment').merge({data: [
+				{ content: "one" },
+				{ content: "two" }
+			]}).check();
+		});
+		it("should load template from elsewhere and merge it in target", function() {
+			var template = Domt.load('#repeat-load-template > script');
+			template.place(document.querySelector("#repeat-load-template > .target").firstChild);
+			Domt('#repeat-load-template').merge({data: [
+				{ content: "one" },
+				{ content: "two" }
+			]}).check();
+		});
+		it("should load template from elsewhere and merge it in target from a reload", function() {
+			var template = Domt.load('#expected-repeat-load-template > script');
+			template.place(document.querySelector("#expected-repeat-load-template > .target").firstChild);
+			Domt('#expected-repeat-load-template').merge({data: [
+				{ content: "three" }
+			]}).check();
+		});
+		it("should repeat a fragment", function() {
+			Domt('#repeat-fragment').merge({data: [
+				{ content: "one" },
+				{ content: "two" }
+			]}).check();
+		});
 	});
   </script>
 	<title>Domt test suite</title>
@@ -412,6 +418,17 @@
 	<ul id="expected-expected-repeat-load-template">
 		<script type="text/template"><div repeat="data"><span bind-text>[data.content]</span></div></script>
 		<div class="target" domt=""><!----><div><span>one</span></div><div><span>two</span></div><div><span>three</span></div><!----></div>
+	</ul>
+
+	<ul id="repeat-fragment">
+		<li repeat="data" bind-text="data.content" class="first"></li>
+		<li repeat-with bind-text="data.content" class="second"></li>
+	</ul>
+	<ul id="expected-repeat-fragment" domt="">
+		<!--<li repeat="data" bind-text="data.content" class="first"></li>
+		<li bind-text="data.content" class="second"></li>--><li class="first">one</li>
+		<li class="second">one</li><li class="first">two</li>
+		<li class="second">two</li><!---->
 	</ul>
 
 </body>
