@@ -127,8 +127,8 @@ function Template(node) {
 Domt.Template = Template;
 
 Template.prototype.init = function(node) {
-	var REPEAT = Domt.ns.repeat, BIND = Domt.ns.bind;
-	var html, replacing = false;
+	var REPEAT = Domt.ns.repeat, BIND = Domt.ns.bind, LOOKUP = Domt.ns.lookup;
+	var html, fragment, cur, after, copy, replacing = false;
 	this.head = this.tail = null;
 	if (node.nodeType == Node.COMMENT_NODE) {
 		this.head = node;
@@ -143,67 +143,153 @@ Template.prototype.init = function(node) {
 			}
 		}
 		html = (node.nodeValue || node.textContent).replace(/\\-\\-/g, "--"); // HTML Comments unescaping
-		if (!html && this.template) {
-			node = this.template;
-			replacing = true;
+		if (!html) {
+			if (this.template) {
+				node = this.template;
+				replacing = true;
+			} else {
+				// bad template, just return without tail
+				return;
+			}
 		}
 	} else if (node.nodeName == "SCRIPT") {
 		html = node.textContent || node.innerText;
+	} else if (node.nodeName == "TEMPLATE" && node.content) {
+		fragment = node.content;
 	}
-	if (html) {
+	if (!html && node.nodeType != 1) {
+		// this is somehow weird
+	} else if (html) {
 		this.template = null;
-		var doc = (document.implementation && document.implementation.createHTMLDocument) ?
-			document.implementation.createHTMLDocument('') : document;
-		var div = doc.createElement('div');
-		var tagName = match(/<(\w+)[\s>]/i, html);
+		var doc = document.implementation
+			&& document.implementation.createHTMLDocument
+			&& document.implementation.createHTMLDocument('');
+		if (doc) {
+			fragment = doc.createDocumentFragment();
+		} else {
+			// IE8 do have a documentFragment that is like a document
+			// and also doesn't preload images. Might run scripts, though.
+			fragment = doc = document.createDocumentFragment();
+		}
+		var tagName = match(/^\s*<(\w+)[\s>]/i, html);
+		var wrapperTag = 'div';
 		if (tagName) {
 			tagName = tagName.toLowerCase();
 			if (tagName == "td") {
-				html = '<table><tr>' + html + '</tr></table>';
+				html = '<tr>' + html + '</tr>';
+				wrapperTag = "table";
 			} else if (tagName == "tr") {
-				html = '<table>' + html + '</table>';
+				wrapperTag = "table";
 			}
-			div.innerHTML = html;
-			node = div.querySelector(tagName);
+		} else {
+			throw new DomtError("No tag found in template", html);
 		}
-		if (!node && !this.template) throw DomtError("Problem parsing template\n" + html);
-		if (node) this.template = node;
+
+		var div = doc.createElement(wrapperTag);
+		div.innerHTML = html;
+		node = cur = div.querySelector(tagName);
+		if (!cur) {
+			throw new Error("problem with querySelector here", div.innerHTML, html);
+		}
+		do {
+			after = cur.nextSibling;
+			fragment.appendChild(cur);
+			cur = after;
+		} while (cur);
+
+		if (!fragment.childNodes.length) {
+			if (!this.template) throw DomtError("Problem parsing template\n" + html);
+		} else {
+			this.template = fragment;
+		}
 	} else if (!replacing && node.hasAttribute(REPEAT)) {
 		if (node.hasAttribute('id')) {
 			console.warn("Repeated nodes should not have an 'id' attribute", node.cloneNode().outerHTML);
 		}
-		this.template = node;
-
 		var remove = false;
+		var parent = node.parentNode;
+		fragment = document.createDocumentFragment();
 		if (!this.head) {
 			// browsers do not escape double dashes in comment
-			this.head = node.ownerDocument.createComment(node.outerHTML.replace(/--/g, "\\-\\-"));
-			node.parentNode.insertBefore(this.head, node);
+			this.head = node.ownerDocument.createComment("");
+			parent.insertBefore(this.head, node);
 			remove = true;
 		}
+		var end = after = node;
+		html = "";
+		do {
+			cur = after;
+			after = cur.nextSibling;
+			if (!after) break;
+			if (after.nodeType == Node.TEXT_NODE) {
+				continue;
+			} else if (after.nodeType != Node.ELEMENT_NODE || !after.hasAttribute(REPEAT + '-with')) {
+				break;
+			} else {
+				end = after;
+				after.removeAttribute(REPEAT + '-with');
+			}
+		} while (after);
+
 		if (!this.tail) {
-			this.tail = node.ownerDocument.createComment("");
-			node.parentNode.insertBefore(this.tail, node);
+			this.tail = end.ownerDocument.createComment("");
+			if (end.nextSibling) end.parentNode.insertBefore(this.tail, end.nextSibling);
+			else end.parentNode.appendChild(this.tail);
 		}
-		if (remove) node.parentNode.removeChild(node);
+
+		after = node;
+		node = null;
+		do {
+			cur = after;
+			after = cur.nextSibling;
+			if (cur.ownerDocument != fragment.ownerDocument) {
+				if (remove)	{
+					cur.parentNode.removeChild(cur);
+				}
+				copy = fragment.ownerDocument.importNode(cur, true);
+				fragment.appendChild(copy);
+			} else {
+				if (remove) {
+					fragment.appendChild(cur);
+					copy = cur;
+				} else {
+					copy = cur.cloneNode(true);
+					fragment.appendChild(copy);
+				}
+			}
+
+			if (cur.nodeType == Node.ELEMENT_NODE) {
+				if (!node) node = copy;
+				html += cur.outerHTML;
+			} else if (cur.nodeType == Node.TEXT_NODE) {
+				html += cur.nodeValue;
+			} else {
+				console.trace("Undealt node type, please report", cur.nodeType, cur.outerHTML || cur.nodeValue);
+			}
+		} while (cur != end);
+
+		this.template = fragment;
+		this.head.nodeValue = html.replace(/--/g, "\\-\\-");
 	} else if (!replacing) {
 		this.head = node;
 	}
-	if (node.hasAttribute(REPEAT)) {
-		this.repeat = node.getAttribute(REPEAT);
-		node.removeAttribute(REPEAT);
+	if (node.nodeType == Node.ELEMENT_NODE) {
+		if (node.hasAttribute(REPEAT)) {
+			this.repeat = node.getAttribute(REPEAT);
+			node.removeAttribute(REPEAT);
+		}
+		if (node.hasAttribute(BIND)) {
+			this.bind = node.getAttribute(BIND);
+			node.removeAttribute(BIND);
+		}
 	}
-	if (node.hasAttribute(BIND)) {
-		this.bind = node.getAttribute(BIND);
-		node.removeAttribute(BIND);
-	}
-	if (this.head) this.head[Domt.ns.lookup] = this;
+	if (this.head) this.head[LOOKUP] = this;
 };
 
 Template.prototype.close = function() {
 	var head = this.head;
 	var parent = head.parentNode;
-	if (parent && this.repeat != null && !parent.hasAttribute(Domt.ns.lookup)) {
+	if (parent && parent.nodeType == Node.ELEMENT_NODE && this.repeat != null && !parent.hasAttribute(Domt.ns.lookup)) {
 		parent.setAttribute(Domt.ns.lookup, "");
 	}
 	if (this.bind != null && head.nodeType != Node.COMMENT_NODE && !head.hasAttribute(Domt.ns.bind)) {
@@ -291,10 +377,16 @@ Domt.prototype.empty = function() {
 };
 
 Domt.prototype.merge = function(obj, opts) {
+	debugger;
 	if (this._nodes) this.init();
 	opts = opts || {};
 	var filters = addToFilters(this.filters, opts); // TODO copy current filters
-	var nodes = opts.node ? [opts.node] : this.nodes;
+	var nodes = opts.node;
+	if (nodes) {
+		if (nodes.length == null) nodes = [nodes];
+	} else {
+		nodes = this.nodes;
+	}
 	var that = this;
 	var REPEAT = Domt.ns.repeat;
 	var BIND = Domt.ns.bind;
@@ -307,7 +399,8 @@ Domt.prototype.merge = function(obj, opts) {
 			node = parent;
 		} else {
 			parent = node;
-			if (node.hasAttribute(REPEAT)) {
+			if (node.hasAttribute(REPEAT) && !opts.node) {
+				// because the repeated node mutates
 				console.error("Repeated nodes must not be selected directly", node.cloneNode().outerHTML);
 			}
 		}
@@ -334,7 +427,6 @@ Domt.prototype.merge = function(obj, opts) {
 		function processNode(node, h) {
 			var bound, repeated, len, parentNode, curNode, i;
 			templates.push(h);
-			parentNode = h.head.parentNode;
 			if (h.bind) {
 				obj = find(obj, h.bind, undefined, filters, node);
 				bound = {};
@@ -344,9 +436,10 @@ Domt.prototype.merge = function(obj, opts) {
 				bound = obj;
 			}
 
+			parentNode = h.head.parentNode;
 			if (h.repeat !== undefined) {
 				if (opts.empty) {
-					while ((curNode = h.head.nextSibling) && curNode.id != h.tail.id) {
+					while ((curNode = h.head.nextSibling) && curNode != h.tail) {
 						parentNode.removeChild(curNode);
 					}
 					// template modified by current.value === undefined (see after)
@@ -354,42 +447,57 @@ Domt.prototype.merge = function(obj, opts) {
 				}
 				var accessor = h.repeat.split('|');
 				repeated = find(bound, accessor);
+				var template = h.template;
+
 				if (repeated.val === undefined) {
 					// h.template is out of DOM so it won't be found by querySelector
-					that.merge(bound, {node: h.template});
+					that.merge(bound, {node: template.childNodes});
 				} else {
 					each(repeated.val, function(val, key) {
-						var clone = h.template.ownerDocument != parentNode.ownerDocument && document.importNode ? parentNode.ownerDocument.importNode(h.template, true) : h.template.cloneNode(true);
 						bound[repeated.name] = val;
-						that.replace(bound, clone, key);
+						var clone = parentNode.ownerDocument.createDocumentFragment();
+						each(template.childNodes, function(child) {
+							var copy = cloneFor(parentNode, child);
+							clone.appendChild(copy);
+							if (child.querySelectorAll) {
+								that.replace(bound, copy, key);
+							}
+						});
 						bound[repeated.name] = repeated.val;
-						var insertNode = true;
+						var insertNodes = true;
 						for (var i=1; i < accessor.length; i++) {
 							var bfilter = filters[accessor[i]];
 							if (!bfilter) continue;
+							var isSingle = clone.childNodes.length == 1;
 							var maybe = bfilter(val, key, {
 								parent: h.head.parentNode,
 								filters: filters,
-								node: clone,
-								scope:bound,
+								node: isSingle ? clone.childNodes.item(0) : clone,
+								scope: bound,
 								path: accessor[0],
 								head: h.head,
 								tail: h.tail
 							});
-							if (maybe && maybe.nodeType) clone = maybe;
-							else if (maybe === false) {
-								insertNode = false;
+							if (maybe && maybe.nodeType) {
+								if (maybe.nodeType == Node.DOCUMENT_FRAGMENT) clone = maybe;
+								else if (isSingle) clone.replaceChild(maybe, clone.childNodes.item(0));
+								else console.error("Block filter must return a fragment");
+							} else if (maybe === false) {
+								insertNodes = false;
 								break;
 							}
 						}
-						if (insertNode && clone.parentNode == null) {
-							if (h.head.parentNode != h.tail.parentNode) throw new Error("Head and tail split");
-							parentNode.insertBefore(clone, h.tail);
+						if (h.head.parentNode != h.tail.parentNode) throw new Error("Head and tail split");
+						if (!h.tail) throw new Error("No tail");
+						if (insertNodes) while (clone.childNodes.length) {
+							parentNode.insertBefore(clone.firstChild, h.tail);
 						}
 					});
 				}
-			} else {
+			} else if (node.nodeType == 1) {
 				that.replace(bound, node);
+			} else {
+				console.error("Unprocessed node", node.nodeType, node.nodeValue);
 			}
 		}
 
