@@ -415,6 +415,7 @@ function fragmentToString(frag) {
 }
 
 Domt.prototype.replace = function(obj, node, key) {
+	if (!node.querySelectorAll) throw new DomtError("Cannot replace node with type " + node.nodeType);
 	var descendants = node.querySelectorAll(this.query);
 	var i = 0;
 	var len = descendants.length;
