@@ -401,6 +401,19 @@ Domt.prototype.merge = function(obj, opts) {
 	return this;
 };
 
+function cloneFor(parent, node) {
+	return (node.ownerDocument != parent.ownerDocument && document.importNode) ? parent.ownerDocument.importNode(node, true) : node.cloneNode(true);
+}
+
+function fragmentToString(frag) {
+	var doc = frag.ownerDocument;
+	var div = doc.createElement('div');
+	for (var i=0; i < frag.childNodes.length; i++) {
+		div.appendChild(frag.childNodes.item(i).cloneNode(true));
+	}
+	return div.innerHTML;
+}
+
 Domt.prototype.replace = function(obj, node, key) {
 	var descendants = node.querySelectorAll(this.query);
 	var i = 0;
