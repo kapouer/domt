@@ -479,7 +479,7 @@ Domt.prototype.merge = function(obj, opts) {
 								tail: h.tail
 							});
 							if (maybe && maybe.nodeType) {
-								if (maybe.nodeType == Node.DOCUMENT_FRAGMENT) clone = maybe;
+								if (maybe.nodeType == Node.DOCUMENT_FRAGMENT_NODE) clone = maybe;
 								else if (isSingle) clone.replaceChild(maybe, clone.childNodes.item(0));
 								else console.error("Block filter must return a fragment");
 							} else if (maybe === false) {
