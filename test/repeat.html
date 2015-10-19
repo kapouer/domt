@@ -231,7 +231,11 @@
 			Domt('#repeat-fragment').merge({data: [
 				{ content: "one" },
 				{ content: "two" }
-			]}).check();
+			]}, {
+				bFilter: function(row, key, context) {
+					context.node.lastChild.className += " test";
+				}
+			}).check();
 		});
 		it("should repeat a node and use a block filter to replace it by a fragment", function() {
 			Domt('#repeat-return-fragment').merge({data: [
@@ -437,14 +441,14 @@
 	</ul>
 
 	<ul id="repeat-fragment">
-		<li repeat="data" bind-text="data.content" class="first"></li>
+		<li repeat="data|bFilter" bind-text="data.content" class="first"></li>
 		<li repeat-with bind-text="data.content" class="second"></li>
 	</ul>
 	<ul id="expected-repeat-fragment" domt="">
-		<!--<li repeat="data" bind-text="data.content" class="first"></li>
+		<!--<li repeat="data|bFilter" bind-text="data.content" class="first"></li>
 		<li bind-text="data.content" class="second"></li>--><li class="first">one</li>
-		<li class="second">one</li><li class="first">two</li>
-		<li class="second">two</li><!---->
+		<li class="second test">one</li><li class="first">two</li>
+		<li class="second test">two</li><!---->
 	</ul>
 
 	<div id="repeat-return-fragment">
