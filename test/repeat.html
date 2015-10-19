@@ -29,13 +29,13 @@
 		it("should process repeat even if not repeating anything", function() {
 			Domt('#repeat-process').merge().check();
 		});
-		it("should strip bind, bind-* attributes from repeated fragment", function() {
+		it("should strip bind, bind-* attributes from repeated node", function() {
 			Domt('#repeat-strip').merge([
 				{ content: "one" },
 				{ content: "two" }
 			]).check();
 		});
-		it("should strip bind-* attributes but not bind-bind-* from repeated fragment", function() {
+		it("should strip bind-* attributes but not bind-bind-* from repeated node", function() {
 			Domt('#repeat-strip-bind-bind').merge([
 				{ content: "one", 'class': "test1" },
 				{ content: "two", 'class': "test2" }
