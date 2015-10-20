@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <script src="../domt.js"></script>
+  <script src="check.js"></script>
+  <script>
+	describe("fragment", function suite() {
+		it("should accept to merge a fragment", function() {
+			var div = document.getElementById('merge-fragment');
+			var frag = document.createDocumentFragment();
+			while (div.firstChild) frag.appendChild(div.firstChild);
+			var inst = Domt(frag).merge({data: {
+				a: 'da',
+				b: 'db',
+				c: 'dc'
+			}});
+			inst.check("expected-merge-fragment");
+		});
+		it("should repeat a fragment", function() {
+			Domt('#repeat-fragment').merge({data: [
+				{ content: "one" },
+				{ content: "two" }
+			]}, {
+				bFilter: function(row, key, context) {
+					context.node.lastChild.className += " test";
+				}
+			}).check();
+		});
+		it("should repeat a node and use a block filter to replace it by a fragment", function() {
+			Domt('#repeat-return-fragment').merge({data: [
+				{ content: "one" },
+				{ content: "two" },
+				{ content: "three" }
+			]}, {
+				bFilter: function(row, key, context) {
+					if (context.scope.data.length == key + 1) return;
+					var doc = context.node.ownerDocument;
+					var frag = doc.createDocumentFragment();
+					frag.appendChild(context.node);
+					frag.appendChild(doc.createElement('br'));
+					return frag;
+				}
+			}).check();
+		});
+	});
+  </script>
+	<title>Domt test suite</title>
+</head>
+<body>
+	<div id="merge-fragment">
+		<span class="a" bind-text>[data.a]</span>
+		<span class="b" bind-text>[data.b]</span>
+		<span class="c" bind-text>[data.c]</span>
+	</div>
+	<div id="expected-merge-fragment">
+		<span class="a" bind-text="[data.a]">da</span>
+		<span class="b" bind-text="[data.b]">db</span>
+		<span class="c" bind-text="[data.c]">dc</span>
+	</div>
+
+	<ul id="repeat-fragment">
+		<li repeat="data|bFilter" bind-text="data.content" class="first"></li>
+		<li repeat-with bind-text="data.content" class="second"></li>
+	</ul>
+	<ul id="expected-repeat-fragment" domt="">
+		<!--<li repeat="data|bFilter" bind-text="data.content" class="first"></li>
+		<li bind-text="data.content" class="second"></li>--><li class="first">one</li>
+		<li class="second test">one</li><li class="first">two</li>
+		<li class="second test">two</li><!---->
+	</ul>
+
+	<div id="repeat-return-fragment">
+		<span repeat="data|bFilter" bind-text="data.content"></span>
+	</div>
+	<div id="expected-repeat-return-fragment" domt="">
+		<!--<span repeat="data|bFilter" bind-text="data.content"></span>--><span>one</span><br><span>two</span><br><span>three</span><!---->
+	</div>
+
+</body>
+</html>
+

@@ -25,7 +25,7 @@ Domt.prototype.check = function(expectedId) {
 	var id = actual.id;
 	if (!actual) throw new Error("Missing node with id " + id);
 	actual = actual.cloneNode(true);
-	actual.removeAttribute('id');
+	if (actual.removeAttribute) actual.removeAttribute('id');
 
 	expectedId = expectedId || 'expected-' + id;
 	var expected = document.getElementById(expectedId);
@@ -36,7 +36,7 @@ Domt.prototype.check = function(expectedId) {
 	expected = expected.cloneNode(true);
 	expected.removeAttribute('id');
 
-	actual = actual && actual.outerHTML;
+	actual = actual && actual.outerHTML || fragmentToString(actual);
 	expected =  expected && expected.outerHTML;
 
 	if (!actual && !expected) throw new Error("void check " + id + " " + expectedId);
@@ -44,3 +44,8 @@ Domt.prototype.check = function(expectedId) {
 	window.assert.equal(actual, expected);
 }
 
+function fragmentToString(frag) {
+	var div = frag.ownerDocument.createElement("div");
+	div.appendChild(frag.cloneNode(true));
+	return div.outerHTML;
+}
