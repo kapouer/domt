@@ -18,14 +18,17 @@ window.assert = {equal: function(actual, expected) {
 
 Domt.prototype.check = function(expectedId) {
 	var actual = this.nodes;
-	if (actual.length != 1) {
-		throw new Error("domt.check() only works with one target node instead of " + actual.length);
+	var isFragment = this.nodes.nodeType == Node.DOCUMENT_FRAGMENT_NODE;
+	if (!isFragment) {
+		if (actual.length != 1) {
+			throw new Error("domt.check() only works with one target node instead of " + actual.length);
+		}
+		actual = actual[0];
+		var id = actual.id;
 	}
-	actual = actual[0];
-	var id = actual.id;
-	if (!actual) throw new Error("Missing node with id " + id);
+	if (!actual) throw new Error("Missing node when checking against " + expectedId);
 	actual = actual.cloneNode(true);
-	if (actual.removeAttribute) actual.removeAttribute('id');
+	if (!isFragment) actual.removeAttribute('id');
 
 	expectedId = expectedId || 'expected-' + id;
 	var expected = document.getElementById(expectedId);
@@ -36,8 +39,9 @@ Domt.prototype.check = function(expectedId) {
 	expected = expected.cloneNode(true);
 	expected.removeAttribute('id');
 
-	actual = actual && actual.outerHTML || fragmentToString(actual);
-	expected =  expected && expected.outerHTML;
+
+	actual = actual && (isFragment ? fragmentToString(actual) : actual.outerHTML);
+	expected =  expected && (isFragment ? expected.innerHTML : expected.outerHTML);
 
 	if (!actual && !expected) throw new Error("void check " + id + " " + expectedId);
 
@@ -47,5 +51,5 @@ Domt.prototype.check = function(expectedId) {
 function fragmentToString(frag) {
 	var div = frag.ownerDocument.createElement("div");
 	div.appendChild(frag.cloneNode(true));
-	return div.outerHTML;
+	return div.innerHTML;
 }

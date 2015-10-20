@@ -44,6 +44,16 @@
 				}
 			}).check();
 		});
+		it("should load a fragment from template and merge clones", function() {
+			var inst = Domt(Domt.template('#stored-fragment').template);
+			var aClone = inst.clone().merge({data: 'a'});
+			aClone.nodes.querySelector('span').removeAttribute('bind-text');
+			var bClone = inst.clone().merge({data: 'b'});
+			bClone.nodes.querySelector('span').removeAttribute('bind-text');
+
+			assert.equal(aClone.nodes.firstChild.outerHTML, document.getElementById('expected-stored-fragment-a').innerHTML);
+			assert.equal(bClone.nodes.firstChild.outerHTML, document.getElementById('expected-stored-fragment-b').innerHTML);
+		});
 	});
   </script>
 	<title>Domt test suite</title>
@@ -77,6 +87,10 @@
 	<div id="expected-repeat-return-fragment" domt="">
 		<!--<span repeat="data|bFilter" bind-text="data.content"></span>--><span>one</span><br><span>two</span><br><span>three</span><!---->
 	</div>
+
+	<script id="stored-fragment" type="text/template"><span bind-text>[data]</span></script>
+	<div id="expected-stored-fragment-a"><span>a</span></div>
+	<div id="expected-stored-fragment-b"><span>b</span></div>
 
 </body>
 </html>
