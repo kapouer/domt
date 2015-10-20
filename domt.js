@@ -288,11 +288,11 @@ Template.prototype.init = function(node) {
 
 Template.prototype.close = function() {
 	var head = this.head;
-	var parent = head.parentNode;
+	var parent = head && head.parentNode;
 	if (parent && parent.nodeType == Node.ELEMENT_NODE && this.repeat != null && !parent.hasAttribute(Domt.ns.lookup)) {
 		parent.setAttribute(Domt.ns.lookup, "");
 	}
-	if (this.bind != null && head.nodeType != Node.COMMENT_NODE && !head.hasAttribute(Domt.ns.bind)) {
+	if (head && this.bind != null && head.nodeType != Node.COMMENT_NODE && !head.hasAttribute(Domt.ns.bind)) {
 		head.setAttribute(Domt.ns.bind, this.bind);
 	}
 };
@@ -398,14 +398,14 @@ Domt.prototype.merge = function(obj, opts) {
 			node = parent;
 		} else {
 			parent = node;
-			if (node.hasAttribute(REPEAT) && !opts.node) {
+			if (node.hasAttribute && node.hasAttribute(REPEAT) && !opts.node) {
 				// because the repeated node mutates
 				console.error("Repeated nodes must not be selected directly", node.cloneNode().outerHTML);
 			}
 		}
 		var templates = [];
 		do {
-			if (node.hasAttribute(LOOKUP)) {
+			if (node.hasAttribute && node.hasAttribute(LOOKUP)) {
 				node.removeAttribute(LOOKUP);
 				var subnode = node.firstChild;
 				while (subnode) {
@@ -435,7 +435,7 @@ Domt.prototype.merge = function(obj, opts) {
 				bound = obj;
 			}
 
-			parentNode = h.head.parentNode;
+			parentNode = h.head && h.head.parentNode;
 			if (h.repeat !== undefined) {
 				if (opts.empty) {
 					while ((curNode = h.head.nextSibling) && curNode != h.tail) {
@@ -493,7 +493,7 @@ Domt.prototype.merge = function(obj, opts) {
 						}
 					});
 				}
-			} else if (node.nodeType == 1) {
+			} else if (node.querySelector) {
 				that.replace(bound, node);
 			} else {
 				console.error("Unprocessed node", node.nodeType, node.nodeValue);
@@ -530,7 +530,7 @@ Domt.prototype.replace = function(obj, node, key) {
 	var filters = this.filters;
 	var willRepeat = {};
 	do {
-		each(Array.prototype.slice.call(node.attributes, 0), function(att) { // iterates over a copy
+		each(Array.prototype.slice.call(node.attributes || [], 0), function(att) { // iterates over a copy
 			if (att.name == Domt.ns.repeat && att.value) {
 				willRepeat[att.value.split('|').shift()] = true;
 				return;
