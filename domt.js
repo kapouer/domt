@@ -376,6 +376,25 @@ Domt.prototype.empty = function() {
 	return this;
 };
 
+Domt.prototype.clone = function() {
+	if (this._nodes) this.init();
+	var nodes;
+	if (this.nodes.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
+		nodes = this.nodes.cloneNode(true);
+	} else {
+		nodes = [];
+		for (var i=0, node; i < this.nodes.length; i++) {
+			node = this.nodes[i];
+			if (node.nodeType) nodes.push(node.cloneNode(true));
+			else nodes.push(node);
+		}
+	}
+	var copy = new Domt(nodes);
+	copy.filters = this.filters;
+	copy.query = this.query;
+	return copy;
+};
+
 Domt.prototype.merge = function(obj, opts) {
 	if (this._nodes) this.init();
 	opts = opts || {};

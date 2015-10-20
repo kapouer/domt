@@ -384,6 +384,10 @@ Utilities
   Useful when templates are not embedded where they are merged.  
   See test/repeat.html#should
 
+* Domt(nodes, opts).clone()  
+  clones the initialized domt instance nodes and return a new instance with
+  them, also with same filters and query.
+
 
 Best practices
 --------------
