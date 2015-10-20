@@ -357,7 +357,7 @@ Domt.prototype.init = function() {
 	delete this._nodes;
 	if (typeof nodes == "string") {
 		nodes = document.querySelectorAll(nodes);
-	} else if (nodes && (nodes.nodeType != Node.DOCUMENT_FRAGMENT_NODE || nodes instanceof Template)) {
+	} else if (nodes && (!nodes.jquery && nodes.nodeType != Node.DOCUMENT_FRAGMENT_NODE || nodes instanceof Template)) {
 		nodes = [nodes];
 	}
 	if (!nodes || nodes.length === 0 || nodes.nodeType == Node.DOCUMENT_FRAGMENT_NODE && nodes.childNodes.length == 0) throw DomtError("Domt has no nodes to merge");
