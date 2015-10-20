@@ -357,10 +357,10 @@ Domt.prototype.init = function() {
 	delete this._nodes;
 	if (typeof nodes == "string") {
 		nodes = document.querySelectorAll(nodes);
-	} else if (nodes && (nodes.nodeType || nodes instanceof Template)) {
+	} else if (nodes && (nodes.nodeType != Node.DOCUMENT_FRAGMENT_NODE || nodes instanceof Template)) {
 		nodes = [nodes];
 	}
-	if (!nodes || nodes.length == 0) throw DomtError("Domt has no nodes to merge");
+	if (!nodes || nodes.length === 0 || nodes.nodeType == Node.DOCUMENT_FRAGMENT_NODE && nodes.childNodes.length == 0) throw DomtError("Domt has no nodes to merge");
 	this.nodes = nodes;
 };
 
@@ -409,6 +409,10 @@ Domt.prototype.merge = function(obj, opts) {
 	var REPEAT = Domt.ns.repeat;
 	var BIND = Domt.ns.bind;
 	var LOOKUP = Domt.ns.lookup;
+	if (nodes.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
+		processNode(nodes);
+		return this;
+	}
 	each(nodes, function(node) {
 		var parent;
 		if (node instanceof Template) {
@@ -417,20 +421,21 @@ Domt.prototype.merge = function(obj, opts) {
 			node = parent;
 		} else {
 			parent = node;
-			if (node.hasAttribute && node.hasAttribute(REPEAT) && !opts.node) {
+			if (node.hasAttribute(REPEAT) && !opts.node) {
 				// because the repeated node mutates
 				console.error("Repeated nodes must not be selected directly", node.cloneNode().outerHTML);
 			}
 		}
-		var templates = [];
+		var templates = [], h;
 		do {
 			if (node.hasAttribute && node.hasAttribute(LOOKUP)) {
 				node.removeAttribute(LOOKUP);
 				var subnode = node.firstChild;
 				while (subnode) {
 					if (subnode.nodeType == Node.COMMENT_NODE) {
-						var h = Template(subnode);
+						h = Template(subnode);
 						if (h.tail) {
+							templates.push(h);
 							processNode(subnode, h);
 							subnode = h.tail;
 						}
@@ -438,92 +443,95 @@ Domt.prototype.merge = function(obj, opts) {
 					subnode = subnode.nextSibling;
 				}
 			} else {
-				processNode(node, Template(node));
+				h = Template(node);
+				templates.push(h);
+				processNode(node, h);
 			}
 		} while ((node = parent.querySelector('[' + LOOKUP + '],[' + REPEAT + '],[' + BIND + ']')));
-
-		function processNode(node, h) {
-			var bound, repeated, len, parentNode, curNode, i;
-			templates.push(h);
-			if (h.bind) {
-				obj = find(obj, h.bind, undefined, filters, node);
-				bound = {};
-				bound[obj.name] = obj.val;
-				obj = bound;
-			} else {
-				bound = obj;
-			}
-
-			parentNode = h.head && h.head.parentNode;
-			if (h.repeat !== undefined) {
-				if (opts.empty) {
-					while ((curNode = h.head.nextSibling) && curNode != h.tail) {
-						parentNode.removeChild(curNode);
-					}
-					// template modified by current.value === undefined (see after)
-				}
-				var accessor = h.repeat.split('|');
-				repeated = find(bound, accessor);
-				var template = h.template;
-				h.attach();
-
-				if (repeated.val === undefined) {
-					// h.template is out of DOM so it won't be found by querySelector
-					that.merge(bound, {node: template.childNodes});
-				} else {
-					each(repeated.val, function(val, key) {
-						bound[repeated.name] = val;
-						var clone = parentNode.ownerDocument.createDocumentFragment();
-						each(template.childNodes, function(child) {
-							var copy = cloneFor(parentNode, child);
-							clone.appendChild(copy);
-							if (child.querySelectorAll) {
-								that.replace(bound, copy, key);
-							}
-						});
-						bound[repeated.name] = repeated.val;
-						var insertNodes = true;
-						for (var i=1; i < accessor.length; i++) {
-							var bfilter = filters[accessor[i]];
-							if (!bfilter) continue;
-							var isSingle = clone.childNodes.length == 1;
-							var maybe = bfilter(val, key, {
-								parent: h.head.parentNode,
-								filters: filters,
-								node: isSingle ? clone.childNodes.item(0) : clone,
-								scope: bound,
-								path: accessor[0],
-								head: h.head,
-								tail: h.tail
-							});
-							if (maybe && maybe.nodeType) {
-								if (maybe.nodeType == Node.DOCUMENT_FRAGMENT_NODE) clone = maybe;
-								else if (isSingle) clone.replaceChild(maybe, clone.childNodes.item(0));
-								else console.error("Block filter must return a fragment");
-							} else if (maybe === false) {
-								insertNodes = false;
-								break;
-							}
-						}
-						if (h.head.parentNode != h.tail.parentNode) throw new Error("Head and tail split");
-						if (!h.tail) throw new Error("No tail");
-						if (insertNodes) while (clone.childNodes.length) {
-							parentNode.insertBefore(clone.firstChild, h.tail);
-						}
-					});
-				}
-			} else if (node.querySelector) {
-				that.replace(bound, node);
-			} else {
-				console.error("Unprocessed node", node.nodeType, node.nodeValue);
-			}
-		}
 
 		len = templates.length;
 		for (i=0; i < len; i++) {
 			templates[i].close();
 		}
 	});
+
+	function processNode(node, h) {
+		var bound, repeated, len, parentNode, curNode, i;
+		if (!h) h = {};
+		if (h.bind) {
+			obj = find(obj, h.bind, undefined, filters, node);
+			bound = {};
+			bound[obj.name] = obj.val;
+			obj = bound;
+		} else {
+			bound = obj;
+		}
+
+		parentNode = h.head && h.head.parentNode;
+		if (h.repeat !== undefined) {
+			if (opts.empty) {
+				while ((curNode = h.head.nextSibling) && curNode != h.tail) {
+					parentNode.removeChild(curNode);
+				}
+				// template modified by current.value === undefined (see after)
+				h.attach();
+			}
+			var accessor = h.repeat.split('|');
+			repeated = find(bound, accessor);
+			var template = h.template;
+
+			if (repeated.val === undefined) {
+				// h.template is out of DOM so it won't be found by querySelector
+				that.merge(bound, {node: template.childNodes});
+			} else {
+				each(repeated.val, function(val, key) {
+					bound[repeated.name] = val;
+					var clone = parentNode.ownerDocument.createDocumentFragment();
+					each(template.childNodes, function(child) {
+						var copy = cloneFor(parentNode, child);
+						clone.appendChild(copy);
+						if (child.querySelectorAll) {
+							that.replace(bound, copy, key);
+						}
+					});
+					bound[repeated.name] = repeated.val;
+					var insertNodes = true;
+					for (var i=1; i < accessor.length; i++) {
+						var bfilter = filters[accessor[i]];
+						if (!bfilter) continue;
+						var isSingle = clone.childNodes.length == 1;
+						var maybe = bfilter(val, key, {
+							parent: h.head.parentNode,
+							filters: filters,
+							node: isSingle ? clone.childNodes.item(0) : clone,
+							scope: bound,
+							path: accessor[0],
+							head: h.head,
+							tail: h.tail
+						});
+						if (maybe && maybe.nodeType) {
+							if (maybe.nodeType == Node.DOCUMENT_FRAGMENT_NODE) clone = maybe;
+							else if (isSingle) clone.replaceChild(maybe, clone.childNodes.item(0));
+							else console.error("Block filter must return a fragment");
+						} else if (maybe === false) {
+							insertNodes = false;
+							break;
+						}
+					}
+					if (h.head.parentNode != h.tail.parentNode) throw new Error("Head and tail split");
+					if (!h.tail) throw new Error("No tail");
+					if (insertNodes) while (clone.childNodes.length) {
+						parentNode.insertBefore(clone.firstChild, h.tail);
+					}
+				});
+			}
+		} else if (node.querySelector) {
+			that.replace(bound, node);
+		} else {
+			console.error("Unprocessed node", node.nodeType, node.nodeValue);
+		}
+	}
+
 	return this;
 };
 
