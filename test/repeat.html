@@ -213,16 +213,16 @@
 			]}).check();
 		});
 		it("should load template from elsewhere and merge it in target", function() {
-			var template = Domt.load('#repeat-load-template > script');
-			template.place(document.querySelector("#repeat-load-template > .target").firstChild);
+			var template = Domt.template('#repeat-load-template > script');
+			template.attach(document.querySelector("#repeat-load-template > .target").firstChild);
 			Domt('#repeat-load-template').merge({data: [
 				{ content: "one" },
 				{ content: "two" }
 			]}).check();
 		});
 		it("should load template from elsewhere and merge it in target from a reload", function() {
-			var template = Domt.load('#expected-repeat-load-template > script');
-			template.place(document.querySelector("#expected-repeat-load-template > .target").firstChild);
+			var template = Domt.template('#expected-repeat-load-template > script');
+			template.attach(document.querySelector("#expected-repeat-load-template > .target").firstChild);
 			Domt('#expected-repeat-load-template').merge({data: [
 				{ content: "three" }
 			]}).check();

@@ -121,7 +121,7 @@ function Template(node) {
 		return orig;
 	}
 	if (!(this instanceof Template)) return new Template(node);
-	this.place(node, true);
+	this.attach(node, true);
 	return this;
 }
 Domt.Template = Template;
@@ -297,7 +297,7 @@ Template.prototype.close = function() {
 	}
 };
 
-Template.prototype.place = function(head, noclose) {
+Template.prototype.attach = function(head, noclose) {
 	if (head) {
 		this.head = head;
 	}
@@ -364,7 +364,7 @@ Domt.prototype.init = function() {
 	this.nodes = nodes;
 };
 
-Domt.load = function(node) {
+Domt.template = function(node) {
 	if (typeof node == "string") {
 		node = document.querySelector(node);
 	}
@@ -442,11 +442,11 @@ Domt.prototype.merge = function(obj, opts) {
 						parentNode.removeChild(curNode);
 					}
 					// template modified by current.value === undefined (see after)
-					h.place();
 				}
 				var accessor = h.repeat.split('|');
 				repeated = find(bound, accessor);
 				var template = h.template;
+				h.attach();
 
 				if (repeated.val === undefined) {
 					// h.template is out of DOM so it won't be found by querySelector

@@ -375,13 +375,14 @@ Utilities
   obj can be an array, an object, a NodeList, a jQuery object  
   iter is a function with signature (item, index) called on each element of obj.
 
-* Domt.load(selectorOrNode)  
+* Domt.template(selectorOrNode)  
   returns an instance of a template, upon which the following method is useful
 
-* template.place(node)  
-  place a template somewhere in the DOM. Useful when templates are not
-  embedded where they are merged.
-  See test/repeat.html#should load template from elsewhere and merge it in target
+* template.attach(commentNode)  
+  attach a template to an empty comment node.  
+  Pass an in-tree node created by document.createComment("").  
+  Useful when templates are not embedded where they are merged.  
+  See test/repeat.html#should
 
 
 Best practices
