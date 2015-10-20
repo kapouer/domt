@@ -78,7 +78,7 @@ used until `merge` or `empty` methods are called.
 the same node - this is the same behavior as before.
 
 
-4.1.0
+5.0.0
 =====
 
 ### Serialization is done in comment nodes
