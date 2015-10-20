@@ -97,9 +97,18 @@ Initialize it on the parent node.
 
 ### A template can be loaded first and placed somewhere else to be merged
 
-This allows reusing templates through the web page, using load() and place().
+This allows reusing templates through the web page, using Domt.template()
+and template.attach().
 
 ### A repeated node can be extended to repeat its following siblings
 
 Internally, Domt now manages repeated nodes in document fragments.
+
+### Domt can be initialized on a document fragment
+
+and Domt(fragment).nodes is still a fragment.
+
+### inst.clone() clones inst.nodes and return a new Domt instance
+
+this is useful when doing off screen templating
 
