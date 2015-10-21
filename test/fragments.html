@@ -51,8 +51,7 @@
 			Domt(aClone).merge({data: 'a'});
 			aClone.template.querySelector('span').removeAttribute('bind-text');
 			var bClone = template.clone();
-			Domt(bClone).merge({data: 'b'});
-			bClone.template.querySelector('span').removeAttribute('bind-text');
+			Domt(bClone).merge({data: 'b'}).nodes.querySelector('span').removeAttribute('bind-text');
 
 			assert.equal(aClone.template.querySelector('span').outerHTML, document.getElementById('expected-stored-fragment-a').innerHTML);
 			assert.equal(bClone.template.querySelector('span').outerHTML, document.getElementById('expected-stored-fragment-b').innerHTML);
