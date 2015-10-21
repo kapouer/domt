@@ -104,11 +104,15 @@ and template.attach().
 
 Internally, Domt now manages repeated nodes in document fragments.
 
-### Domt can be initialized on a document fragment
+### Domt can be initialized on a document fragment or a template
 
-and Domt(fragment).nodes is still a fragment.
+and Domt(fragment).nodes is still a fragment.  
+Note that
+```
+Domt(Domt.template(node)).nodes == Domt(Domt.template(node).template).nodes
+```
 
-### inst.clone() clones inst.nodes and return a new Domt instance
+### template.clone() clones fragment that can be given to a new Domt instance
 
-this is useful when doing off screen templating
+this is useful when doing off screen templating and by-hand merging.
 

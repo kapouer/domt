@@ -94,6 +94,12 @@ Domt accepts a jquery object
 Domt($('div > .test').not('.out'))
 ```
 
+Domt accepts a documentFragment
+```
+Domt(myTemplateNode.content).merge(data).nodes == myTemplateNode.content
+```
+though in this case one typically would prefer to clone the content fragment.
+
 
 Which DOM nodes are processed ?
 -------------------------------
@@ -382,11 +388,12 @@ Utilities
   attach a template to an empty comment node.  
   Pass an in-tree node created by document.createComment("").  
   Useful when templates are not embedded where they are merged.  
-  See test/repeat.html#should
+  See test/fragment.html for usage.
 
-* Domt(nodes, opts).clone()  
+* template.clone()  
   clones the initialized domt instance nodes and return a new instance with
-  them, also with same filters and query.
+  them, also with same filters and query.  
+  See test/fragment.html for usage.
 
 
 Best practices
