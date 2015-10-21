@@ -369,13 +369,16 @@ function Domt(nodes, opts) {
 Domt.prototype.init = function() {
 	var nodes = this._nodes;
 	delete this._nodes;
-	if (typeof nodes == "string") {
+	if (nodes instanceof Template) {
+		nodes = nodes.template;
+	} else if (typeof nodes == "string") {
 		nodes = document.querySelectorAll(nodes);
-	} else if (nodes && !nodes.jquery && nodes.length === undefined && nodes.nodeType != Node.DOCUMENT_FRAGMENT_NODE && !(nodes instanceof Template)) {
+	} else if (nodes && !nodes.jquery && nodes.length === undefined && nodes.nodeType != Node.DOCUMENT_FRAGMENT_NODE) {
 		nodes = [nodes];
 	}
 	if (!nodes || nodes.length === 0 || nodes.nodeType == Node.DOCUMENT_FRAGMENT_NODE && nodes.childNodes.length == 0) throw DomtError("Domt has no nodes to merge");
 	this.nodes = nodes;
+
 };
 
 Domt.template = function(node) {
@@ -404,10 +407,6 @@ Domt.prototype.merge = function(obj, opts) {
 	var REPEAT = Domt.ns.repeat;
 	var BIND = Domt.ns.bind;
 	var LOOKUP = Domt.ns.lookup;
-	if (nodes instanceof Template) {
-		processNode(nodes.template, nodes);
-		return this;
-	}
 	if (nodes.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
 		processNode(nodes);
 		return this;
