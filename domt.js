@@ -197,11 +197,17 @@ Template.prototype.init = function(node) {
 			cur = after;
 		} while (cur);
 
-		if (!fragment.childNodes.length) {
+		var flen = fragment.childNodes.length;
+
+		if (!flen) {
 			if (!this.template) throw DomtError("Problem parsing template\n" + html);
 		} else {
 			this.template = fragment;
 		}
+		// if there is more than one node in the fragment, we can't consider
+		// this template instance to represent the first node, in particular,
+		// the repeat, bind attributes can't be removed and kept in this template
+		if (flen > 1) node = fragment;
 		if (!this.head) {
 			this.head = doc.createTextNode("");
 			fragment.insertBefore(this.head, fragment.firstChild);
@@ -408,12 +414,11 @@ Domt.prototype.merge = function(obj, opts) {
 	var BIND = Domt.ns.bind;
 	var LOOKUP = Domt.ns.lookup;
 	if (nodes.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
-		processNode(nodes);
-		return this;
+		nodes = [nodes];
 	}
 	each(nodes, function(node) {
 		var parent = node;
-		if (node.hasAttribute(REPEAT) && !opts.node) {
+		if (node.hasAttribute && node.hasAttribute(REPEAT) && !opts.node) {
 			// because the repeated node mutates
 			console.error("Repeated nodes must not be selected directly", node.cloneNode().outerHTML);
 		}
