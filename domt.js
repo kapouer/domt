@@ -155,7 +155,7 @@ Template.prototype.init = function(node) {
 	} else if (node.nodeName == "SCRIPT") {
 		html = node.textContent || node.innerText;
 	} else if (node.nodeName == "TEMPLATE" && node.content) {
-		fragment = node.content;
+		fragment = node.content; // TODO
 	}
 	if (!html && node.nodeType != 1) {
 		// this is somehow weird
