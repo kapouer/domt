@@ -202,6 +202,14 @@ Template.prototype.init = function(node) {
 		} else {
 			this.template = fragment;
 		}
+		if (!this.head) {
+			this.head = doc.createTextNode("");
+			fragment.insertBefore(this.head, fragment.firstChild);
+		}
+		if (!this.tail) {
+			this.tail = doc.createTextNode("");
+			fragment.appendChild(this.tail);
+		}
 	} else if (!replacing && node.hasAttribute(REPEAT)) {
 		if (node.hasAttribute('id')) {
 			console.warn("Repeated nodes should not have an 'id' attribute", node.cloneNode().outerHTML);
