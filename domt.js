@@ -510,8 +510,9 @@ Domt.prototype.merge = function(obj, opts) {
 							break;
 						}
 					}
-					if (h.head.parentNode != h.tail.parentNode) throw new Error("Head and tail split");
-					if (!h.tail) throw new Error("No tail");
+					if (!h.head || !h.tail || h.head.parentNode != h.tail.parentNode) {
+						throw new Error("Template head or tail error");
+					}
 					if (insertNodes) while (clone.childNodes.length) {
 						parentNode.insertBefore(clone.firstChild, h.tail);
 					}
