@@ -45,14 +45,17 @@
 			}).check();
 		});
 		it("should load a fragment from template and merge clones", function() {
-			var inst = Domt(Domt.template('#stored-fragment').template);
-			var aClone = inst.clone().merge({data: 'a'});
-			aClone.nodes.querySelector('span').removeAttribute('bind-text');
-			var bClone = inst.clone().merge({data: 'b'});
-			bClone.nodes.querySelector('span').removeAttribute('bind-text');
+			var template = Domt.template('#stored-fragment');
 
-			assert.equal(aClone.nodes.firstChild.outerHTML, document.getElementById('expected-stored-fragment-a').innerHTML);
-			assert.equal(bClone.nodes.firstChild.outerHTML, document.getElementById('expected-stored-fragment-b').innerHTML);
+			var aClone = template.clone();
+			Domt(aClone).merge({data: 'a'});
+			aClone.template.querySelector('span').removeAttribute('bind-text');
+			var bClone = template.clone();
+			Domt(bClone).merge({data: 'b'});
+			bClone.template.querySelector('span').removeAttribute('bind-text');
+
+			assert.equal(aClone.template.querySelector('span').outerHTML, document.getElementById('expected-stored-fragment-a').innerHTML);
+			assert.equal(bClone.template.querySelector('span').outerHTML, document.getElementById('expected-stored-fragment-b').innerHTML);
 		});
 	});
   </script>
