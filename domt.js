@@ -314,6 +314,12 @@ Template.prototype.attach = function(head, noclose) {
 	return this;
 };
 
+Template.prototype.clone = function() {
+	var copy = new Template({});
+	copy.template = this.template.cloneNode(true);
+	return copy;
+};
+
 function each(obj, fun) {
 	if (obj == null) return 0;
 	var i, len;
@@ -365,7 +371,7 @@ Domt.prototype.init = function() {
 	delete this._nodes;
 	if (typeof nodes == "string") {
 		nodes = document.querySelectorAll(nodes);
-	} else if (nodes && (!nodes.jquery && nodes.nodeType != Node.DOCUMENT_FRAGMENT_NODE || nodes instanceof Template)) {
+	} else if (nodes && !nodes.jquery && nodes.length === undefined && nodes.nodeType != Node.DOCUMENT_FRAGMENT_NODE && !(nodes instanceof Template)) {
 		nodes = [nodes];
 	}
 	if (!nodes || nodes.length === 0 || nodes.nodeType == Node.DOCUMENT_FRAGMENT_NODE && nodes.childNodes.length == 0) throw DomtError("Domt has no nodes to merge");
@@ -384,25 +390,6 @@ Domt.prototype.empty = function() {
 	return this;
 };
 
-Domt.prototype.clone = function() {
-	if (this._nodes) this.init();
-	var nodes;
-	if (this.nodes.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
-		nodes = this.nodes.cloneNode(true);
-	} else {
-		nodes = [];
-		for (var i=0, node; i < this.nodes.length; i++) {
-			node = this.nodes[i];
-			if (node.nodeType) nodes.push(node.cloneNode(true));
-			else nodes.push(node);
-		}
-	}
-	var copy = new Domt(nodes);
-	copy.filters = this.filters;
-	copy.query = this.query;
-	return copy;
-};
-
 Domt.prototype.merge = function(obj, opts) {
 	if (this._nodes) this.init();
 	opts = opts || {};
@@ -417,22 +404,19 @@ Domt.prototype.merge = function(obj, opts) {
 	var REPEAT = Domt.ns.repeat;
 	var BIND = Domt.ns.bind;
 	var LOOKUP = Domt.ns.lookup;
+	if (nodes instanceof Template) {
+		processNode(nodes.template, nodes);
+		return this;
+	}
 	if (nodes.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
 		processNode(nodes);
 		return this;
 	}
 	each(nodes, function(node) {
-		var parent;
-		if (node instanceof Template) {
-			parent = node.head;
-			processNode(parent, node);
-			node = parent;
-		} else {
-			parent = node;
-			if (node.hasAttribute(REPEAT) && !opts.node) {
-				// because the repeated node mutates
-				console.error("Repeated nodes must not be selected directly", node.cloneNode().outerHTML);
-			}
+		var parent = node;
+		if (node.hasAttribute(REPEAT) && !opts.node) {
+			// because the repeated node mutates
+			console.error("Repeated nodes must not be selected directly", node.cloneNode().outerHTML);
 		}
 		var templates = [], h;
 		do {
@@ -455,7 +439,7 @@ Domt.prototype.merge = function(obj, opts) {
 				templates.push(h);
 				processNode(node, h);
 			}
-		} while ((node = parent.querySelector('[' + LOOKUP + '],[' + REPEAT + '],[' + BIND + ']')));
+		} while (parent.querySelector && (node = parent.querySelector('[' + LOOKUP + '],[' + REPEAT + '],[' + BIND + ']')));
 
 		len = templates.length;
 		for (i=0; i < len; i++) {
@@ -475,8 +459,8 @@ Domt.prototype.merge = function(obj, opts) {
 			bound = obj;
 		}
 
-		parentNode = h.head && h.head.parentNode;
 		if (h.repeat !== undefined) {
+			parentNode = h.head.parentNode;
 			if (opts.empty) {
 				while ((curNode = h.head.nextSibling) && curNode != h.tail) {
 					parentNode.removeChild(curNode);
