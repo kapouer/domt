@@ -677,6 +677,7 @@ function find(scope, accessor, key, filters, node, att) {
 	if (filters) for (var i=1; i < accessor.length; i++) {
 		filter = filters[accessor[i]];
 		if (filter) val = filter(val, {node: node, att: att, filters: filters, scope:scope, index:index-1, path:path, name: last});
+		else console.error("Missing filter", accessor[i], "in", accessor);
 	}
 	if (last == null) last = "";
 	return {name: last, val: val};
