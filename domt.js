@@ -287,7 +287,7 @@ Template.prototype.init = function(node) {
 	} else if (!replacing) {
 		this.head = node;
 	}
-	if (node.nodeType == Node.ELEMENT_NODE) {
+	if (node.hasAttribute) {
 		if (node.hasAttribute(REPEAT)) {
 			this.repeat = node.getAttribute(REPEAT);
 			node.removeAttribute(REPEAT);
@@ -306,7 +306,7 @@ Template.prototype.close = function() {
 	if (parent && parent.nodeType == Node.ELEMENT_NODE && this.repeat != null && !parent.hasAttribute(Domt.ns.lookup)) {
 		parent.setAttribute(Domt.ns.lookup, "");
 	}
-	if (head && this.bind != null && head.nodeType != Node.COMMENT_NODE && !head.hasAttribute(Domt.ns.bind)) {
+	if (head && this.bind != null && head.hasAttribute && !head.hasAttribute(Domt.ns.bind)) {
 		head.setAttribute(Domt.ns.bind, this.bind);
 	}
 };
