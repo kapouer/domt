@@ -20,6 +20,8 @@ Domt.ns = {
 	query: ['html', 'text', 'src', 'href', 'lowsrc', 'srcset', 'class', 'value', 'data', 'action', 'hidden', 'id', 'name', 'style']
 };
 
+Domt.maxloops = 10000;
+
 function Filters(obj) {
 	addToFilters(this, obj);
 }
@@ -352,6 +354,7 @@ Domt.each = each;
 function Domt(nodes, opts) {
 	if (!(this instanceof Domt)) return new Domt(nodes, opts);
 	if (!opts) opts = {};
+	this.loops = 0;
 	this.filters = new Filters(opts);
 	this._nodes = nodes;
 	this.reBind = new RegExp("^" + Domt.ns.bind + "-(.*)$", "i");
@@ -424,6 +427,10 @@ Domt.prototype.merge = function(obj, opts) {
 		}
 		var templates = [], h;
 		do {
+			if (that.loops++ > Domt.maxloops) {
+				console.error("Domt might be stuck in a loop - consider raising Domt.maxloops if needed");
+				return;
+			}
 			if (node.hasAttribute && node.hasAttribute(LOOKUP)) {
 				node.removeAttribute(LOOKUP);
 				var subnode = node.firstChild;
