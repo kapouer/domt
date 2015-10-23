@@ -75,6 +75,16 @@
 			}).check();
 			assert.equal(blockFilterCalls, 2);
 		});
+
+		it("should process attributes by setting empty bind", function() {
+			Domt('#innerbind').merge({
+				data: {
+					"class": "class",
+					"test": "test",
+					"text": "text"
+				}
+			}).check();
+		});
 	});
   </script>
 	<title>Domt test suite</title>
@@ -114,6 +124,17 @@
 	<h1 id="expected-bindrepeat" domt="">bind then repeat
 		<!--<span bind="article.list|myValueFilter" repeat="list|myBlockFilter" bind-text="">[list.txt]</span>--><span>b</span><span>c</span><!---->
 	</h1>
+
+	<div id="innerbind">
+		<div bind-class="data.class">
+			<a bind bind-test="data.test" bind-text="data.text">test</a>
+		</div>
+	</div>
+	<div id="expected-innerbind">
+		<div bind-class="data.class" class="class">
+			<a bind-test="data.test" bind-text="data.text" test="test" bind="">text</a>
+		</div>
+	</div>
 
 </body>
 </html>
