@@ -76,7 +76,15 @@
 			assert.equal(blockFilterCalls, 2);
 		});
 
-		it("should process attributes by setting empty bind", function() {
+		it("should not timeout or error when bound twice with a reused instance", function() {
+			Domt.maxloops = 10;
+			Domt('#innerbind').merge({
+				data: {
+					"class": "class",
+					"test": "test",
+					"text": "text"
+				}
+			});
 			Domt('#innerbind').merge({
 				data: {
 					"class": "class",
