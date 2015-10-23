@@ -428,7 +428,7 @@ Domt.prototype.merge = function(obj, opts) {
 		var templates = [], h;
 		do {
 			if (that.loops++ > Domt.maxloops) {
-				console.error("Domt might be stuck in a loop - consider raising Domt.maxloops if needed");
+				throw new DomtError("Parsing aborted - consider raising Domt.maxloops");
 				return;
 			}
 			if (node.hasAttribute && node.hasAttribute(LOOKUP)) {
