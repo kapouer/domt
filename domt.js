@@ -118,18 +118,35 @@ function match(re, str) {
 }
 
 function Template(node) {
-	var orig = node[Domt.ns.lookup];
-	if (orig) {
-		return orig;
+	var inst = node[Domt.ns.lookup];
+	if (inst) {
+		inst.open(node);
+		return inst;
 	}
-	if (!(this instanceof Template)) return new Template(node);
+	if (!(this instanceof Template)) {
+		return new Template(node);
+	}
 	this.attach(node, true);
 	return this;
 }
 Domt.Template = Template;
 
+Template.prototype.open = function(node) {
+	if (node.hasAttribute) {
+		var REPEAT = Domt.ns.repeat, BIND = Domt.ns.bind;
+		if (node.hasAttribute(REPEAT)) {
+			this.repeat = node.getAttribute(REPEAT);
+			node.removeAttribute(REPEAT);
+		}
+		if (node.hasAttribute(BIND)) {
+			this.bind = node.getAttribute(BIND);
+			node.removeAttribute(BIND);
+		}
+	}
+};
+
 Template.prototype.init = function(node) {
-	var REPEAT = Domt.ns.repeat, BIND = Domt.ns.bind, LOOKUP = Domt.ns.lookup;
+	var REPEAT = Domt.ns.repeat;
 	var html, fragment, cur, after, copy, replacing = false;
 	this.head = this.tail = null;
 	if (node.nodeType == Node.COMMENT_NODE) {
@@ -289,27 +306,18 @@ Template.prototype.init = function(node) {
 	} else if (!replacing) {
 		this.head = node;
 	}
-	if (node.hasAttribute) {
-		if (node.hasAttribute(REPEAT)) {
-			this.repeat = node.getAttribute(REPEAT);
-			node.removeAttribute(REPEAT);
-		}
-		if (node.hasAttribute(BIND)) {
-			this.bind = node.getAttribute(BIND);
-			node.removeAttribute(BIND);
-		}
-	}
-	if (this.head) this.head[LOOKUP] = this;
+	this.open(node);
 };
 
 Template.prototype.close = function() {
 	var head = this.head;
 	var parent = head && head.parentNode;
-	if (parent && parent.nodeType == Node.ELEMENT_NODE && this.repeat != null && !parent.hasAttribute(Domt.ns.lookup)) {
-		parent.setAttribute(Domt.ns.lookup, "");
+	if (parent && parent.setAttribute) {
+		if (this.repeat != null) parent.setAttribute(Domt.ns.lookup, "");
 	}
-	if (head && this.bind != null && head.hasAttribute && !head.hasAttribute(Domt.ns.bind)) {
-		head.setAttribute(Domt.ns.bind, this.bind);
+	if (head && head.setAttribute) {
+		if (this.repeat != null) head.setAttribute(Domt.ns.repeat, this.repeat);
+		if (this.bind != null) head.setAttribute(Domt.ns.bind, this.bind);
 	}
 };
 
@@ -318,6 +326,7 @@ Template.prototype.attach = function(head, noclose) {
 		this.head = head;
 	}
 	this.init(this.head);
+	if (this.head) this.head[Domt.ns.lookup] = this;
 	if (!noclose && head) this.close();
 	return this;
 };
