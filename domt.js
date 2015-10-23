@@ -363,9 +363,9 @@ function Domt(nodes, opts) {
 	}
 	query = [Domt.ns.bind, Domt.ns.repeat];
 	for (var i=0; i < atts.length; i++) {
-		query.push('[' + Domt.ns.bind + '-' + atts[i] + ']');
+		query.push(Domt.ns.bind + '-' + atts[i]);
 	}
-	this.query = query.join(',');
+	this.query = '[' + query.join('],[') + ']';
 	var delims = Domt.ns.expr.split('*');
 	if (delims.length != 2) throw DomtError("bad Domt.ns.expr");
 	var start = '\\' + delims[0], end = '\\' + delims[1];
