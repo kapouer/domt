@@ -486,7 +486,7 @@ Domt.prototype.merge = function(obj, opts) {
 					each(template.childNodes, function(child) {
 						var copy = cloneFor(parentNode, child);
 						clone.appendChild(copy);
-						if (child.querySelectorAll) {
+						if (copy.querySelectorAll) {
 							that.replace(bound, copy, key);
 						}
 					});
