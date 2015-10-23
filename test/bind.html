@@ -93,6 +93,15 @@
 				}
 			}).check();
 		});
+
+		it("should bind a node and repeat a sibling when lookup is set on parent", function() {
+			Domt('#bindsiblingrepeat').merge({
+				list: [
+					{txt: "a"},
+					{txt: "b"}
+				]
+			}).check();
+		});
 	});
   </script>
 	<title>Domt test suite</title>
@@ -142,6 +151,15 @@
 		<div bind-class="data.class" class="class">
 			<a bind-test="data.test" bind-text="data.text" test="test" bind="">text</a>
 		</div>
+	</div>
+
+	<div id="bindsiblingrepeat" domt="">
+		<span class="uneclasse [list.length]" bind-class>content</span>
+		<span repeat="list" bind-text>[list.txt]</span>
+	</div>
+	<div id="expected-bindsiblingrepeat" domt="">
+		<span class="uneclasse 2" bind-class="uneclasse [list.length]">content</span>
+		<!--<span repeat="list" bind-text="">[list.txt]</span>--><span>a</span><span>b</span><!---->
 	</div>
 
 </body>
