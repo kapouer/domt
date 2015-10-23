@@ -444,11 +444,11 @@ Domt.prototype.merge = function(obj, opts) {
 				node.removeAttribute(LOOKUP);
 				var subnode = node.firstChild;
 				while (subnode) {
-					if (subnode.nodeType == Node.COMMENT_NODE) {
+					if (subnode.nodeType != Node.TEXT_NODE) {
 						h = Template(subnode);
-						if (h.tail) {
-							templates.push(h);
-							processNode(subnode, h);
+						templates.push(h);
+						processNode(subnode, h);
+						if (subnode.nodeType == Node.COMMENT_NODE && h.tail) {
 							subnode = h.tail;
 						}
 					}
