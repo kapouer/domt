@@ -21,12 +21,13 @@ Domt.prototype.check = function(expectedId) {
 	var isFragment = this.nodes.nodeType == Node.DOCUMENT_FRAGMENT_NODE;
 	if (!isFragment) {
 		if (actual.length != 1) {
-			throw new Error("domt.check() only works with one target node instead of " + actual.length);
+			throw new Error("domt.check() only works with one target node instead of " + fragmentToString(actual));
 		}
 		actual = actual[0];
 		var id = actual.id;
 	}
 	if (!actual) throw new Error("Missing node when checking against " + expectedId);
+	if (actual.nodeType == Node.COMMENT_NODE) actual = actual.parentNode;
 	actual = actual.cloneNode(true);
 	if (!isFragment) actual.removeAttribute('id');
 

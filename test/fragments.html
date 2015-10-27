@@ -28,6 +28,15 @@
 				}
 			}).check();
 		});
+		it("should repeat a named fragment", function() {
+			// initialize templates
+			Domt('#repeat-name').merge();
+			// get the template, clone it to some place else and merge it
+			Domt.template('myfrag')
+			.clone('#attach-repeat-name')
+			.merge({data: [{ content: "fdfdf" }]})
+			.check('expected-repeat-name');
+		});
 		it("should repeat a node and use a block filter to replace it by a fragment", function() {
 			Domt('#repeat-return-fragment').merge({data: [
 				{ content: "one" },
@@ -49,12 +58,12 @@
 
 			var aClone = template.clone();
 			Domt(aClone).merge({data: 'a'});
-			aClone.template.querySelector('span').removeAttribute('bind-text');
+			aClone.fragment.querySelector('span').removeAttribute('bind-text');
 			var bClone = template.clone();
 			Domt(bClone).merge({data: 'b'}).nodes.querySelector('span').removeAttribute('bind-text');
 
-			assert.equal(aClone.template.querySelector('span').outerHTML, document.getElementById('expected-stored-fragment-a').innerHTML);
-			assert.equal(bClone.template.querySelector('span').outerHTML, document.getElementById('expected-stored-fragment-b').innerHTML);
+			assert.equal(aClone.fragment.querySelector('span').outerHTML, document.getElementById('expected-stored-fragment-a').innerHTML);
+			assert.equal(bClone.fragment.querySelector('span').outerHTML, document.getElementById('expected-stored-fragment-b').innerHTML);
 		});
 	});
   </script>
@@ -82,6 +91,12 @@
 		<li class="second test">one</li><li class="first">two</li>
 		<li class="second test">two</li><!---->
 	</ul>
+
+	<div id="repeat-name">
+		<p repeat="data" repeat-name="myfrag" bind-text="data.content"></p>
+	</div>
+	<div id="attach-repeat-name"></div>
+	<div id="expected-repeat-name" domt=""><!----><p>fdfdf</p><!----></div>
 
 	<div id="repeat-return-fragment">
 		<span repeat="data|bFilter" bind-text="data.content"></span>
