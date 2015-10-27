@@ -366,8 +366,8 @@ Template.prototype.clone = function(node) {
 	return copy;
 };
 
-Template.prototype.merge = function(data) {
-	return Domt(this).merge(data);
+Template.prototype.merge = function(data, opts) {
+	return Domt(this).merge(data, opts);
 };
 
 Template.prototype.empty = function() {
