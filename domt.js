@@ -14,6 +14,7 @@ Domt.version = 4;
 Domt.ns = {
 	id: 'domt',
 	repeat: 'repeat',
+	name: 'repeat-name',
 	bind: 'bind',
 	lookup: 'domt',
 	expr: '[*]',
@@ -21,6 +22,8 @@ Domt.ns = {
 };
 
 Domt.maxloops = 10000;
+
+var templates = {};
 
 function Filters(obj) {
 	addToFilters(this, obj);
@@ -118,6 +121,7 @@ function match(re, str) {
 }
 
 function Template(node) {
+	if (!node) throw new DomtError("Missing node in Template constructor");
 	var inst = node[Domt.ns.lookup];
 	if (inst) {
 		inst.open(node);
@@ -133,11 +137,18 @@ Domt.Template = Template;
 
 Template.prototype.open = function(node) {
 	if (node.hasAttribute) {
-		var REPEAT = Domt.ns.repeat, BIND = Domt.ns.bind;
+		var REPEAT = Domt.ns.repeat;
 		if (node.hasAttribute(REPEAT)) {
 			this.repeat = node.getAttribute(REPEAT);
 			node.removeAttribute(REPEAT);
 		}
+		var NAME = Domt.ns.name;
+		if (node.hasAttribute(NAME)) {
+			this.name = node.getAttribute(NAME);
+			templates[this.name] = this;
+			node.removeAttribute(NAME);
+		}
+		var BIND = Domt.ns.bind;
 		if (node.hasAttribute(BIND)) {
 			this.bind = node.getAttribute(BIND);
 			node.removeAttribute(BIND);
@@ -318,6 +329,7 @@ Template.prototype.close = function() {
 	if (head && head.setAttribute) {
 		if (this.repeat != null) head.setAttribute(Domt.ns.repeat, this.repeat);
 		if (this.bind != null) head.setAttribute(Domt.ns.bind, this.bind);
+		if (this.name != null) head.setAttribute(Domt.ns.name, this.name);
 	}
 };
 
@@ -401,7 +413,8 @@ Domt.prototype.init = function() {
 
 Domt.template = function(node) {
 	if (typeof node == "string") {
-		node = document.querySelector(node);
+		if (templates[node]) return templates[node];
+		else node = document.querySelector(node);
 	}
 	return new Template(node);
 };
@@ -434,7 +447,7 @@ Domt.prototype.merge = function(obj, opts) {
 			// because the repeated node mutates
 			console.error("Repeated nodes must not be selected directly", node.cloneNode().outerHTML);
 		}
-		var templates = [], h;
+		var cleanStack = [], h;
 		do {
 			if (that.loops++ > Domt.maxloops) {
 				throw new DomtError("Parsing aborted - consider raising Domt.maxloops");
@@ -446,7 +459,7 @@ Domt.prototype.merge = function(obj, opts) {
 				while (subnode) {
 					if (subnode.nodeType != Node.TEXT_NODE) {
 						h = Template(subnode);
-						templates.push(h);
+						cleanStack.push(h);
 						processNode(subnode, h);
 						if (subnode.nodeType == Node.COMMENT_NODE && h.tail) {
 							subnode = h.tail;
@@ -456,14 +469,14 @@ Domt.prototype.merge = function(obj, opts) {
 				}
 			} else {
 				h = Template(node);
-				templates.push(h);
+				cleanStack.push(h);
 				processNode(node, h);
 			}
 		} while (parent.querySelector && (node = parent.querySelector('[' + LOOKUP + '],[' + REPEAT + '],[' + BIND + ']')));
 
-		len = templates.length;
+		len = cleanStack.length;
 		for (i=0; i < len; i++) {
-			templates[i].close();
+			cleanStack[i].close();
 		}
 	});
 
