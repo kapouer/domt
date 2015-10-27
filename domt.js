@@ -174,8 +174,8 @@ Template.prototype.init = function(node) {
 		}
 		html = (node.nodeValue || node.textContent).replace(/\\-\\-/g, "--"); // HTML Comments unescaping
 		if (!html) {
-			if (this.template) {
-				node = this.template;
+			if (this.fragment) {
+				node = this.fragment;
 				replacing = true;
 			} else {
 				// bad template, just return without tail
@@ -190,7 +190,7 @@ Template.prototype.init = function(node) {
 	if (!html && node.nodeType != 1) {
 		// this is somehow weird
 	} else if (html) {
-		this.template = null;
+		this.fragment = null;
 		var doc = document.implementation
 			&& document.implementation.createHTMLDocument
 			&& document.implementation.createHTMLDocument('');
@@ -230,9 +230,9 @@ Template.prototype.init = function(node) {
 		var flen = fragment.childNodes.length;
 
 		if (!flen) {
-			if (!this.template) throw DomtError("Problem parsing template\n" + html);
+			if (!this.fragment) throw DomtError("Problem parsing template\n" + html);
 		} else {
-			this.template = fragment;
+			this.fragment = fragment;
 		}
 		// if there is more than one node in the fragment, we can't consider
 		// this template instance to represent the first node, in particular,
@@ -312,7 +312,7 @@ Template.prototype.init = function(node) {
 			}
 		} while (cur != end);
 
-		this.template = fragment;
+		this.fragment = fragment;
 		this.head.nodeValue = html.replace(/--/g, "\\-\\-");
 	} else if (!replacing) {
 		this.head = node;
@@ -333,20 +333,45 @@ Template.prototype.close = function() {
 	}
 };
 
-Template.prototype.attach = function(head, noclose) {
-	if (head) {
-		this.head = head;
+Template.prototype.attach = function(node, delayClose) {
+	if (typeof node == "string") node = document.querySelector(node);
+	if (node) {
+		if (!delayClose && node.nodeType != Node.COMMENT_NODE) {
+			var comment = node.ownerDocument.createComment("");
+			node.appendChild(comment);
+			if (this.tail) node.appendChild(this.tail);
+			node = comment;
+		}
+		this.head = node;
 	}
 	this.init(this.head);
 	if (this.head) this.head[Domt.ns.lookup] = this;
-	if (!noclose && head) this.close();
+	if (!delayClose && node) this.close();
 	return this;
 };
 
-Template.prototype.clone = function() {
+Template.prototype.clone = function(node) {
 	var copy = new Template({});
-	copy.template = this.template.cloneNode(true);
+	copy.fragment = this.fragment.cloneNode(true);
+	copy.name = this.name;
+	copy.bind = this.bind;
+	copy.repeat = this.repeat;
+	copy.tail = this.tail && this.tail.cloneNode(true);
+	if (node) {
+		copy.attach(node);
+	} else if (this.head) {
+		copy.head = this.head.cloneNode(true);
+		copy.head[Domt.ns.lookup] = copy;
+	}
 	return copy;
+};
+
+Template.prototype.merge = function(data) {
+	return Domt(this).merge(data);
+};
+
+Template.prototype.empty = function() {
+	return Domt(this).empty();
 };
 
 function each(obj, fun) {
@@ -400,7 +425,13 @@ Domt.prototype.init = function() {
 	var nodes = this._nodes;
 	delete this._nodes;
 	if (nodes instanceof Template) {
-		nodes = nodes.template;
+		if (nodes.head && nodes.head.parentNode) {
+			// attached template
+			nodes = [nodes.head];
+		} else {
+			// template as a fragment
+			nodes = nodes.fragment;
+		}
 	} else if (typeof nodes == "string") {
 		nodes = document.querySelectorAll(nodes);
 	} else if (nodes && !nodes.jquery && nodes.length === undefined && nodes.nodeType != Node.DOCUMENT_FRAGMENT_NODE) {
@@ -408,7 +439,7 @@ Domt.prototype.init = function() {
 	}
 	if (!nodes || nodes.length === 0 || nodes.nodeType == Node.DOCUMENT_FRAGMENT_NODE && nodes.childNodes.length == 0) throw DomtError("Domt has no nodes to merge");
 	this.nodes = nodes;
-
+	return this;
 };
 
 Domt.template = function(node) {
@@ -503,16 +534,16 @@ Domt.prototype.merge = function(obj, opts) {
 			}
 			var accessor = h.repeat.split('|');
 			repeated = find(bound, accessor);
-			var template = h.template;
+			var fragment = h.fragment;
 
 			if (repeated.val === undefined) {
-				// h.template is out of DOM so it won't be found by querySelector
-				that.merge(bound, {node: template.childNodes});
+				// h.fragment is out of DOM so it won't be found by querySelector
+				that.merge(bound, {node: fragment.childNodes});
 			} else {
 				each(repeated.val, function(val, key) {
 					bound[repeated.name] = val;
 					var clone = parentNode.ownerDocument.createDocumentFragment();
-					each(template.childNodes, function(child) {
+					each(fragment.childNodes, function(child) {
 						var copy = cloneFor(parentNode, child);
 						clone.appendChild(copy);
 						if (copy.querySelectorAll) {
