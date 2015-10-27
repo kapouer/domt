@@ -101,6 +101,29 @@ Domt(myTemplateNode.content).merge(data).nodes == myTemplateNode.content
 though in this case one typically would prefer to clone the content fragment.
 
 
+Attributes
+----------
+
+* bind  
+  replace current context data with the data found by the accessor in the value.  
+  If empty, used as a way to make sure the node will be merged.
+
+* bind-xxx  
+  will create a xxx attribute (or merge it if already present)  
+  Several attributes are search by default. To add more, just do
+  `Domt.query.push('xxx')` so that a node having a `bind-xxx` attribute will
+  be found if the only recognizable attribute is this one.
+
+* repeat  
+  repeat-with  
+  See below.
+
+* repeat-name  
+  name a repeated fragment, so that Domt.template(name) return its template.  
+  The fragment must have been merged once before.
+  Usage: `Domt.template('myfrag').clone().merge(data)`.
+
+
 Which DOM nodes are processed ?
 -------------------------------
 
@@ -153,6 +176,7 @@ Either call Domt on that span, or add a bind attribute to it.
 * the next siblings with attribute "repeat-with" of a node with attribute "repeat"
   this allows repeating several nodes at once, as a fragment.  
   When doing this, the block filter context.node argument is a fragment.
+
 
 Operations on instances
 -----------------------
@@ -394,6 +418,9 @@ Utilities
   clones the initialized domt instance nodes and return a new instance with
   them, also with same filters and query.  
   See test/fragment.html for usage.
+
+* template.merge(...)  
+  alias of `Domt(template).merge(...)`
 
 
 Best practices
