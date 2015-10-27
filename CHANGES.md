@@ -116,3 +116,21 @@ Domt(Domt.template(node)).nodes == Domt(Domt.template(node).template).nodes
 
 this is useful when doing off screen templating and by-hand merging.
 
+
+5.1.0
+=====
+
+### repeated fragments can be named using repeat-name attribute
+and accessed later with Domt.template(name)
+
+### merge method added to template instance
+is an alias of Domt(template).merge, so one can do offline merge
+```
+var inst = Domt.template('myfrag').clone().merge(data);
+document.body.appendChild(inst.nodes);
+```
+or attached merge
+`Domt.template('myfrag').clone('#thatid').merge(data)`
+
+### expose template head, tail, fragment
+

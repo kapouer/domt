@@ -405,22 +405,35 @@ Utilities
   obj can be an array, an object, a NodeList, a jQuery object  
   iter is a function with signature (item, index) called on each element of obj.
 
-* Domt.template(selectorOrNode)  
-  returns an instance of a template, upon which the following method is useful
+* Domt.template(name|selector|node)  
+  where name is defined by repeat-name.  
+  returns an instance of a template, upon which the following methods are useful
 
-* template.attach(commentNode)  
-  attach a template to an empty comment node.  
-  Pass an in-tree node created by document.createComment("").  
-  Useful when templates are not embedded where they are merged.  
-  See test/fragment.html for usage.
+* template.head, template.tail, template.fragment  
+  the nodes defining a template
 
-* template.clone()  
-  clones the initialized domt instance nodes and return a new instance with
-  them, also with same filters and query.  
+* template.attach(selector|element|comment)  
+  attach a template to a node.  
+  If it is a comment node, it is used as the new head of the fragment.  
+  If an element is passed, append a comment node to it and work with it.  
+  See test/fragment.html for usages.
+
+* template.clone(selector|element|comment)  
+  return a new template with cloned head, fragment and tail  
   See test/fragment.html for usage.
 
 * template.merge(...)  
   alias of `Domt(template).merge(...)`
+
+Access to templates is usefull when they are defined in a place and merged
+in another place.
+It is possible to merge them outside the DOM, in a DocumentFragment like
+```
+var inst = Domt.template('myfrag').clone().merge(data);
+document.body.appendChild(inst.nodes);
+```
+or attach them like
+`Domt.template('myfrag').clone('#thatid').merge(data)`
 
 
 Best practices
