@@ -92,6 +92,12 @@ Filters.prototype['?'] = function(val) {
 	if (val != null && val !== "") return val + '';
 	else return val;
 };
+Filters.prototype.always = function() {
+	return true;
+};
+Filters.prototype.never = function() {
+	return false;
+};
 Filters.prototype.drop = function(val, context) {
 	if (!val && context.att) {
 		context.node.removeAttribute(context.att);
