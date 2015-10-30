@@ -14,6 +14,7 @@ Domt.version = 4;
 Domt.ns = {
 	id: 'domt',
 	repeat: 'repeat',
+	with: 'repeat-with',
 	name: 'repeat-name',
 	bind: 'bind',
 	lookup: 'domt',
@@ -168,7 +169,7 @@ Template.prototype.open = function(node) {
 };
 
 Template.prototype.init = function(node) {
-	var REPEAT = Domt.ns.repeat;
+	var REPEAT = Domt.ns.repeat, WITH = Domt.ns.with;
 	var html, fragment, cur, after, copy, replacing = false;
 	this.head = this.tail = null;
 	if (node.nodeType == Node.COMMENT_NODE) {
@@ -278,11 +279,11 @@ Template.prototype.init = function(node) {
 			if (!after) break;
 			if (after.nodeType == Node.TEXT_NODE) {
 				continue;
-			} else if (after.nodeType != Node.ELEMENT_NODE || !after.hasAttribute(REPEAT + '-with')) {
+			} else if (after.nodeType != Node.ELEMENT_NODE || !after.hasAttribute(WITH)) {
 				break;
 			} else {
 				end = after;
-				after.removeAttribute(REPEAT + '-with');
+				after.removeAttribute(WITH);
 			}
 		} while (after);
 
