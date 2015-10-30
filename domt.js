@@ -99,7 +99,7 @@ Filters.prototype.never = function() {
 	return false;
 };
 Filters.prototype.drop = function(val, context) {
-	if (!val && context.att) {
+	if (val && context.att) {
 		context.node.removeAttribute(context.att);
 	}
 	return val;
