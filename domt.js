@@ -104,11 +104,9 @@ Fp.drop = function(val, context) {
 	}
 	return val;
 };
-Fp.log = function(val, context, c) {
-	if (c) context = c;
-	var args = ["Domt", val, context.path && context.path.join('.')];
-	if (context.name != null) args.push(context.name);
-	if (context.index != null) args.push(context.index);
+Fp.log = function() {
+	var args = Array.prototype.slice.call(arguments);
+	args.unshift("Domt log");
 	Function.prototype.apply.apply(console.log, [console, args]);
 };
 
