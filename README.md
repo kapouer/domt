@@ -319,10 +319,13 @@ Some filters are already availables:
 * int   : parseInt or ""
 * float : parseFloat or ""
 * att   : return attribute name if current value evaluates to true
-* drop  : remove target attribute if current value evaluates to false - does not
+* drop  : remove target attribute if current value evaluates to true - does not
   modify val.
+* always: return true
+* never : return false
 * !     : return !val
 * ?     : return val.toString() if it's not empty, else return null or undefined or ""
+* log   : log value and context path, name, index
 
 More filters could be written, but they would typically depend on features
 like Element.classList or jQuery - they're not fit to be in domt.
