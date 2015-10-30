@@ -29,7 +29,7 @@ function Filters(obj) {
 	addToFilters(this, obj);
 }
 
-Domt.filters = Filters.prototype;
+var Fp = Domt.filters = Filters.prototype;
 
 function addToFilters(filters, obj) {
 	for (var name in obj) {
@@ -39,74 +39,81 @@ function addToFilters(filters, obj) {
 }
 
 // Value Filters
-Filters.prototype.upper = function(val) {
+Fp.upper = function(val) {
 	if (val == null) return val;
 	return (val + "").toUpperCase();
 };
-Filters.prototype.lower = function(val) {
+Fp.lower = function(val) {
 	if (val == null) return val;
 	return (val + "").toLowerCase();
 };
-Filters.prototype.br = function(val) {
+Fp.br = function(val) {
 	if (val == null) return val;
 	return (val + "").replace(/\n/g, "<br />");
 };
-Filters.prototype.text = function(val) {
+Fp.text = function(val) {
 	if (val == null) return val;
 	return escapeText(val);
 };
-Filters.prototype.esc = function(val) {
+Fp.esc = function(val) {
 	if (val == null) return val;
 	return encodeURIComponent(val + "");
 };
-Filters.prototype.unesc = function(val) {
+Fp.unesc = function(val) {
 	if (val == null) return val;
 	return decodeURIComponent(val + "");
 };
-Filters.prototype.json = function(val) {
+Fp.json = function(val) {
 	return JSON.stringify(val);
 };
-Filters.prototype.int = function(val) {
+Fp.int = function(val) {
 	var n = parseInt(val);
 	if (!isNaN(n)) return "";
 };
-Filters.prototype.float = function(val) {
+Fp.float = function(val) {
 	var f = parseFloat(val);
 	if (!isNaN(f)) return "";
 };
-Filters.prototype.bool = function(val) {
+Fp.bool = function(val) {
 	if (val) return true;
 	else return false;
 };
-Filters.prototype.att = function(val, context) {
+Fp.att = function(val, context) {
 	if (val && context.att) {
 		return context.att;
 	} else {
 		return null;
 	}
 };
-Filters.prototype['!'] = function(val) {
+Fp['!'] = function(val) {
 	return !val;
 };
-Filters.prototype['?'] = function(val) {
+Fp['?'] = function(val) {
 	if (val != null && val !== "") return val + '';
 	else return val;
 };
-Filters.prototype.always = function() {
+Fp.always = function() {
 	return true;
 };
-Filters.prototype.never = function() {
+Fp.never = function() {
 	return false;
 };
-Filters.prototype.drop = function(val, context) {
+Fp.drop = function(val, context) {
 	if (val && context.att) {
 		context.node.removeAttribute(context.att);
 	}
 	return val;
 };
+Fp.log = function(val, context, c) {
+	if (c) context = c;
+	var args = ["Domt", val, context.path && context.path.join('.')];
+	if (context.name != null) args.push(context.name);
+	if (context.index != null) args.push(context.index);
+	Function.prototype.apply.apply(console.log, [console, args]);
+};
 
 // Block Filters
-Filters.prototype.invert = function(row, key, info) {
+Fp.invert = function(row, key, info) {
 	info.head.parentNode.insertBefore(info.node, info.head.nextSibling);
 };
 
