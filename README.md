@@ -236,7 +236,10 @@ Global settings
 
 Domt.ns object is used to set the prefixes used for the attribute names,
 or change delimiters, like this: `Domt.ns.expr = '{{*}}';`.
-Likewise, `Domt.ns.query` holds a list of bind-* attributes to search for,
+It's also possible to change the "bind-" prefix and other names, just have
+a look in Domt's code and tests to find out about Domt.ns.
+
+Domt.ns.query holds a list of bind-* attributes to search for,
 those special ones do not need "repeat" or "bind" to be set at all.
 As for filters, query options can be passed in `Domt(node, {query: ["size"]});`,
 which will search for nodes having a bind-size attribute.
