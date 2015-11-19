@@ -17,6 +17,7 @@ Domt.ns = {
 	with: 'repeat-with',
 	name: 'repeat-name',
 	bind: 'bind',
+	prefix: 'bind-',
 	lookup: 'domt',
 	expr: '[*]',
 	query: ['html', 'text', 'src', 'href', 'lowsrc', 'srcset', 'class', 'value', 'data', 'action', 'hidden', 'id', 'name', 'style']
@@ -415,7 +416,7 @@ function Domt(nodes, opts) {
 	this.loops = 0;
 	this.filters = new Filters(opts);
 	this._nodes = nodes;
-	this.reBind = new RegExp("^" + Domt.ns.bind + "-(.*)$", "i");
+	this.reBind = new RegExp("^" + Domt.ns.prefix + "(.*)$", "i");
 	var atts = [Domt.ns.bind, Domt.ns.repeat].concat(Domt.ns.query);
 	var query = opts.query;
 	if (query) {
@@ -424,7 +425,7 @@ function Domt(nodes, opts) {
 	}
 	query = [Domt.ns.bind, Domt.ns.repeat];
 	for (var i=0; i < atts.length; i++) {
-		query.push(Domt.ns.bind + '-' + atts[i]);
+		query.push(Domt.ns.prefix + atts[i]);
 	}
 	this.query = '[' + query.join('],[') + ']';
 	var delims = Domt.ns.expr.split('*');
@@ -668,7 +669,7 @@ Domt.prototype.replace = function(obj, node, key) {
 				if (!name) {
 					name = target;
 					if (key == null) {
-						node.setAttribute(Domt.ns.bind + '-' + target, initial);
+						node.setAttribute(Domt.ns.prefix + target, initial);
 					}
 				}
 			} else {
