@@ -18,6 +18,12 @@
 			}});
 			inst.check("expected-merge-fragment");
 		});
+		it("should not choke to death when tag name is made from weird chars", function() {
+			Domt('#merge-fragment-webcomponent').merge({data: [
+				{ content: "one" },
+				{ content: "two" }
+			]}).check();
+		});
 		it("should repeat a fragment", function() {
 			Domt('#repeat-fragment').merge({data: [
 				{ content: "one" },
@@ -90,6 +96,13 @@
 		<li bind-text="data.content" class="second"></li>--><li class="first">one</li>
 		<li class="second test">one</li><li class="first">two</li>
 		<li class="second test">two</li><!---->
+	</ul>
+
+	<ul id="merge-fragment-webcomponent" domt="">
+		<!--<custom-slider repeat="data" bind-text="data.content"></custom-slider>--><!---->
+	</ul>
+	<ul id="expected-merge-fragment-webcomponent" domt="">
+		<!--<custom-slider repeat="data" bind-text="data.content"></custom-slider>--><custom-slider>one</custom-slider><custom-slider>two</custom-slider><!---->
 	</ul>
 
 	<div id="repeat-name">
