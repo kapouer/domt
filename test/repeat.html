@@ -227,6 +227,15 @@
 				{ content: "three" }
 			]}).check();
 		});
+		it("should repeat node and process parent attributes", function() {
+			Domt.ns.query.push('test');
+			Domt('#repeat-process-fragment-attributes').empty()
+			.merge({str: 'test'})
+			.merge({data: [
+				{ content: "one" },
+				{ content: "two" }
+			]}).check();
+		});
 	});
   </script>
 	<title>Domt test suite</title>
@@ -242,6 +251,12 @@
 	<ul id="expected-expected-repeat" domt="">
 		<!--<li repeat="data" bind-text="data.content"></li>--><li>one</li><li>two</li><li>one</li><li>two</li><!---->
 	</ul>
+	<div id="repeat-process-fragment-attributes" bind-test="str">
+		<p repeat="data" bind-text="data.content"></p>
+	</div>
+	<div id="expected-repeat-process-fragment-attributes" bind-test="str" test="test" domt="">
+		<!--<p repeat="data" bind-text="data.content"></p>--><p>one</p><p>two</p><!---->
+	</div>
 
 	<ul id="repeat-root">
 		<li repeat bind-text=".content"></li>
