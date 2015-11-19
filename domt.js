@@ -511,11 +511,10 @@ Domt.prototype.merge = function(obj, opts) {
 					}
 					subnode = subnode.nextSibling;
 				}
-			} else {
-				h = Template(node);
-				cleanStack.push(h);
-				processNode(node, h);
 			}
+			h = Template(node);
+			cleanStack.push(h);
+			processNode(node, h);
 		} while (parent.querySelector && (node = parent.querySelector('[' + LOOKUP + '],[' + REPEAT + '],[' + BIND + ']')));
 
 		len = cleanStack.length;
