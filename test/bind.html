@@ -102,6 +102,17 @@
 				]
 			}).check();
 		});
+
+		it("should use another prefix", function() {
+			Domt.ns.prefix = "ɑ";
+			Domt.ns.repeat = "ß";
+			Domt('#prefix').merge({
+				list: [
+					{txt: "a"},
+					{txt: "b"}
+				]
+			}).check();
+		});
 	});
   </script>
 	<title>Domt test suite</title>
@@ -160,6 +171,13 @@
 	<div id="expected-bindsiblingrepeat" domt="">
 		<span class="uneclasse 2" bind-class="uneclasse [list.length]">content</span>
 		<!--<span repeat="list" bind-text="">[list.txt]</span>--><span>a</span><span>b</span><!---->
+	</div>
+
+	<div id="prefix">
+		<span ß="list" ɑclass="uneclasse [list.length]" ɑhtml>[list.txt]</span>
+	</div>
+	<div id="expected-prefix" domt="">
+		<!--<span ß="list" ɑclass="uneclasse [list.length]" ɑhtml="" class="uneclasse 2">[list.txt]</span>--><span ɑclass="uneclasse [list.length]" class="uneclasse 2">a</span><span ɑclass="uneclasse [list.length]" class="uneclasse 2">b</span><!---->
 	</div>
 
 </body>
