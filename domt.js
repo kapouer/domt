@@ -214,7 +214,7 @@ Template.prototype.init = function(node) {
 			// and also doesn't preload images. Might run scripts, though.
 			fragment = doc = document.createDocumentFragment();
 		}
-		var tagName = match(/^\s*<(\w+)[\s>]/i, html);
+		var tagName = match(/^\s*<\s*([^\s>]+)[\s>]/i, html);
 		var wrapperTag = 'div';
 		if (tagName) {
 			tagName = tagName.toLowerCase();
