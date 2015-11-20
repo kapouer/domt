@@ -134,3 +134,12 @@ or attached merge
 
 ### expose template head, tail, fragment
 
+
+5.2.0
+=====
+
+Expose Domt.createFragment, Domt.import.
+Better foreign document management - better support for web components,
+meaning templates being merged off-document won't have their component
+initialized until domt.import() is called before insertion in main
+document.
