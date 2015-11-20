@@ -415,6 +415,15 @@ Utilities
   where name is defined by repeat-name.  
   returns an instance of a template, upon which the following methods are useful
 
+* Domt.createFragment(<document>)  
+  creates a fragment from given document or from a new context as far as possible
+
+* Domt.import(node, <document>)  
+  import a node in a document or fall back to cloneNode
+
+* domt.import(<document>)  
+  import current nodes of Domt instance into the given document
+
 * template.head, template.tail, template.fragment  
   the nodes defining a template
 
