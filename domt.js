@@ -601,7 +601,6 @@ Domt.import = function(node, doc) {
 };
 
 Domt.createFragment = function(doc) {
-	if (!doc) doc = document;
 	// http://w3c.github.io/webcomponents/spec/custom/#creating-and-passing-registries
 	if (!doc && typeof HTMLTemplateElement == 'function') {
 		var template = document.createElement('template');
