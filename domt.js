@@ -204,16 +204,7 @@ Template.prototype.init = function(node) {
 		// this is somehow weird
 	} else if (html) {
 		this.fragment = null;
-		var doc = document.implementation
-			&& document.implementation.createHTMLDocument
-			&& document.implementation.createHTMLDocument('');
-		if (doc) {
-			fragment = doc.createDocumentFragment();
-		} else {
-			// IE8 do have a documentFragment that is like a document
-			// and also doesn't preload images. Might run scripts, though.
-			fragment = doc = document.createDocumentFragment();
-		}
+		var fragment = Domt.createFragment();
 		var tagName = match(/^\s*<\s*([^\s>]+)[\s>]/i, html);
 		var wrapperTag = 'div';
 		if (tagName) {
@@ -228,7 +219,7 @@ Template.prototype.init = function(node) {
 			throw new DomtError("No tag found in template", html);
 		}
 
-		var div = doc.createElement(wrapperTag);
+		var div = fragment.ownerDocument.createElement(wrapperTag);
 		div.innerHTML = html;
 		node = cur = div.querySelector(tagName);
 		if (!cur) {
@@ -252,11 +243,11 @@ Template.prototype.init = function(node) {
 		// the repeat, bind attributes can't be removed and kept in this template
 		if (flen > 1) node = fragment;
 		if (!this.head) {
-			this.head = doc.createTextNode("");
+			this.head = fragment.ownerDocument.createTextNode("");
 			fragment.insertBefore(this.head, fragment.firstChild);
 		}
 		if (!this.tail) {
-			this.tail = doc.createTextNode("");
+			this.tail = fragment.ownerDocument.createTextNode("");
 			fragment.appendChild(this.tail);
 		}
 	} else if (!replacing && node.hasAttribute(REPEAT)) {
@@ -265,7 +256,7 @@ Template.prototype.init = function(node) {
 		}
 		var remove = false;
 		var parent = node.parentNode;
-		fragment = document.createDocumentFragment();
+		fragment = Domt.createFragment();
 		if (!this.head) {
 			// browsers do not escape double dashes in comment
 			this.head = node.ownerDocument.createComment("");
@@ -554,9 +545,9 @@ Domt.prototype.merge = function(obj, opts) {
 			} else {
 				each(repeated.val, function(val, key) {
 					bound[repeated.name] = val;
-					var clone = parentNode.ownerDocument.createDocumentFragment();
+					var clone = Domt.createFragment(parentNode.ownerDocument);
 					each(fragment.childNodes, function(child) {
-						var copy = cloneFor(parentNode, child);
+						var copy = Domt.import(child, parentNode.ownerDocument);
 						clone.appendChild(copy);
 						if (copy.querySelectorAll) {
 							that.replace(bound, copy, key);
@@ -604,9 +595,26 @@ Domt.prototype.merge = function(obj, opts) {
 	return this;
 };
 
-function cloneFor(parent, node) {
-	return (node.ownerDocument != parent.ownerDocument && document.importNode) ? parent.ownerDocument.importNode(node, true) : node.cloneNode(true);
-}
+Domt.import = function(node, doc) {
+	if (!doc) doc = document;
+	return (node.ownerDocument != doc && doc.importNode) ? doc.importNode(node, true) : node.cloneNode(true);
+};
+
+Domt.createFragment = function(doc) {
+	if (!doc) doc = document;
+	// http://w3c.github.io/webcomponents/spec/custom/#creating-and-passing-registries
+	if (!doc && typeof HTMLTemplateElement == 'function') {
+		var template = document.createElement('template');
+		if (template.content) doc = template.content.ownerDocument;
+	}
+	if (!doc && document.implementation && document.implementation.createHTMLDocument) {
+		doc = document.implementation.createHTMLDocument('');
+	}
+	// IE8 do have a documentFragment that is like a document
+	// and also doesn't preload images. Might run scripts, though.
+	if (!doc) doc = document;
+	return doc.createDocumentFragment();
+};
 
 function fragmentToString(frag) {
 	var doc = frag.ownerDocument;
@@ -616,6 +624,10 @@ function fragmentToString(frag) {
 	}
 	return div.innerHTML;
 }
+
+Domt.prototype.import = function(doc) {
+	return Domt.import(this.nodes, doc);
+};
 
 Domt.prototype.replace = function(obj, node, key) {
 	if (!node.querySelectorAll) throw new DomtError("Cannot replace node with type " + node.nodeType);
