@@ -356,7 +356,7 @@ Template.prototype.attach = function(node, delayClose) {
 
 Template.prototype.clone = function(node) {
 	var copy = new Template({});
-	copy.fragment = this.fragment.cloneNode(true);
+	copy.fragment = Domt.import(this.fragment, this.fragment.ownerDocument);
 	copy.name = this.name;
 	copy.bind = this.bind;
 	copy.repeat = this.repeat;
@@ -547,7 +547,7 @@ Domt.prototype.merge = function(obj, opts) {
 					bound[repeated.name] = val;
 					var clone = Domt.createFragment(parentNode.ownerDocument);
 					each(fragment.childNodes, function(child) {
-						var copy = Domt.import(child, parentNode.ownerDocument);
+						var copy = Domt.import(child, clone.ownerDocument);
 						clone.appendChild(copy);
 						if (copy.querySelectorAll) {
 							that.replace(bound, copy, key);
@@ -597,21 +597,34 @@ Domt.prototype.merge = function(obj, opts) {
 
 Domt.import = function(node, doc) {
 	if (!doc) doc = document;
-	return (node.ownerDocument != doc && doc.importNode) ? doc.importNode(node, true) : node.cloneNode(true);
+	if (doc.importNode) {
+		// do not use cloneNode to work around
+		// https://github.com/webcomponents/webcomponentsjs/issues/438#issuecomment-158900997
+		return doc.importNode(node, true);
+	} else {
+		// IE8 would need a polyfill here, like
+		// https://gist.github.com/dchambers/0abcec9eaf529f993b9d
+		return node.cloneNode(true);
+	}
 };
 
 Domt.createFragment = function(doc) {
+	// template content has a new registry of custom elements
 	// http://w3c.github.io/webcomponents/spec/custom/#creating-and-passing-registries
 	if (!doc && typeof HTMLTemplateElement == 'function') {
 		var template = document.createElement('template');
-		if (template.content) doc = template.content.ownerDocument;
+		if (template.content && template.content.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
+			return template.content;
+		}
 	}
 	if (!doc && document.implementation && document.implementation.createHTMLDocument) {
 		doc = document.implementation.createHTMLDocument('');
 	}
 	// IE8 do have a documentFragment that is like a document
 	// and also doesn't preload images. Might run scripts, though.
-	if (!doc) doc = document;
+	if (!doc) {
+		doc = document;
+	}
 	return doc.createDocumentFragment();
 };
 
