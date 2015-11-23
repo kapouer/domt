@@ -143,3 +143,8 @@ Better foreign document management - better support for web components,
 meaning templates being merged off-document won't have their component
 initialized until domt.import() is called before insertion in main
 document.
+
+5.2.2
+=====
+
+Compatibility with webcomponents.js 0.7.18
