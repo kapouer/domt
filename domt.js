@@ -290,21 +290,11 @@ Template.prototype.init = function(node) {
 		do {
 			cur = after;
 			after = cur.nextSibling;
-			if (cur.ownerDocument != fragment.ownerDocument) {
-				if (remove)	{
-					cur.parentNode.removeChild(cur);
-				}
-				copy = fragment.ownerDocument.importNode(cur, true);
-				fragment.appendChild(copy);
-			} else {
-				if (remove) {
-					fragment.appendChild(cur);
-					copy = cur;
-				} else {
-					copy = cur.cloneNode(true);
-					fragment.appendChild(copy);
-				}
+			if (remove)	{
+				cur.parentNode.removeChild(cur);
 			}
+			copy = Domt.import(cur, fragment.ownerDocument);
+			fragment.appendChild(copy);
 
 			if (cur.nodeType == Node.ELEMENT_NODE) {
 				if (!node) node = copy;
