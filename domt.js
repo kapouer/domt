@@ -618,6 +618,7 @@ Domt.createFragment = function(doc) {
 	return doc.createDocumentFragment();
 };
 
+/* only used for debugging */
 function fragmentToString(frag) {
 	var doc = frag.ownerDocument;
 	var div = doc.createElement('div');
