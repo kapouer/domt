@@ -34,6 +34,17 @@
 				}
 			}).check();
 		});
+		it("should empty then repeat a fragment", function() {
+			var inst = Domt('#repeat-fragment').empty();
+			inst.merge({data: [
+				{ content: "one" },
+				{ content: "two" }
+			]}, {
+				bFilter: function(row, key, context) {
+					context.node.lastChild.className += " test";
+				}
+			}).check();
+		});
 		it("should repeat a named fragment", function() {
 			// initialize templates
 			Domt('#repeat-name').merge();
@@ -86,17 +97,20 @@
 		<span class="b" bind-text="[data.b]">db</span>
 		<span class="c" bind-text="[data.c]">dc</span>
 	</div>
-
-	<ul id="repeat-fragment">
-		<li repeat="data|bFilter" bind-text="data.content" class="first"></li>
-		<li repeat-with bind-text="data.content" class="second"></li>
-	</ul>
-	<ul id="expected-repeat-fragment" domt="">
-		<!--<li repeat="data|bFilter" bind-text="data.content" class="first"></li>
-		<li bind-text="data.content" class="second"></li>--><li class="first">one</li>
-		<li class="second test">one</li><li class="first">two</li>
-		<li class="second test">two</li><!---->
-	</ul>
+	<div id="repeat-fragment">
+		<ul>
+			<li repeat="data|bFilter" bind-text="data.content" class="first"></li>
+			<li repeat-with bind-text="data.content" class="second"></li>
+		</ul>
+	</div>
+	<div id="expected-repeat-fragment">
+		<ul domt="">
+			<!--<li repeat="data|bFilter" bind-text="data.content" class="first"></li>
+			<li bind-text="data.content" class="second"></li>--><li class="first">one</li>
+			<li class="second test">one</li><li class="first">two</li>
+			<li class="second test">two</li><!---->
+		</ul>
+	</div>
 
 	<ul id="merge-fragment-webcomponent" domt="">
 		<!--<custom-slider repeat="data" bind-text="data.content"></custom-slider>--><!---->
