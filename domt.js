@@ -489,11 +489,11 @@ Domt.prototype.merge = function(obj, opts) {
 				node.removeAttribute(LOOKUP);
 				var subnode = node.firstChild;
 				while (subnode) {
-					if (subnode.nodeType != Node.TEXT_NODE) {
+					if (subnode.nodeType == Node.COMMENT_NODE) {
 						h = Template(subnode);
 						cleanStack.push(h);
 						processNode(subnode, h);
-						if (subnode.nodeType == Node.COMMENT_NODE && h.tail) {
+						if (h.tail) {
 							subnode = h.tail;
 						}
 					}
