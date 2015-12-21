@@ -172,20 +172,10 @@ Template.prototype.open = function(node) {
 Template.prototype.init = function(node) {
 	var REPEAT = Domt.ns.repeat, WITH = Domt.ns.with;
 	var html, fragment, cur, after, copy, replacing = false;
-	this.head = this.tail = null;
+
 	if (node.nodeType == Node.COMMENT_NODE) {
-		this.head = node;
-		this.tail = next(node, Node.COMMENT_NODE);
-		if (!this.tail) {
-			// restore it
-			this.tail = node.ownerDocument.createComment("");
-			if (node.nextSibling) {
-				node.parentNode.insertBefore(this.tail, node.nextSibling);
-			} else {
-				node.parentNode.appendChild(this.tail);
-			}
-		}
 		html = (node.nodeValue || node.textContent).replace(/\\-\\-/g, "--"); // HTML Comments unescaping
+		this.head = node;
 		if (!html) {
 			if (this.fragment) {
 				node = this.fragment;
@@ -193,6 +183,16 @@ Template.prototype.init = function(node) {
 			} else {
 				// bad template, just return without tail
 				return;
+			}
+		}
+		this.tail = next(this.head, Node.COMMENT_NODE);
+		if (!this.tail) {
+			// restore it
+			this.tail = this.head.ownerDocument.createComment("");
+			if (this.head.nextSibling) {
+				this.head.parentNode.insertBefore(this.tail, this.head.nextSibling);
+			} else {
+				this.head.parentNode.appendChild(this.tail);
 			}
 		}
 	} else if (node.nodeName == "SCRIPT") {
@@ -330,16 +330,22 @@ Template.prototype.close = function() {
 Template.prototype.attach = function(node, delayClose) {
 	if (typeof node == "string") node = document.querySelector(node);
 	if (node) {
-		if (!delayClose && node.nodeType != Node.COMMENT_NODE) {
-			var comment = node.ownerDocument.createComment("");
-			node.appendChild(comment);
-			if (this.tail) node.appendChild(this.tail);
-			node = comment;
+		if (node.nodeType != Node.COMMENT_NODE) {
+			if (!delayClose) {
+				var comment = node.ownerDocument.createComment("");
+				node.appendChild(comment);
+				if (this.tail) node.appendChild(this.tail);
+				this.head = node = comment;
+			}
+		} else {
+			this.head = node;
 		}
-		this.head = node;
 	}
-	this.init(this.head);
-	if (this.head) this.head[Domt.ns.lookup] = this;
+
+	this.init(this.head || node);
+	if (this.head) {
+		this.head[Domt.ns.lookup] = this;
+	}
 	if (!delayClose && node) this.close();
 	return this;
 };
