@@ -529,7 +529,7 @@ Domt.prototype.merge = function(obj, opts) {
 				while ((curNode = h.head.nextSibling) && curNode != h.tail) {
 					parentNode.removeChild(curNode);
 				}
-				// template modified by current.value === undefined (see after)
+				// rebuild template from original
 				h.attach();
 			}
 			var accessor = h.repeat.split('|');
