@@ -584,6 +584,8 @@ Domt.prototype.merge = function(obj, opts) {
 			}
 		} else if (node.querySelector) {
 			that.replace(bound, node);
+		} else if (node.nodeType == Node.COMMENT_NODE && !node.nodeValue) {
+			// it's fine to not process a tail
 		} else {
 			console.error("Unprocessed node", node.nodeType, node.nodeValue);
 		}
