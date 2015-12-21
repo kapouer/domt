@@ -225,6 +225,7 @@ Template.prototype.init = function(node) {
 		if (!cur) {
 			throw new Error("problem with querySelector here", div.innerHTML, html);
 		}
+		this.open(cur);
 		do {
 			after = cur.nextSibling;
 			fragment.appendChild(cur);
