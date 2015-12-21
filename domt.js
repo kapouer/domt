@@ -473,6 +473,7 @@ Domt.prototype.merge = function(obj, opts) {
 		nodes = [nodes];
 	}
 	each(nodes, function(node) {
+		if (node.nodeType == Node.TEXT_NODE) return;
 		var parent = node;
 		if (node.hasAttribute && node.hasAttribute(REPEAT) && !opts.node) {
 			// because the repeated node mutates
