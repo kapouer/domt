@@ -120,11 +120,13 @@ Fp.invert = function(row, key, info) {
 
 var escaper;
 function escapeText(str) {
+	if (typeof str == "object") return str;
+	if (str == null) return str;
 	if (!escaper) {
 		escaper = document.createElement('div');
 		escaper.appendChild(document.createTextNode(""));
 	}
-	escaper.firstChild.nodeValue = str;
+	escaper.firstChild.nodeValue = str + "";
 	return escaper.innerHTML;
 }
 
@@ -516,7 +518,7 @@ Domt.prototype.merge = function(obj, opts) {
 		var bound, repeated, len, parentNode, curNode, i;
 		if (!h) h = {};
 		if (h.bind) {
-			obj = find(obj, h.bind, undefined, filters, node);
+			obj = find(obj, h.bind, undefined, null, filters, node);
 			bound = {};
 			bound[obj.name] = obj.val;
 			obj = bound;
@@ -675,11 +677,10 @@ Domt.prototype.replace = function(obj, node, key) {
 			val = initial.replace(reExpr, function(str, path) {
 				var accessor = path.split('|');
 				if (willRepeat[accessor[0]]) return;
-				var repl = find(obj, accessor, key, filters, node, target).val;
+				var repl = find(obj, accessor, key, name == "text" ? escapeText : null, filters, node, target).val;
 				if (repl === undefined || repl !== null && typeof repl == "object") return "";
 				replacements++;
 				if (repl == null) return "";
-				else if (name == "text") return escapeText(repl);
 				else return repl;
 			});
 			function clean() {
@@ -704,8 +705,7 @@ Domt.prototype.replace = function(obj, node, key) {
 				if (att.name == Domt.ns.bind) {
 					return clean();
 				}
-				val = find(obj, accessor, key, filters, node, target).val;
-				if (name == "text" && val != null && typeof val != "object") val = escapeText(val);
+				val = find(obj, accessor, key, name == "text" ? escapeText : null, filters, node, target).val;
 			}
 			if (name) {
 				if (replace(node, name, val)) {
@@ -737,7 +737,7 @@ function replace(node, name, val) {
 	return true;
 }
 
-function find(scope, accessor, key, filters, node, att) {
+function find(scope, accessor, key, optFilter, filters, node, att) {
 	var name, last, val = scope, prev = scope, filter;
 	if (!accessor) accessor = [];
 	else if (typeof accessor == "string") accessor = accessor.split('|');
@@ -771,6 +771,7 @@ function find(scope, accessor, key, filters, node, att) {
 		if (typeof val == "function") val = val(prev, path);
 		last = name;
 	}
+	if (optFilter) val = optFilter(val);
 	if (filters) for (var i=1; i < accessor.length; i++) {
 		filter = filters[accessor[i]];
 		if (filter) val = filter(val, {node: node, att: att, filters: filters, scope:scope, index:index-1, path:path, name: last});
