@@ -14,6 +14,13 @@
 				}
 			}).check();
 		});
+		it("should replace all html", function() {
+			Domt('#replace-all').merge({
+				data: {
+					html: "This is <b>bold</b>"
+				}
+			}).check();
+		});
 		it("should replace value and call filter when merging data", function() {
 			Domt('#replace-escape').merge({
 				name: "Barns & Smiths"
@@ -100,6 +107,9 @@
 
 	<p id="replace" bind-html><i>this is italic</i>[data.html]</p>
 	<p id="expected-replace" bind-html="&lt;i&gt;this is italic&lt;/i&gt;[data.html]"><i>this is italic</i>This is <b>bold</b></p>
+
+	<p id="replace-all" bind-html>data.html</p>
+	<p id="expected-replace-all" bind-html="data.html">This is <b>bold</b></p>
 
 	<a id="replace-escape" bind-href href="http://localhost/?name=[name|esc]">Test replace</a>
 	<a id="expected-replace-escape" bind-href="http://localhost/?name=[name|esc]" href="http://localhost/?name=Barns%20%26%20Smiths">Test replace</a>
