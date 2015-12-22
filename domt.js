@@ -335,10 +335,11 @@ Template.prototype.attach = function(node, delayClose) {
 	if (node) {
 		if (node.nodeType != Node.COMMENT_NODE) {
 			if (!delayClose) {
-				var comment = node.ownerDocument.createComment("");
-				node.appendChild(comment);
-				if (this.tail) node.appendChild(this.tail);
-				this.head = node = comment;
+				this.head = node.ownerDocument.createComment("");
+				node.appendChild(this.head);
+				this.tail = node.ownerDocument.createComment("");
+				node.appendChild(this.tail);
+				node = this.head;
 			}
 		} else {
 			this.head = node;
