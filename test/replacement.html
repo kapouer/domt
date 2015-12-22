@@ -64,6 +64,11 @@
 				data: '<b>no html</b>\nand a newline'
 			}).check();
 		});
+		it("should escape value as text and replace newlines by br in a simpler way", function() {
+			Domt('#replace-escape-br-simpler').merge({
+				data: '<b>no html</b>\nand a newline'
+			}).check();
+		});
 		it("should call filter even if accessor leads to undefined data", function() {
 			Domt('#replace-undefined', {
 				check: function(val) {
@@ -119,6 +124,9 @@
 
 	<p id="replace-escape-br" bind-html="data|text|br"></p>
 	<p id="expected-replace-escape-br" bind-html="data|text|br">&lt;b&gt;no html&lt;/b&gt;<br>and a newline</p>
+
+	<p id="replace-escape-br-simpler" bind-text="data|br"></p>
+	<p id="expected-replace-escape-br-simpler" bind-text="data|br">&lt;b&gt;no html&lt;/b&gt;<br>and a newline</p>
 
 	<p id="replace-undefined" bind-text="data.undef|check"></p>
 	<p id="expected-replace-undefined" bind-text="data.undef|check">was undefined</p>
