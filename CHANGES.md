@@ -148,3 +148,13 @@ document.
 =====
 
 Compatibility with webcomponents.js 0.7.18
+
+5.3.0
+=====
+
+* bind-text="data" is now an alias of bind-html="data|text",
+  typically allowing bind-text="data|br" to work as expected.
+* innerHTML is now evaluated for replacements like attributes,
+  <span bind-html>list.name</span> works like <span bind-html="list.name>.
+  Before, brackets were needed in text content but not always in attributes.
+
