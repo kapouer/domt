@@ -698,7 +698,7 @@ Domt.prototype.replace = function(obj, node, key) {
 					}
 				}
 			} else {
-				var accessor = (att.value || "").split('|');
+				accessor = initial.split('|');
 				if (willRepeat[accessor[0]]) {
 					return clean();
 				}
@@ -713,6 +713,7 @@ Domt.prototype.replace = function(obj, node, key) {
 				}
 			}
 			if (!replacements) clean();
+			else if (!att.value) att.value = initial;
 			if (replacements && key != null && name != att.name) {
 				// get rid of initial attributes in a repeated block
 				node.removeAttribute(att.name);
