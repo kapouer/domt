@@ -174,7 +174,7 @@ Template.prototype.init = function(node) {
 	var html, fragment, cur, after, copy, replacing = false;
 
 	if (node.nodeType == Node.COMMENT_NODE) {
-		html = (node.nodeValue || node.textContent).replace(/\\-\\-/g, "--"); // HTML Comments unescaping
+		html = (node.nodeValue || node.textContent).replace(/\\-\\-/g, "--"); // HTML Comments unescaping
 		this.head = node;
 		if (!html) {
 			if (this.fragment) {
@@ -651,7 +651,7 @@ Domt.prototype.replace = function(obj, node, key) {
 	var filters = this.filters;
 	var willRepeat = {};
 	do {
-		each(Array.prototype.slice.call(node.attributes || [], 0), function(att) { // iterates over a copy
+		each(Array.prototype.slice.call(node.attributes || [], 0), function(att) { // iterates over a copy
 			if (att.name == Domt.ns.repeat && att.value) {
 				willRepeat[att.value.split('|').shift()] = true;
 				return;
@@ -661,7 +661,7 @@ Domt.prototype.replace = function(obj, node, key) {
 			if (name == "text" || name == "html") {
 				val = node.innerHTML;
 			}	else {
-				target = name || att.name;
+				target = name || att.name;
 				val = att.value;
 			}
 			var replacements = 0, initial = val;
