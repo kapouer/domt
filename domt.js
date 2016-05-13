@@ -94,6 +94,10 @@ Fp['?'] = function(val) {
 	if (val != null && val !== "") return val + '';
 	else return val;
 };
+Fp[''] = function(val) {
+	if (val === undefined) return "";
+	else return val;
+};
 Fp.always = function() {
 	return true;
 };
