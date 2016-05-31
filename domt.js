@@ -612,24 +612,30 @@ Domt.import = function(node, doc) {
 	}
 };
 
-Domt.createFragment = function(doc) {
+Domt.createFragment = function(doc, str) {
 	// template content has a new registry of custom elements
 	// http://w3c.github.io/webcomponents/spec/custom/#creating-and-passing-registries
 	if (!doc && typeof HTMLTemplateElement == 'function') {
 		var template = document.createElement('template');
 		if (template.content && template.content.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
+			if (str) template.innerHTML = str;
 			return template.content;
 		}
 	}
 	if (!doc && document.implementation && document.implementation.createHTMLDocument) {
 		doc = document.implementation.createHTMLDocument('');
 	}
-	// IE8 do have a documentFragment that is like a document
-	// and also doesn't preload images. Might run scripts, though.
+	// fallback
 	if (!doc) {
-		doc = document;
+		doc = document.createElement('iframe').contentWindow.document;
 	}
-	return doc.createDocumentFragment();
+	var frag = doc.createDocumentFragment();
+	if (str) {
+		var div = doc.createElement("div");
+		div.innerHTML = str;
+		while (div.firstChild) frag.appendChild(div.firstChild);
+	}
+	return frag;
 };
 
 /* only used for debugging */
@@ -730,7 +736,10 @@ function replace(node, name, val) {
 		return false;
 	}
 	if (name == "text" || name == "html") {
-		node.innerHTML = val == null ? "" : val;
+		node.innerHTML = "";
+		if (val != null) {
+			node.appendChild(Domt.import(Domt.createFragment(null, val), node.ownerDocument));
+		}
 	} else if (node.hasAttribute(name)) {
 		if (val !== null) node.setAttribute(name, val);
 		else node.removeAttribute(name);
