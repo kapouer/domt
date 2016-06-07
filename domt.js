@@ -516,7 +516,7 @@ Domt.prototype.merge = function(obj, opts) {
 	});
 
 	function processNode(node, h) {
-		var bound, repeated, len, parentNode, curNode, i;
+		var bound, repeated, parentNode, curNode;
 		if (!h) h = {};
 		if (h.bind) {
 			obj = find(obj, h.bind, undefined, filters, node);
