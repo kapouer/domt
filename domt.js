@@ -488,7 +488,6 @@ Domt.prototype.merge = function(obj, opts) {
 		do {
 			if (that.loops++ > Domt.maxloops) {
 				throw new DomtError("Parsing aborted - consider raising Domt.maxloops");
-				return;
 			}
 			if (node.hasAttribute && node.hasAttribute(LOOKUP)) {
 				node.removeAttribute(LOOKUP);
